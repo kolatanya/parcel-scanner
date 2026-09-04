@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#101418">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Parcel Scanner</title>
+<style>
+:root{
+  --ground:#101418;
+  --panel:#191F25;
+  --edge:#2B343C;
+  --text:#EDF1F3;
+  --muted:#8A99A5;
+  --mark:#E23B2E;
+  --ok:#3FBF7F;
+  --stock:#FBFAF7;
+  --stock-ink:#14181B;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--ground);color:var(--text);font-family:var(--sans)}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:520px;margin:0 auto;padding:14px 14px 28px}
+
+/* header */
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.count{font-size:2rem;font-weight:650;letter-spacing:-.02em;line-height:1}
+.count small{display:block;font-size:.8rem;font-weight:400;color:var(--muted);letter-spacing:0}
+.mode{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted)}
+.mode input{width:38px;height:22px;appearance:none;background:var(--edge);border-radius:11px;position:relative;transition:background .15s;flex:none}
+.mode input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.mode input:checked{background:#243b31}
+.mode input:checked::after{transform:translateX(16px);background:var(--ok)}
+.mode input:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+
+/* viewfinder */
+.view{position:relative;aspect-ratio:4/3;background:#05080A;border-radius:10px;overflow:hidden;border:1px solid var(--edge)}
+.view video{width:100%;height:100%;object-fit:cover;display:block}
+.idle{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:20px;color:var(--muted);font-size:.9rem}
+.idle .bars{display:flex;gap:3px;height:38px;align-items:stretch;margin-bottom:6px;opacity:.45}
+.idle .bars i{display:block;background:var(--muted);border-radius:1px}
+.frame{position:absolute;left:11%;right:11%;top:26%;bottom:26%;pointer-events:none}
+.frame span{position:absolute;width:24px;height:24px;border:3px solid var(--mark)}
+.frame span:nth-child(1){top:0;left:0;border-right:0;border-bottom:0}
+.frame span:nth-child(2){top:0;right:0;border-left:0;border-bottom:0}
+.frame span:nth-child(3){bottom:0;left:0;border-right:0;border-top:0}
+.frame span:nth-child(4){bottom:0;right:0;border-left:0;border-top:0}
+.view.hit .frame span{border-color:var(--ok)}
+.torch{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border-radius:50%;border:1px solid var(--edge);
+  background:rgba(16,20,24,.75);color:var(--text);font-size:1.15rem;line-height:1;cursor:pointer}
+.torch[aria-pressed="true"]{background:#F2C14E;color:#241C05;border-color:#F2C14E}
+
+/* status */
+.status{margin:10px 0;min-height:38px;display:flex;align-items:center;gap:9px;font-size:.9rem;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.status.good{color:var(--ok)} .status.good .dot{background:var(--ok)}
+.status.warn{color:#F2C14E} .status.warn .dot{background:#F2C14E}
+.status.bad{color:var(--mark)} .status.bad .dot{background:var(--mark)}
+.status code{font-family:var(--mono);color:var(--text)}
+
+/* buttons */
+button{font-family:inherit;font-size:1rem}
+.primary{width:100%;padding:17px;border:0;border-radius:9px;background:var(--mark);color:#fff;font-size:1.05rem;font-weight:600;cursor:pointer}
+.primary.stop{background:var(--panel);color:var(--text);box-shadow:inset 0 0 0 1px var(--edge)}
+.primary:active{transform:translateY(1px)}
+
+/* manual */
+.manual{display:flex;gap:8px;margin-top:10px}
+.manual input{flex:1;min-width:0;padding:13px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);
+  color:var(--text);font-family:var(--mono);font-size:.95rem;text-transform:uppercase}
+.manual input::placeholder{font-family:var(--sans);text-transform:none;color:var(--muted)}
+.manual button{padding:0 18px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--text);cursor:pointer}
+.manual input:focus-visible,.manual button:focus-visible{outline:2px solid var(--mark);outline-offset:1px}
+
+/* list — label stock */
+.list{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;align-items:center;gap:12px;background:var(--stock);color:var(--stock-ink);border-radius:5px;
+  padding:11px 12px 11px 0;overflow:hidden;animation:in .18s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(-6px)}}
+.row .stripe{flex:none;width:16px;align-self:stretch;
+  background:repeating-linear-gradient(90deg,#14181B 0 2px,transparent 2px 4px,#14181B 4px 5px,transparent 5px 9px)}
+.row .code{flex:1;min-width:0;font-family:var(--mono);font-size:1.02rem;font-weight:600;letter-spacing:.02em;
+  word-break:break-all}
+.row .when{flex:none;font-size:.72rem;color:#6C7780;font-variant-numeric:tabular-nums}
+.row .del{flex:none;width:30px;height:30px;border:0;background:transparent;color:#98A2AA;font-size:1.15rem;
+  cursor:pointer;border-radius:5px}
+.row .del:hover{background:#EDEAE3;color:var(--stock-ink)}
+.row.other .code{font-weight:500;font-size:.9rem;color:#3E464C}
+
+.empty{margin:16px 0 0;padding:20px;border:1px dashed var(--edge);border-radius:8px;color:var(--muted);
+  font-size:.88rem;text-align:center}
+
+/* actions */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.actions button{padding:15px 10px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);
+  color:var(--text);cursor:pointer;font-weight:500}
+.actions button:disabled{opacity:.35;cursor:default}
+.actions .wa{background:#1F3A2E;border-color:#2C5343;color:#8FE3B4}
+.actions .clear{color:#E88A82}
+.actions button:focus-visible,.primary:focus-visible,.torch:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+
+.foot{margin-top:18px;font-size:.75rem;color:#5D6970;line-height:1.6}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="count"><span id="n">0</span><small id="nlabel">nothing scanned yet</small></div>
+    <label class="mode">
+      <input type="checkbox" id="strict" checked>
+      <span>Tracking numbers only</span>
+    </label>
+  </div>
+
+  <div class="view" id="view">
+    <video id="video" playsinline muted autoplay></video>
+    <div class="idle" id="idle">
+      <div class="bars" id="bars"></div>
+      <div>Point the camera at the long barcode</div>
+      <div style="font-size:.78rem">The one above <code style="font-family:var(--mono)">QM 0000 0000 0GB</code></div>
+    </div>
+    <div class="frame"><span></span><span></span><span></span><span></span></div>
+    <button class="torch" id="torch" hidden aria-pressed="false" title="Torch">☀</button>
+  </div>
+
+  <div class="status" id="status"><span class="dot"></span><span id="msg">Camera off</span></div>
+
+  <button class="primary" id="go">Start scanning</button>
+
+  <div class="manual">
+    <input id="entry" placeholder="Damaged barcode? Type it here" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button id="add">Add</button>
+  </div>
+
+  <ul class="list" id="list"></ul>
+  <div class="empty" id="empty">Scanned codes collect here. Copy or send the whole batch in one go.</div>
+
+  <div class="actions">
+    <button id="copy" disabled>Copy all</button>
+    <button class="wa" id="wa" disabled>Send to WhatsApp</button>
+    <button id="save" disabled>Save .txt</button>
+    <button class="clear" id="clear" disabled>Clear list</button>
+  </div>
+
+  <p class="foot">Codes stay on this phone until you copy, send or save them. Duplicates are rejected automatically.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- barcode stripes for the idle state ---------- */
+var bars=document.getElementById('bars');
+for(var i=0;i<34;i++){var b=document.createElement('i');b.style.width=(1+Math.round(Math.random()*3))+'px';bars.appendChild(b);}
+
+/* ---------- elements ---------- */
+var video=document.getElementById('video'),view=document.getElementById('view'),idle=document.getElementById('idle'),
+    go=document.getElementById('go'),msg=document.getElementById('msg'),status=document.getElementById('status'),
+    listEl=document.getElementById('list'),emptyEl=document.getElementById('empty'),nEl=document.getElementById('n'),
+    nLabel=document.getElementById('nlabel'),strict=document.getElementById('strict'),torchBtn=document.getElementById('torch'),
+    entry=document.getElementById('entry'),addBtn=document.getElementById('add'),
+    copyBtn=document.getElementById('copy'),waBtn=document.getElementById('wa'),
+    saveBtn=document.getElementById('save'),clearBtn=document.getElementById('clear');
+
+/* ---------- state ---------- */
+var codes=[], running=false, stream=null, timer=null, detector=null, zx=null, last={v:'',t:0}, track=null;
+var S10=/[A-Z]{2}\d{9}[A-Z]{2}/;   /* Royal Mail / UPU format: QM631247028GB */
+
+/* ---------- tiny persistence (survives a page refresh mid-round) ---------- */
+var store={
+  get:function(){ try{ if(!window.storage) return Promise.resolve(null);
+      return window.storage.get('scanner:codes').then(function(r){return r?JSON.parse(r.value):null;},function(){return null;});
+    }catch(e){ return Promise.resolve(null); } },
+  set:function(v){ try{ if(window.storage) window.storage.set('scanner:codes',JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------- feedback ---------- */
+var ac=null;
+function beep(freq,ms){
+  try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    var o=ac.createOscillator(),g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);o.frequency.value=freq;o.type='square';
+    g.gain.setValueAtTime(.09,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+ms/1000);
+    o.start();o.stop(ac.currentTime+ms/1000);
+  }catch(e){}
+}
+function buzz(p){ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+function say(text,kind){ msg.innerHTML=text; status.className='status'+(kind?' '+kind:''); }
+function flash(){ view.classList.add('hit'); setTimeout(function(){view.classList.remove('hit');},260); }
+
+/* ---------- core ---------- */
+function clean(raw){
+  var up=String(raw).replace(/\s+/g,'').toUpperCase();
+  var m=up.match(S10);
+  return { value:m?m[0]:up, tracking:!!m };
+}
+
+function accept(raw){
+  var now=Date.now(), c=clean(raw);
+  if(c.value===last.v && now-last.t<2500) return;
+  last={v:c.value,t:now};
+
+  if(strict.checked && !c.tracking){
+    beep(220,120); buzz(60);
+    say('Not a tracking barcode — that\'s the wrong code on the label','warn');
+    return;
+  }
+  for(var i=0;i<codes.length;i++){
+    if(codes[i].value===c.value){
+      beep(300,90); beep(300,90); buzz([50,60,50]);
+      say('Already scanned — <code>'+c.value+'</code>','warn');
+      return;
+    }
+  }
+  var d=new Date();
+  codes.unshift({value:c.value,tracking:c.tracking,
+    time:('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)});
+  beep(880,110); buzz(45); flash();
+  say('Added <code>'+c.value+'</code>','good');
+  render();
+}
+
+function render(){
+  listEl.innerHTML='';
+  codes.forEach(function(c,i){
+    var li=document.createElement('li');
+    li.className='row'+(c.tracking?'':' other');
+    var s=document.createElement('div'); s.className='stripe'; li.appendChild(s);
+    var v=document.createElement('div'); v.className='code'; v.textContent=c.value; li.appendChild(v);
+    var w=document.createElement('div'); w.className='when'; w.textContent=c.time; li.appendChild(w);
+    var x=document.createElement('button'); x.className='del'; x.type='button';
+    x.setAttribute('aria-label','Remove '+c.value); x.textContent='×';
+    x.onclick=function(){ codes.splice(i,1); render(); };
+    li.appendChild(x);
+    listEl.appendChild(li);
+  });
+  var n=codes.length;
+  nEl.textContent=n;
+  nLabel.textContent = n===0?'nothing scanned yet':(n===1?'parcel scanned':'parcels scanned');
+  emptyEl.hidden = n>0;
+  [copyBtn,waBtn,saveBtn,clearBtn].forEach(function(b){ b.disabled = n===0; });
+  store.set(codes);
+}
+
+function text(){ return codes.map(function(c){return c.value;}).reverse().join('\n'); }
+
+/* ---------- camera ---------- */
+function loadZXing(){
+  if(window.ZXing) return Promise.resolve(window.ZXing);
+  var urls=['https://cdnjs.cloudflare.com/ajax/libs/zxing-library/0.21.3/index.min.js',
+            'https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js',
+            'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js'];
+  return new Promise(function(res,rej){
+    (function next(i){
+      if(i>=urls.length) return rej(new Error('no reader'));
+      var s=document.createElement('script'); s.src=urls[i];
+      s.onload=function(){ window.ZXing?res(window.ZXing):next(i+1); };
+      s.onerror=function(){ next(i+1); };
+      document.head.appendChild(s);
+    })(0);
+  });
+}
+
+function setupTorch(){
+  try{
+    track=stream?stream.getVideoTracks()[0]:(video.srcObject&&video.srcObject.getVideoTracks()[0]);
+    var caps=track&&track.getCapabilities?track.getCapabilities():{};
+    torchBtn.hidden=!('torch' in caps);
+  }catch(e){ torchBtn.hidden=true; }
+}
+torchBtn.onclick=function(){
+  var on=torchBtn.getAttribute('aria-pressed')==='true';
+  try{ track.applyConstraints({advanced:[{torch:!on}]});
+    torchBtn.setAttribute('aria-pressed',String(!on));
+  }catch(e){}
+};
+
+function start(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    say('This browser can\'t open the camera. Open the page in Chrome or Safari.','bad'); return;
+  }
+  say('Opening camera…');
+  var wanted=['code_128','data_matrix','qr_code','code_39','itf','ean_13','pdf417'];
+
+  var native = window.BarcodeDetector
+    ? BarcodeDetector.getSupportedFormats().then(function(f){
+        var use=wanted.filter(function(x){return f.indexOf(x)>-1;});
+        if(!use.length) throw new Error('no formats');
+        detector=new BarcodeDetector({formats:use});
+      })
+    : Promise.reject(new Error('no detector'));
+
+  native.then(function(){
+    return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:960}}});
+  }).then(function(s){
+    stream=s; video.srcObject=s; return video.play();
+  }).then(function(){
+    live(); setupTorch();
+    timer=setInterval(function(){
+      if(!running) return;
+      detector.detect(video).then(function(r){ if(r&&r.length) accept(r[0].rawValue); }).catch(function(){});
+    },160);
+  }).catch(function(err){
+    if(err&&(err.name==='NotAllowedError'||err.name==='SecurityError')){
+      say('Camera blocked. Allow camera access for this page, then try again.','bad'); return;
+    }
+    /* fall back to the JS decoder */
+    loadZXing().then(function(Z){
+      zx=new Z.BrowserMultiFormatReader();
+      return zx.decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},video,function(res){
+        if(res&&running) accept(res.getText());
+      });
+    }).then(function(){ live(); setupTorch(); })
+      .catch(function(e){
+        if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))
+          say('Camera blocked. Allow camera access for this page, then try again.','bad');
+        else if(e&&e.name==='NotFoundError') say('No camera found on this device.','bad');
+        else say('Couldn\'t start the scanner. Check you\'re on https and connected.','bad');
+      });
+  });
+}
+
+function live(){
+  running=true; idle.hidden=true;
+  go.textContent='Stop scanning'; go.classList.add('stop');
+  say('Scanning — hold the barcode inside the corners');
+}
+
+function stop(){
+  running=false;
+  if(timer){clearInterval(timer);timer=null;}
+  if(zx){ try{zx.reset();}catch(e){} zx=null; }
+  if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
+  if(video.srcObject){ try{video.srcObject.getTracks().forEach(function(t){t.stop();});}catch(e){} video.srcObject=null; }
+  track=null; torchBtn.hidden=true; torchBtn.setAttribute('aria-pressed','false');
+  idle.hidden=false; go.textContent='Start scanning'; go.classList.remove('stop');
+  say('Camera off');
+}
+
+go.onclick=function(){ running?stop():start(); };
+document.addEventListener('visibilitychange',function(){ if(document.hidden&&running) stop(); });
+
+/* ---------- manual entry ---------- */
+function manual(){
+  var v=entry.value.trim();
+  if(!v) return;
+  accept(v); entry.value='';
+}
+addBtn.onclick=manual;
+entry.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();manual();} });
+
+/* ---------- outputs ---------- */
+copyBtn.onclick=function(){
+  var t=text();
+  var done=function(){ say(codes.length+' code'+(codes.length>1?'s':'')+' copied','good'); beep(660,80); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done,fallback);
+  } else fallback();
+  function fallback(){
+    var ta=document.createElement('textarea'); ta.value=t;
+    ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta);
+    ta.select(); ta.setSelectionRange(0,99999);
+    try{ document.execCommand('copy'); done(); }catch(e){ say('Copy failed — use Save .txt instead','bad'); }
+    document.body.removeChild(ta);
+  }
+};
+
+waBtn.onclick=function(){
+  var d=new Date(), stamp=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();
+  var body=stamp+' — '+codes.length+' parcel'+(codes.length>1?'s':'')+'\n\n'+text();
+  window.open('https://wa.me/?text='+encodeURIComponent(body),'_blank');
+};
+
+saveBtn.onclick=function(){
+  var d=new Date(),
+      name='scans-'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'-'+
+           ('0'+d.getHours()).slice(-2)+('0'+d.getMinutes()).slice(-2)+'.txt';
+  var blob=new Blob([text()+'\n'],{type:'text/plain'}),
+      a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+  say('Saved '+name,'good');
+};
+
+clearBtn.onclick=function(){
+  if(!confirm('Clear all '+codes.length+' codes? This can\'t be undone.')) return;
+  codes=[]; render(); say('List cleared');
+};
+
+/* ---------- boot ---------- */
+store.get().then(function(saved){
+  if(saved&&saved.length){ codes=saved; render(); say('Restored '+saved.length+' code'+(saved.length>1?'s':'')+' from earlier'); }
+  else render();
+},function(){ render(); });
+
+})();
+</script>
+</body>
+</html>
