@@ -64,6 +64,8 @@ button{font-family:inherit;font-size:1rem}
 .status code{font-family:var(--mono);color:var(--text)}
 
 .primary{width:100%;padding:17px;border:0;border-radius:9px;background:var(--mark);color:#fff;font-size:1.05rem;font-weight:600;cursor:pointer}
+.diag{font-family:var(--mono);font-size:.68rem;color:#5D6970;margin:-4px 0 10px;word-break:break-all;line-height:1.5}
+.ghost{width:100%;margin-top:8px;padding:13px;border-radius:9px;border:1px solid var(--edge);background:transparent;color:var(--muted);cursor:pointer;font-size:.88rem}
 .primary.stop{background:var(--panel);color:var(--text);box-shadow:inset 0 0 0 1px var(--edge)}
 
 /* review */
@@ -118,7 +120,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
   <div class="top">
     <div class="count"><span id="n">0</span><small id="nlabel">nothing scanned yet</small></div>
     <div class="right">
-      <span class="ver">v2</span>
+      <span class="ver">v3</span>
       <label class="mode"><input type="checkbox" id="tabs"><span>Tab columns</span></label>
     </div>
   </div>
@@ -149,7 +151,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
 
   <div class="status" id="status"><span class="dot"></span><span id="msg">Camera off</span></div>
 
+  <div class="diag" id="diag" hidden></div>
+
   <button class="primary" id="go">Start scanning</button>
+  <button class="ghost" id="manualstart" hidden>Start a label without the barcode</button>
 
   <!-- confirmation -->
   <div class="review" id="review" hidden>
@@ -683,32 +688,51 @@ $('clear').onclick=function(){
 };
 
 /* ---- camera ---- */
-function onBarcode(v){
-  var c=String(v).replace(/\s+/g,'').toUpperCase(), now=Date.now();
+var seen=0, lastRaw='', engine='—', diag=$('diag');
+function diagUpdate(){
+  diag.hidden=false;
+  diag.textContent=engine+' · '+(video.videoWidth||'?')+'×'+(video.videoHeight||'?')
+    +' · barcodes seen: '+seen+(lastRaw?' · last: '+lastRaw.slice(0,30):'');
+}
+
+/* Pull an S10 tracking number out of whatever the barcode encodes. Royal Mail
+   codes sometimes carry extra characters around it, so we don't insist the
+   whole payload is the tracking number. */
+function trackingFrom(raw){
+  var c=String(raw).replace(/\s+/g,'').toUpperCase();
   var m=c.match(/[A-Z]{2}\d{9}[A-Z]{2}/);
-  if(!m){ return; }                       /* ignore the other barcodes on the label */
-  var t=m[0];
+  if(m) return m[0];
+  m=c.match(/([A-Z]{2})([0-9OISBZGQDL]{9})([A-Z]{2})/);
+  if(m) return m[1]+toDigits(m[2])+m[3];
+  return '';
+}
+
+function onBarcode(v){
+  var raw=String(v).trim(), now=Date.now();
+  seen++; lastRaw=raw; diagUpdate();
+  var t=trackingFrom(raw);
+
   if(collecting){
-    if(!got.track){ got.track=t; drawChecks(); beep(880,90); buzz(35); flash(); say('Got tracking number','good'); }
+    if(!got.track && t){ got.track=t; drawChecks(); beep(880,90); buzz(35); flash(); say('Got tracking number','good'); }
     return;
   }
   if(!review.hidden) return;
-  if(t===last.v && now-last.t<3000) return;
 
-  /* Don't shoot on the first sighting — the same code has to hold across
-     several frames, which means the phone is pointed steadily at one label. */
-  if(arm.code!==t){
-    arm={code:t,hits:1};
-    say('Found <code>'+fmtTrack(t)+'</code> — keep the whole label in the frame');
+  var key=t||raw;
+  if(key===last.v && now-last.t<3000) return;
+  if(arm.code!==key){
+    arm={code:key,hits:1};
+    say(t? 'Found <code>'+fmtTrack(t)+'</code> — hold it'
+         : 'Saw a barcode but no tracking number in it — hold it');
     return;
   }
   arm.hits++;
   if(arm.hits<LOCK_HITS){ say('Locking on… '+arm.hits+' of '+LOCK_HITS); return; }
-
   arm={code:'',hits:0};
-  last={v:t,t:now};
-  startCollect(t);
+  last={v:key,t:now};
+  startCollect(t);            /* blank is fine — the reader will hunt for it */
 }
+
 function setupTorch(){
   try{
     track=stream?stream.getVideoTracks()[0]:(video.srcObject&&video.srcObject.getVideoTracks()[0]);
@@ -731,7 +755,7 @@ function start(){
     ? BarcodeDetector.getSupportedFormats().then(function(f){
         var use=wanted.filter(function(x){return f.indexOf(x)>-1;});
         if(!use.length) throw new Error('formats');
-        detector=new BarcodeDetector({formats:use});
+        detector=new BarcodeDetector({formats:use}); engine='native ('+use.length+' formats)';
       })
     : Promise.reject(new Error('detector'));
 
@@ -755,7 +779,7 @@ function start(){
                 'https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js',
                 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js'])
     .then(function(){
-      zx=new ZXing.BrowserMultiFormatReader();
+      zx=new ZXing.BrowserMultiFormatReader(); engine='zxing';
       return zx.decodeFromConstraints({video:{facingMode:{ideal:'environment'},width:{ideal:1920}}},video,function(res){
         if(res&&running) onBarcode(res.getText());
       });
@@ -768,7 +792,8 @@ function start(){
   });
 }
 function live(){
-  running=true; paused=false; idle.hidden=true; arm={code:'',hits:0};
+  running=true; idle.hidden=true; arm={code:'',hits:0};
+  $('manualstart').hidden=false; seen=0; lastRaw=''; setTimeout(diagUpdate,700);
   go.textContent='Stop scanning'; go.classList.add('stop');
   say('Point at the long barcode to start a label');
 }
@@ -780,8 +805,14 @@ function stop(){
   if(video.srcObject){ try{video.srcObject.getTracks().forEach(function(t){t.stop();});}catch(e){} video.srcObject=null; }
   track=null; torchBtn.hidden=true; torchBtn.setAttribute('aria-pressed','false');
   idle.hidden=false; go.textContent='Start scanning'; go.classList.remove('stop');
+  $('manualstart').hidden=true; diag.hidden=true;
   say('Camera off');
 }
+$('manualstart').onclick=function(){
+  if(!running||collecting||!review.hidden) return;
+  arm={code:'',hits:0};
+  startCollect('');
+};
 go.onclick=function(){ running?stop():start(); };
 document.addEventListener('visibilitychange',function(){ if(document.hidden&&running&&!collecting) stop(); });
 
