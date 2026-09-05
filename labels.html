@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101418">
+<title>Label reader — Ecomflex</title>
+<style>
+:root{
+  --ground:#101418; --panel:#191F25; --edge:#2B343C;
+  --text:#EDF1F3; --muted:#8A99A5; --mark:#E23B2E; --ok:#3FBF7F; --warn:#F2C14E;
+  --stock:#FBFAF7; --stock-ink:#14181B;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans)}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px 34px}
+button{font-family:inherit;font-size:1rem}
+[hidden]{display:none!important}
+a.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.85rem;margin-bottom:12px}
+
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+h1{margin:0;font-size:1.35rem;font-weight:650;letter-spacing:-.02em}
+.sub{margin:4px 0 0;color:var(--muted);font-size:.84rem}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.ver{font-family:var(--mono);font-size:.72rem;color:var(--muted);border:1px solid var(--edge);border-radius:20px;padding:2px 9px}
+.mode{display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--muted);text-align:right}
+.mode input{width:36px;height:21px;appearance:none;background:var(--edge);border-radius:11px;position:relative;flex:none}
+.mode input::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.mode input:checked{background:#243b31}
+.mode input:checked::after{transform:translateX(15px);background:var(--ok)}
+
+.drop{border:2px dashed var(--edge);border-radius:12px;padding:34px 20px;text-align:center;background:var(--panel);cursor:pointer}
+.drop.over{border-color:var(--mark);background:#20181A}
+.drop .big{font-size:1.05rem;font-weight:600;margin-bottom:5px}
+.drop .small{font-size:.84rem;color:var(--muted);line-height:1.5}
+.drop .mark{display:flex;gap:3px;height:34px;justify-content:center;margin-bottom:12px;opacity:.45}
+.drop .mark i{display:block;background:var(--muted);border-radius:1px}
+
+.bar{margin-top:12px;height:6px;border-radius:3px;background:var(--edge);overflow:hidden}
+.bar div{height:100%;background:var(--mark);width:0;transition:width .2s}
+.status{margin:11px 0 0;min-height:34px;display:flex;align-items:center;gap:9px;font-size:.87rem;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.status.good{color:var(--ok)} .status.good .dot{background:var(--ok)}
+.status.warn{color:var(--warn)} .status.warn .dot{background:var(--warn)}
+.status.bad{color:var(--mark)} .status.bad .dot{background:var(--mark)}
+
+.summary{margin-top:14px;display:flex;gap:9px;flex-wrap:wrap}
+.pill{font-size:.78rem;padding:5px 11px;border-radius:20px;border:1px solid var(--edge);color:var(--muted)}
+.pill.ok{border-color:#2C5343;background:#152A21;color:#8FE3B4}
+.pill.bad{border-color:#5A2A26;background:#2A1614;color:#F0A79E}
+
+.list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.row{background:var(--stock);color:var(--stock-ink);border-radius:5px;overflow:hidden}
+.rowhead{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 0;cursor:pointer}
+.row .stripe{flex:none;width:14px;align-self:stretch;min-height:38px;background:repeating-linear-gradient(90deg,#14181B 0 2px,transparent 2px 4px,#14181B 4px 5px,transparent 5px 9px)}
+.row.warn .stripe{background:repeating-linear-gradient(90deg,#B8860B 0 2px,transparent 2px 4px,#B8860B 4px 5px,transparent 5px 9px)}
+.row .txt{flex:1;min-width:0;font-family:var(--mono);font-size:.75rem;line-height:1.5;word-break:break-word}
+.row .flag{flex:none;font-size:.68rem;color:#9A6B00;padding-right:2px}
+.row .chev{flex:none;color:#98A2AA;font-size:1rem;padding-right:4px}
+.edit{padding:0 12px 12px;border-top:1px solid #E6E2DA}
+.edit .f{margin-top:9px}
+.edit label{display:block;font-size:.68rem;color:#6C7780;margin-bottom:2px}
+.edit input{width:100%;padding:9px;border-radius:6px;border:1px solid #D8D3C9;background:#fff;color:var(--stock-ink);font-family:var(--mono);font-size:.86rem}
+.edit input.miss{border-color:#C9A227;background:#FFF9E6}
+.edit .drop-row{margin-top:11px;width:100%;padding:9px;border-radius:6px;border:1px solid #D8D3C9;background:#fff;color:#8B3A32;cursor:pointer;font-size:.85rem}
+
+.empty{margin:14px 0 0;padding:22px;border:1px dashed var(--edge);border-radius:8px;color:var(--muted);font-size:.85rem;text-align:center}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.actions button{padding:15px 10px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--text);cursor:pointer;font-weight:500}
+.actions button:disabled{opacity:.35}
+.actions .wa{background:#1F3A2E;border-color:#2C5343;color:#8FE3B4}
+.actions .clear{color:#E88A82}
+.foot{margin-top:20px;font-size:.74rem;color:#5D6970;line-height:1.6}
+button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">‹ Ecomflex</a>
+
+  <div class="top">
+    <div>
+      <h1>Label reader</h1>
+      <p class="sub">Reads label PDFs directly — no camera, no photos</p>
+    </div>
+    <div class="right">
+      <span class="ver">v1</span>
+      <label class="mode"><input type="checkbox" id="tabs"><span>Tab columns</span></label>
+    </div>
+  </div>
+
+  <div class="drop" id="drop" role="button" tabindex="0">
+    <div class="mark" id="mark"></div>
+    <div class="big">Drop label PDFs here</div>
+    <div class="small">Or tap to choose files. Add as many as you like —<br>every page is read as one label.</div>
+  </div>
+  <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
+
+  <div class="bar" id="barwrap" hidden><div id="bar"></div></div>
+  <div class="status" id="status"><span class="dot"></span><span id="msg">Waiting for files</span></div>
+  <div class="summary" id="summary" hidden></div>
+
+  <ul class="list" id="list"></ul>
+  <div class="empty" id="empty">Results appear here, one line per label, ready to paste.</div>
+
+  <div class="actions">
+    <button id="copy" disabled>Copy all</button>
+    <button class="wa" id="wa" disabled>Send to WhatsApp</button>
+    <button id="dl" disabled>Save .txt</button>
+    <button class="clear" id="clear" disabled>Clear</button>
+  </div>
+
+  <p class="foot">The PDFs never leave this phone — they are read in the browser and nothing is uploaded.
+  Tap any row to check or correct it. Rows with something missing are marked in amber.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i);};
+var drop=$('drop'),file=$('file'),msg=$('msg'),status=$('status'),listEl=$('list'),emptyEl=$('empty'),
+    barwrap=$('barwrap'),bar=$('bar'),summary=$('summary'),tabs=$('tabs');
+
+var mk=$('mark');
+[3,1,2,1,1,3,1,2,1,3,1,1,2].forEach(function(w){
+  var b=document.createElement('i'); b.style.width=(w*2)+'px'; mk.appendChild(b);
+});
+
+var KEYS=['sku','qty','name','post','ref','track'];
+var LABELS={sku:'SKU',qty:'quantity',name:'name',post:'postcode',ref:'reference',track:'tracking'};
+var rows=[];
+
+/* ---------- patterns ---------- */
+var RX={
+  s10:      /\b([A-Z]{2})\s?(\d{4})\s?(\d{4})\s?(\d)\s?([A-Z]{2})\b/,
+  skuFull:  /\b([A-Z]{2}\d{3,6}(?:-[A-Z0-9]{1,6}){3}-[A-Z]{2})\b/,
+  skuPart:  /\b([A-Z]{2}\d{2,6}(?:-[A-Z0-9]{1,6}){2,4})\b/,
+  ref:      /\b(\d{3}-\d{7}-\d{7})\b/,
+  post:     /\b([A-Z]{1,2}\d{1,2}[A-Z]?)\s*(\d[A-Z]{2})\b/g,
+  mailcode: /^\s*\d{2}-\d{3}\s+\d{3}/
+};
+var OURS=/RETURN|SYNERGY|SINERGY|COMPOSITE|AYLESFORD|COACHWORKS|OLD MILL/i;
+var CHROME=/ROYAL\s*MAIL|TRACKED|SIGNATURE|POSTAGE|DELIVERED|LARGE LETTER|ACCOUNT GB|CUSTOMER REF|DELIVER TO/i;
+
+function today(){ var d=new Date();
+  return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear(); }
+function fmtTrack(v){
+  var c=String(v||'').replace(/\s+/g,'').toUpperCase();
+  var m=c.match(/^([A-Z]{2})(\d{4})(\d{4})(\d)([A-Z]{2})$/);
+  return m? m[1]+' '+m[2]+' '+m[3]+' '+m[4]+m[5] : c;
+}
+function isName(s){
+  if(!s) return false;
+  var t=s.trim();
+  if(/\d/.test(t)||OURS.test(t)||CHROME.test(t)) return false;
+  var w=t.split(/\s+/).filter(Boolean);
+  if(w.length<1||w.length>5) return false;
+  return t.replace(/[^A-Za-z]/g,'').length>=3;
+}
+function tidyName(s){
+  return s.trim().split(/\s+/).map(function(w){
+    return (w.length<=2&&w===w.toUpperCase())?w:w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+/* ---------- turn one PDF page into lines of text ----------
+   Sideways text (the return address) is dropped: in the file it carries a
+   rotation, so it can be told apart from the delivery address with certainty. */
+function pageLines(items){
+  var kept=[];
+  items.forEach(function(it){
+    if(!it.str||!it.str.trim()) return;
+    var t=it.transform;
+    if(Math.abs(t[1])>0.05||Math.abs(t[2])>0.05) return;   /* rotated — skip */
+    kept.push({x:t[4],y:t[5],s:it.str});
+  });
+  kept.sort(function(a,b){ return (b.y-a.y)||(a.x-b.x); });
+  var lines=[],cur=null;
+  kept.forEach(function(it){
+    if(!cur||Math.abs(cur.y-it.y)>4){ cur={y:it.y,parts:[]}; lines.push(cur); }
+    cur.parts.push(it);
+  });
+  return lines.map(function(l){
+    l.parts.sort(function(a,b){return a.x-b.x;});
+    var out='',prev=null;
+    l.parts.forEach(function(p){
+      if(prev!==null && p.x-prev>3 && !/\s$/.test(out)) out+=' ';
+      out+=p.s; prev=p.x+p.s.length*3;
+    });
+    return out.replace(/\s+/g,' ').trim();
+  }).filter(Boolean);
+}
+
+/* ---------- pull the six fields out of one page ---------- */
+function readPage(lines){
+  var f={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:''};
+  var up=lines.map(function(l){return l.toUpperCase();});
+  var joined=up.join('\n');
+
+  /* 6 - tracking */
+  var mt=joined.match(RX.s10);
+  if(mt) f.track=mt[1]+mt[2]+mt[3]+mt[4]+mt[5];
+
+  /* 5 - customer reference: the code to the right of the slash */
+  var mr=joined.match(RX.ref);
+  if(mr) f.ref=mr[1];
+  else for(var i=0;i<up.length;i++){
+    if(/CUSTOMER\s*REF/.test(up[i])){
+      var blob=up[i]+' '+(up[i+1]||'');
+      if(blob.indexOf('/')>-1){
+        var r=blob.split('/').pop().trim().split(/\s+/)[0];
+        if(r&&r.length>=6) f.ref=r;
+      }else{
+        var parts=blob.replace(/CUSTOMER\s*REF\.?:?/,'').trim().split(/\s+/);
+        if(parts.length>1) f.ref=parts[parts.length-1];
+      }
+      break;
+    }
+  }
+
+  /* 1 + 2 - SKU and quantity, from the bottom upwards */
+  for(var j=up.length-1;j>=0;j--){
+    var L=up[j];
+    if(!L||OURS.test(L)) continue;
+    var ms=L.match(RX.skuFull)||L.match(RX.skuPart);
+    if(!ms||RX.ref.test(ms[1])) continue;
+    f.sku=ms[1];
+    var b=L.slice(0,L.indexOf(ms[1]));
+    var mq=b.match(/(\d{1,3})\s*[X\u00D7]\s*[^A-Z0-9]*$/)||b.match(/(\d{1,3})\s*[X\u00D7]/);
+    f.qty=mq? String(parseInt(mq[1],10)) : '1';
+    break;
+  }
+
+  /* 4 - postcode */
+  var pcIdx=-1;
+  for(var k=0;k<up.length;k++){
+    if(OURS.test(up[k])||CHROME.test(up[k])) continue;
+    RX.post.lastIndex=0;
+    var mp,best=null;
+    while((mp=RX.post.exec(up[k]))!==null){
+      var pc=mp[1]+' '+mp[2];
+      if(/^ME20/.test(pc)) continue;
+      best=pc;
+    }
+    if(best){ f.post=best; pcIdx=k; }
+  }
+
+  /* 3 - name: top of the address block above the postcode */
+  if(pcIdx>-1){
+    var st=pcIdx;
+    for(var a=pcIdx-1;a>=0;a--){
+      var u=up[a];
+      if(!u||RX.s10.test(u)||RX.mailcode.test(u)||OURS.test(u)||CHROME.test(u)) break;
+      st=a;
+    }
+    if(isName(lines[st])) f.name=tidyName(lines[st]);
+    else for(var c=st;c<pcIdx;c++){ if(isName(lines[c])){ f.name=tidyName(lines[c]); break; } }
+  }
+  return f;
+}
+
+/* ---------- pdf.js ---------- */
+function loadScript(urls){
+  return new Promise(function(res,rej){
+    (function next(i){
+      if(i>=urls.length) return rej(new Error('cdn'));
+      var s=document.createElement('script'); s.src=urls[i];
+      s.onload=function(){res(urls[i]);}; s.onerror=function(){next(i+1);};
+      document.head.appendChild(s);
+    })(0);
+  });
+}
+var pdfReady=null;
+function getPdfjs(){
+  if(pdfReady) return pdfReady;
+  say('Loading the PDF reader…');
+  pdfReady=loadScript([
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+    'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js',
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'
+  ]).then(function(used){
+    var lib=window.pdfjsLib;
+    if(!lib) throw new Error('pdf.js missing');
+    lib.GlobalWorkerOptions.workerSrc = used.replace(/pdf\.min\.js$/,'pdf.worker.min.js');
+    return lib;
+  });
+  return pdfReady;
+}
+
+/* ---------- handle files ---------- */
+function say(t,k){ msg.textContent=t; status.className='status'+(k?' '+k:''); }
+function handle(files){
+  var pdfs=Array.prototype.slice.call(files).filter(function(f){
+    return /\.pdf$/i.test(f.name)||f.type==='application/pdf';
+  });
+  if(!pdfs.length){ say('Those are not PDFs. Choose the label PDFs.','warn'); return; }
+  barwrap.hidden=false; bar.style.width='0%';
+  say('Reading '+pdfs.length+' file'+(pdfs.length>1?'s':'')+'…');
+
+  getPdfjs().then(function(lib){
+    var done=0,total=pdfs.length,added=0,blank=0;
+    return pdfs.reduce(function(chain,f){
+      return chain.then(function(){
+        return f.arrayBuffer()
+          .then(function(buf){ return lib.getDocument({data:buf}).promise; })
+          .then(function(doc){
+            var pages=[];
+            for(var p=1;p<=doc.numPages;p++) pages.push(p);
+            return pages.reduce(function(c2,p){
+              return c2.then(function(){
+                return doc.getPage(p).then(function(page){ return page.getTextContent(); })
+                  .then(function(tc){
+                    var lines=pageLines(tc.items);
+                    if(lines.join('').replace(/\s/g,'').length<20){ blank++; return; }
+                    var row=readPage(lines);
+                    row.src=f.name+(doc.numPages>1?' p'+p:'');
+                    rows.push(row); added++;
+                  });
+              });
+            },Promise.resolve());
+          })
+          .catch(function(){ say('Could not open '+f.name,'warn'); })
+          .then(function(){
+            done++; bar.style.width=Math.round(done/total*100)+'%';
+          });
+      });
+    },Promise.resolve()).then(function(){
+      barwrap.hidden=true;
+      render();
+      if(!added && blank) say('No text found in those PDFs — they look like scans rather than real labels.','bad');
+      else if(blank) say('Read '+added+' label'+(added===1?'':'s')+'. '+blank+' page'+(blank===1?'':'s')+' had no text.','warn');
+      else say('Read '+added+' label'+(added===1?'':'s'),'good');
+    });
+  }).catch(function(){
+    barwrap.hidden=true;
+    say('Could not load the PDF reader. Check the connection and try again.','bad');
+  });
+}
+
+drop.onclick=function(){ file.click(); };
+drop.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); file.click(); } };
+file.onchange=function(){ handle(file.files); file.value=''; };
+['dragenter','dragover'].forEach(function(ev){
+  drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.add('over'); });
+});
+['dragleave','drop'].forEach(function(ev){
+  drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.remove('over'); });
+});
+drop.addEventListener('drop',function(e){ if(e.dataTransfer&&e.dataTransfer.files) handle(e.dataTransfer.files); });
+
+/* ---------- output ---------- */
+function gapsOf(f){ return KEYS.filter(function(k){ return !f[k]; }); }
+function lineOf(f){
+  return [f.date,f.sku,f.qty,f.name,f.post,f.ref,fmtTrack(f.track)].join(tabs.checked?'\t':'  ');
+}
+function render(){
+  listEl.innerHTML='';
+  rows.forEach(function(f,i){
+    var miss=gapsOf(f);
+    var li=document.createElement('li');
+    li.className='row'+(miss.length?' warn':'');
+
+    var head=document.createElement('div'); head.className='rowhead';
+    var s=document.createElement('div'); s.className='stripe'; head.appendChild(s);
+    var t=document.createElement('div'); t.className='txt'; t.textContent=lineOf(f); head.appendChild(t);
+    if(miss.length){
+      var fl=document.createElement('div'); fl.className='flag';
+      fl.textContent='missing '+miss.length; head.appendChild(fl);
+    }
+    var ch=document.createElement('div'); ch.className='chev'; ch.textContent='\u203A'; head.appendChild(ch);
+    li.appendChild(head);
+
+    var ed=document.createElement('div'); ed.className='edit'; ed.hidden=true;
+    KEYS.forEach(function(k){
+      var w=document.createElement('div'); w.className='f';
+      var lab=document.createElement('label'); lab.textContent=LABELS[k]+(f.src?'':''); w.appendChild(lab);
+      var inp=document.createElement('input');
+      inp.value = k==='track'? fmtTrack(f[k]) : (f[k]||'');
+      if(!f[k]) inp.className='miss';
+      inp.oninput=function(){ f[k]=inp.value.trim(); inp.className=f[k]?'':'miss'; t.textContent=lineOf(f);
+        li.className='row'+(gapsOf(f).length?' warn':''); save(); };
+      w.appendChild(inp); ed.appendChild(w);
+    });
+    var src=document.createElement('label'); src.style.marginTop='10px'; src.style.display='block';
+    src.textContent='from '+(f.src||'file'); ed.appendChild(src);
+    var rm=document.createElement('button'); rm.className='drop-row'; rm.textContent='Remove this label';
+    rm.onclick=function(){ rows.splice(i,1); render(); save(); };
+    ed.appendChild(rm);
+    li.appendChild(ed);
+
+    head.onclick=function(){ ed.hidden=!ed.hidden; ch.textContent=ed.hidden?'\u203A':'\u02C5'; };
+    listEl.appendChild(li);
+  });
+
+  var n=rows.length, bad=rows.filter(function(f){return gapsOf(f).length;}).length;
+  emptyEl.hidden=n>0;
+  summary.hidden=!n;
+  summary.innerHTML='';
+  if(n){
+    var p1=document.createElement('span'); p1.className='pill ok';
+    p1.textContent=(n-bad)+' complete'; summary.appendChild(p1);
+    if(bad){ var p2=document.createElement('span'); p2.className='pill bad';
+      p2.textContent=bad+' need checking'; summary.appendChild(p2); }
+  }
+  ['copy','wa','dl','clear'].forEach(function(id){ $(id).disabled=n===0; });
+  save();
+}
+function save(){ try{
+  if(window.storage) window.storage.set('labels:rows',JSON.stringify(rows));
+  else localStorage.setItem('labels:rows',JSON.stringify(rows));
+}catch(e){} }
+function allText(){ return rows.map(lineOf).join('\n'); }
+tabs.onchange=render;
+
+$('copy').onclick=function(){
+  var t=allText(), ok=function(){ say(rows.length+' row'+(rows.length>1?'s':'')+' copied','good'); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok,fb); else fb();
+  function fb(){
+    var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,99999);
+    try{ document.execCommand('copy'); ok(); }catch(e){ say('Copy failed — use Save .txt','bad'); }
+    document.body.removeChild(ta);
+  }
+};
+$('wa').onclick=function(){
+  window.open('https://wa.me/?text='+encodeURIComponent(today()+' — '+rows.length+' parcels\n\n'+allText()),'_blank');
+};
+$('dl').onclick=function(){
+  var d=new Date(), name='labels-'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'.txt';
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([allText()+'\n'],{type:'text/plain'})); a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+  say('Saved '+name,'good');
+};
+$('clear').onclick=function(){
+  if(!confirm('Clear all '+rows.length+' rows?')) return;
+  rows=[]; render(); say('Cleared');
+};
+
+try{
+  var saved = window.storage? null : localStorage.getItem('labels:rows');
+  if(saved){ rows=JSON.parse(saved); render(); say('Restored '+rows.length+' row'+(rows.length>1?'s':'')+' from earlier'); }
+}catch(e){}
+})();
+</script>
+</body>
+</html>
