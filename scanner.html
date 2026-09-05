@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#101418">
+<title>Parcel Scanner</title>
+<style>
+:root{
+  --ground:#101418; --panel:#191F25; --edge:#2B343C;
+  --text:#EDF1F3; --muted:#8A99A5; --mark:#E23B2E; --ok:#3FBF7F; --warn:#F2C14E;
+  --stock:#FBFAF7; --stock-ink:#14181B;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans)}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:540px;margin:0 auto;padding:14px 14px 30px}
+button{font-family:inherit;font-size:1rem}
+[hidden]{display:none!important}
+
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.count{font-size:2rem;font-weight:650;letter-spacing:-.02em;line-height:1}
+.count small{display:block;font-size:.8rem;font-weight:400;color:var(--muted)}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.ver{font-family:var(--mono);font-size:.72rem;color:var(--muted);border:1px solid var(--edge);border-radius:20px;padding:2px 9px}
+.mode{display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--muted);text-align:right}
+.mode input{width:36px;height:21px;appearance:none;background:var(--edge);border-radius:11px;position:relative;flex:none}
+.mode input::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.mode input:checked{background:#243b31}
+.mode input:checked::after{transform:translateX(15px);background:var(--ok)}
+
+.view{position:relative;aspect-ratio:4/3;background:#05080A;border-radius:10px;overflow:hidden;border:1px solid var(--edge)}
+.view video{width:100%;height:100%;object-fit:cover;display:block}
+.idle{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:20px;color:var(--muted);font-size:.9rem}
+.idle .bars{display:flex;gap:3px;height:36px;opacity:.4;margin-bottom:4px}
+.idle .bars i{display:block;background:var(--muted);border-radius:1px}
+.frame{position:absolute;left:7%;right:7%;top:24%;bottom:24%;pointer-events:none}
+.frame span{position:absolute;width:24px;height:24px;border:3px solid var(--mark)}
+.frame span:nth-child(1){top:0;left:0;border-right:0;border-bottom:0}
+.frame span:nth-child(2){top:0;right:0;border-left:0;border-bottom:0}
+.frame span:nth-child(3){bottom:0;left:0;border-right:0;border-top:0}
+.frame span:nth-child(4){bottom:0;right:0;border-left:0;border-top:0}
+.view.hit .frame span{border-color:var(--ok)}
+.view.dupe .frame span{border-color:var(--warn)}
+.tools{position:absolute;right:9px;top:9px}
+.tools button{width:42px;height:42px;border-radius:50%;border:1px solid var(--edge);background:rgba(16,20,24,.78);color:var(--text);font-size:1.05rem;cursor:pointer}
+.tools button[aria-pressed="true"]{background:var(--warn);color:#241C05;border-color:var(--warn)}
+.zoom{position:absolute;left:12px;right:12px;bottom:10px;display:flex;align-items:center;gap:9px}
+.zoom input{flex:1;accent-color:var(--mark)}
+.zoom span{font-size:.7rem;color:var(--muted);font-family:var(--mono);background:rgba(16,20,24,.7);padding:2px 6px;border-radius:4px}
+
+.status{margin:10px 0;min-height:38px;display:flex;align-items:center;gap:9px;font-size:.88rem;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.status.good{color:var(--ok)} .status.good .dot{background:var(--ok)}
+.status.warn{color:var(--warn)} .status.warn .dot{background:var(--warn)}
+.status.bad{color:var(--mark)} .status.bad .dot{background:var(--mark)}
+.status code{font-family:var(--mono);color:var(--text)}
+
+.primary{width:100%;padding:18px;border:0;border-radius:9px;background:var(--mark);color:#fff;font-size:1.05rem;font-weight:650;cursor:pointer}
+.primary.stop{background:var(--panel);color:var(--text);box-shadow:inset 0 0 0 1px var(--edge)}
+.manual{display:flex;gap:8px;margin-top:9px}
+.manual input{flex:1;min-width:0;padding:13px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--text);font-family:var(--mono);font-size:.92rem;text-transform:uppercase}
+.manual input::placeholder{font-family:var(--sans);text-transform:none;color:var(--muted)}
+.manual button{padding:0 18px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--text);cursor:pointer}
+
+.list{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;align-items:center;gap:10px;background:var(--stock);color:var(--stock-ink);border-radius:5px;padding:10px 10px 10px 0;overflow:hidden;animation:in .16s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(-6px)}}
+.row .stripe{flex:none;width:14px;align-self:stretch;background:repeating-linear-gradient(90deg,#14181B 0 2px,transparent 2px 4px,#14181B 4px 5px,transparent 5px 9px)}
+.row .body{flex:1;min-width:0}
+.row .code{font-family:var(--mono);font-size:.95rem;font-weight:600;word-break:break-all;line-height:1.35}
+.row .meta{font-size:.68rem;color:#6C7780;margin-top:1px}
+.row .del{flex:none;width:30px;height:30px;border:0;background:transparent;color:#98A2AA;font-size:1.15rem;cursor:pointer;border-radius:5px}
+.empty{margin:16px 0 0;padding:20px;border:1px dashed var(--edge);border-radius:8px;color:var(--muted);font-size:.85rem;text-align:center}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.actions button{padding:15px 10px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--text);cursor:pointer;font-weight:500}
+.actions button:disabled{opacity:.35}
+.actions .wa{background:#1F3A2E;border-color:#2C5343;color:#8FE3B4}
+.actions .clear{color:#E88A82}
+.foot{margin-top:18px;font-size:.74rem;color:#5D6970;line-height:1.6}
+button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="count"><span id="n">0</span><small id="nlabel">nothing scanned yet</small></div>
+    <div class="right">
+      <span class="ver">v8</span>
+      <label class="mode"><input type="checkbox" id="strict" checked><span>Parcel codes only</span></label>
+      <label class="mode"><input type="checkbox" id="spaces"><span>Copy with spaces</span></label>
+    </div>
+  </div>
+
+  <div class="view" id="view">
+    <video id="video" playsinline muted autoplay></video>
+    <div class="idle" id="idle">
+      <div class="bars" id="bars"></div>
+      <div>Royal Mail or DPD</div>
+      <div style="font-size:.76rem">Point at the long barcode</div>
+    </div>
+    <div class="frame"><span></span><span></span><span></span><span></span></div>
+    <div class="tools" id="tools" hidden><button id="torch" aria-pressed="false" title="Torch">☀</button></div>
+    <div class="zoom" id="zoomwrap" hidden>
+      <input type="range" id="zoom" min="1" max="1" step="0.1" value="1" aria-label="Zoom">
+      <span id="zoomval">1.0×</span>
+    </div>
+  </div>
+
+  <div class="status" id="status"><span class="dot"></span><span id="msg">Camera off</span></div>
+
+  <button class="primary" id="go">Start scanning</button>
+
+  <div class="manual">
+    <input id="entry" placeholder="Damaged barcode? Type it here" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button id="add">Add</button>
+  </div>
+
+  <ul class="list" id="list"></ul>
+  <div class="empty" id="empty">Scanned codes collect here. Copy or send the whole batch in one go.</div>
+
+  <div class="actions">
+    <button id="copy" disabled>Copy all</button>
+    <button class="wa" id="wa" disabled>Send to WhatsApp</button>
+    <button id="dl" disabled>Save .txt</button>
+    <button class="clear" id="clear" disabled>Clear list</button>
+  </div>
+
+  <p class="foot">Scans Royal Mail and DPD. One code per line when copied, so it pastes straight down a column. Duplicates are refused. Everything stays on this phone.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i);};
+var video=$('video'),view=$('view'),idle=$('idle'),go=$('go'),msg=$('msg'),status=$('status'),
+    listEl=$('list'),emptyEl=$('empty'),nEl=$('n'),nLabel=$('nlabel'),strict=$('strict'),
+    spaces=$('spaces'),entry=$('entry'),tools=$('tools'),torchBtn=$('torch'),
+    zoomWrap=$('zoomwrap'),zoom=$('zoom'),zoomVal=$('zoomval');
+
+var bars=$('bars');
+for(var i=0;i<30;i++){var b=document.createElement('i');b.style.width=(1+Math.round(Math.random()*3))+'px';bars.appendChild(b);}
+
+var codes=[], running=false, stream=null, vtrack=null, timer=null, detector=null, zx=null,
+    last={v:'',t:0};
+
+/* ---------- what counts as a parcel code ---------- */
+var RM=/^[A-Z]{2}\d{9}[A-Z]{2}$/;
+function classify(raw){
+  var c=String(raw).replace(/\s+/g,'').toUpperCase();
+  if(RM.test(c)) return {code:c,carrier:'Royal Mail',show:c.slice(0,2)+' '+c.slice(2,6)+' '+c.slice(6,10)+' '+c.slice(10)};
+  /* DPD's bottom barcode: a long mostly-numeric string, e.g. 0M188DN1550303674515 0812826K */
+  var d=(c.match(/\d/g)||[]).length;
+  if(c.length>=16&&c.length<=36&&/^[A-Z0-9]+$/.test(c)&&d/c.length>=.6)
+    return {code:c,carrier:'DPD',show:c.replace(/(.{4})/g,'$1 ').trim()};
+  return {code:c,carrier:'',show:c};
+}
+
+/* ---------- storage ---------- */
+var store={
+  get:function(){ try{
+      if(window.storage) return window.storage.get('scan:codes').then(function(r){return r?JSON.parse(r.value):null;},function(){return null;});
+      var s=localStorage.getItem('scan:codes'); return Promise.resolve(s?JSON.parse(s):null);
+    }catch(e){ return Promise.resolve(null); } },
+  set:function(v){ try{
+      if(window.storage) window.storage.set('scan:codes',JSON.stringify(v));
+      else localStorage.setItem('scan:codes',JSON.stringify(v));
+    }catch(e){} }
+};
+
+/* ---------- feedback ---------- */
+var ac=null;
+function beep(f,ms){ try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+  var o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(ac.destination);
+  o.frequency.value=f; o.type='square'; g.gain.setValueAtTime(.09,ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+ms/1000);
+  o.start(); o.stop(ac.currentTime+ms/1000);
+}catch(e){} }
+function buzz(p){ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+function say(t,k){ msg.innerHTML=t; status.className='status'+(k?' '+k:''); }
+function mark(cls){ view.classList.add(cls); setTimeout(function(){view.classList.remove(cls);},260); }
+function today(){ var d=new Date();
+  return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear(); }
+
+/* ---------- add a code ---------- */
+function accept(raw){
+  var now=Date.now(), c=classify(raw);
+  if(!c.code) return;
+  if(c.code===last.v && now-last.t<2000) return;
+  last={v:c.code,t:now};
+
+  if(strict.checked && !c.carrier){
+    beep(220,110); buzz(60);
+    say('Not a parcel code \u2014 that\u2019s a different barcode on the label','warn');
+    return;
+  }
+  for(var i=0;i<codes.length;i++){
+    if(codes[i].code===c.code){
+      beep(300,80); beep(300,80); buzz([45,55,45]); mark('dupe');
+      say('Already scanned \u2014 <code>'+c.show+'</code>','warn');
+      return;
+    }
+  }
+  var d=new Date();
+  codes.unshift({code:c.code,carrier:c.carrier,show:c.show,
+    time:('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)});
+  beep(900,100); buzz(40); mark('hit');
+  say('Added <code>'+c.show+'</code>','good');
+  render();
+}
+
+function render(){
+  listEl.innerHTML='';
+  codes.forEach(function(c,i){
+    var li=document.createElement('li'); li.className='row';
+    var s=document.createElement('div'); s.className='stripe'; li.appendChild(s);
+    var body=document.createElement('div'); body.className='body';
+    var v=document.createElement('div'); v.className='code'; v.textContent=c.show; body.appendChild(v);
+    var m=document.createElement('div'); m.className='meta';
+    m.textContent=(c.carrier||'Other')+' · '+c.time; body.appendChild(m);
+    li.appendChild(body);
+    var x=document.createElement('button'); x.className='del'; x.type='button';
+    x.setAttribute('aria-label','Remove '+c.code); x.textContent='\u00D7';
+    x.onclick=function(){ codes.splice(i,1); render(); };
+    li.appendChild(x); listEl.appendChild(li);
+  });
+  var n=codes.length;
+  nEl.textContent=n;
+  nLabel.textContent=n===0?'nothing scanned yet':(n===1?'parcel scanned':'parcels scanned');
+  emptyEl.hidden=n>0;
+  ['copy','wa','dl','clear'].forEach(function(id){ $(id).disabled=n===0; });
+  store.set(codes);
+}
+function text(){
+  return codes.map(function(c){ return spaces.checked? c.show : c.code; }).reverse().join('\n');
+}
+spaces.addEventListener('change',render);
+
+/* ---------- outputs ---------- */
+$('copy').onclick=function(){
+  var t=text(), ok=function(){ say(codes.length+' code'+(codes.length>1?'s':'')+' copied','good'); beep(660,80); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok,fb); else fb();
+  function fb(){
+    var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,99999);
+    try{ document.execCommand('copy'); ok(); }catch(e){ say('Copy failed \u2014 use Save .txt','bad'); }
+    document.body.removeChild(ta);
+  }
+};
+$('wa').onclick=function(){
+  window.open('https://wa.me/?text='+encodeURIComponent(today()+' \u2014 '+codes.length+' parcels\n\n'+text()),'_blank');
+};
+$('dl').onclick=function(){
+  var d=new Date(), name='scans-'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'-'+
+      ('0'+d.getHours()).slice(-2)+('0'+d.getMinutes()).slice(-2)+'.txt';
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text()+'\n'],{type:'text/plain'})); a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+  say('Saved '+name,'good');
+};
+$('clear').onclick=function(){
+  if(!confirm('Clear all '+codes.length+' codes? This cannot be undone.')) return;
+  codes=[]; render(); say('List cleared');
+};
+function manual(){ var v=entry.value.trim(); if(!v) return; last={v:'',t:0}; accept(v); entry.value=''; }
+$('add').onclick=manual;
+entry.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();manual();} });
+
+/* ---------- camera ---------- */
+function loadScript(urls){
+  return new Promise(function(res,rej){
+    (function next(i){
+      if(i>=urls.length) return rej(new Error('cdn'));
+      var s=document.createElement('script'); s.src=urls[i];
+      s.onload=function(){res();}; s.onerror=function(){next(i+1);};
+      document.head.appendChild(s);
+    })(0);
+  });
+}
+function setupCam(){
+  vtrack=stream.getVideoTracks()[0];
+  var caps={}; try{ caps=vtrack.getCapabilities?vtrack.getCapabilities():{}; }catch(e){}
+  tools.hidden=false;
+  torchBtn.hidden=!('torch' in caps);
+  if(caps.zoom){
+    zoom.min=caps.zoom.min; zoom.max=Math.min(caps.zoom.max,caps.zoom.min*6);
+    zoom.step=caps.zoom.step||.1; zoom.value=caps.zoom.min;
+    zoomWrap.hidden=false; zoomVal.textContent=(+zoom.value).toFixed(1)+'\u00D7';
+  }
+}
+function start(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    say('This browser cannot open the camera. Use Chrome or Safari.','bad'); return;
+  }
+  say('Opening camera…');
+  var want=['code_128','code_39','itf','ean_13','ean_8','upc_a','codabar','data_matrix','qr_code','pdf417'];
+  var native=window.BarcodeDetector
+    ? BarcodeDetector.getSupportedFormats().then(function(f){
+        var use=want.filter(function(x){return f.indexOf(x)>-1;});
+        if(!use.length) throw new Error('formats');
+        detector=new BarcodeDetector({formats:use});
+      })
+    : Promise.reject(new Error('detector'));
+
+  native.then(function(){
+    /* 1280 wide decodes noticeably quicker than 1920 and is plenty for a barcode */
+    return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},
+      width:{ideal:1280},height:{ideal:960}}});
+  }).then(function(s){ stream=s; video.srcObject=s; return video.play(); })
+  .then(function(){
+    live(); setupCam();
+    var running_=true;
+    timer=setInterval(function(){
+      if(!running||!running_) return;
+      running_=false;
+      detector.detect(video).then(function(r){
+        for(var i=0;i<r.length;i++){
+          var c=classify(r[i].rawValue);
+          if(c.carrier){ accept(r[i].rawValue); running_=true; return; }
+        }
+        if(r.length) accept(r[0].rawValue);
+        running_=true;
+      }).catch(function(){ running_=true; });
+    },80);
+  })
+  .catch(function(err){
+    if(err&&(err.name==='NotAllowedError'||err.name==='SecurityError')){
+      say('Camera blocked. Allow camera access for this page, then try again.','bad'); return;
+    }
+    loadScript(['https://cdnjs.cloudflare.com/ajax/libs/zxing-library/0.21.3/index.min.js',
+                'https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js',
+                'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js'])
+    .then(function(){
+      zx=new ZXing.BrowserMultiFormatReader();
+      return zx.decodeFromConstraints({video:{facingMode:{ideal:'environment'},width:{ideal:1280}}},video,
+        function(res){ if(res&&running) accept(res.getText()); });
+    }).then(function(){ stream=video.srcObject; live(); setupCam(); })
+    .catch(function(e){
+      if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError')) say('Camera blocked. Allow camera access, then try again.','bad');
+      else if(e&&e.name==='NotFoundError') say('No camera found on this device.','bad');
+      else say('Could not start the scanner. Check you are on https.','bad');
+    });
+  });
+}
+function live(){
+  running=true; idle.hidden=true;
+  go.textContent='Stop scanning'; go.classList.add('stop');
+  say('Scanning \u2014 hold the barcode inside the corners');
+}
+function stop(){
+  running=false;
+  if(timer){clearInterval(timer);timer=null;}
+  if(zx){ try{zx.reset();}catch(e){} zx=null; }
+  if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
+  if(video.srcObject){ try{video.srcObject.getTracks().forEach(function(t){t.stop();});}catch(e){} video.srcObject=null; }
+  vtrack=null; tools.hidden=true; zoomWrap.hidden=true; torchBtn.setAttribute('aria-pressed','false');
+  idle.hidden=false; go.textContent='Start scanning'; go.classList.remove('stop');
+  say('Camera off');
+}
+go.onclick=function(){ running?stop():start(); };
+torchBtn.onclick=function(){
+  var on=torchBtn.getAttribute('aria-pressed')==='true';
+  try{ vtrack.applyConstraints({advanced:[{torch:!on}]}); torchBtn.setAttribute('aria-pressed',String(!on)); }catch(e){}
+};
+zoom.addEventListener('input',function(){
+  zoomVal.textContent=(+zoom.value).toFixed(1)+'\u00D7';
+  try{ vtrack.applyConstraints({advanced:[{zoom:+zoom.value}]}); }catch(e){}
+});
+document.addEventListener('visibilitychange',function(){ if(document.hidden&&running) stop(); });
+
+store.get().then(function(saved){
+  if(saved&&saved.length){ codes=saved; render(); say('Restored '+saved.length+' code'+(saved.length>1?'s':'')); }
+  else render();
+},function(){ render(); });
+
+})();
+</script>
+</body>
+</html>
