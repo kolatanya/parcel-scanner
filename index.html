@@ -21,10 +21,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 button{font-family:inherit;font-size:1rem}
 [hidden]{display:none!important}
 
-.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
 .count{font-size:2rem;font-weight:650;letter-spacing:-.02em;line-height:1}
-.count small{display:block;font-size:.8rem;font-weight:400;color:var(--muted);letter-spacing:0}
-.right{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.count small{display:block;font-size:.8rem;font-weight:400;color:var(--muted)}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .ver{font-family:var(--mono);font-size:.72rem;color:var(--muted);border:1px solid var(--edge);border-radius:20px;padding:2px 9px}
 .mode{display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--muted)}
 .mode input{width:36px;height:21px;appearance:none;background:var(--edge);border-radius:11px;position:relative;flex:none}
@@ -32,40 +32,51 @@ button{font-family:inherit;font-size:1rem}
 .mode input:checked{background:#243b31}
 .mode input:checked::after{transform:translateX(15px);background:var(--ok)}
 
-.view{position:relative;aspect-ratio:3/4;max-height:52vh;background:#05080A;border-radius:10px;overflow:hidden;border:1px solid var(--edge)}
+/* step strip */
+.steps{display:flex;gap:5px;margin-bottom:9px}
+.steps div{flex:1;height:4px;border-radius:2px;background:var(--edge)}
+.steps div.on{background:var(--ok)}
+.steps div.now{background:var(--warn)}
+
+.ask{font-size:1.02rem;font-weight:600;margin:0 0 3px}
+.hint{font-size:.82rem;color:var(--muted);margin:0 0 9px;line-height:1.4}
+
+.view{position:relative;aspect-ratio:3/4;max-height:46vh;background:#05080A;border-radius:10px;overflow:hidden;border:1px solid var(--edge)}
 .view video{width:100%;height:100%;object-fit:cover;display:block}
+.mask{position:absolute;inset:0;pointer-events:none}
+.mask .over,.mask .under{position:absolute;left:0;right:0;background:rgba(8,11,14,.62)}
+.mask .over{top:0} .mask .under{bottom:0}
+.mask .band{position:absolute;left:0;right:0;border-top:2px solid var(--mark);border-bottom:2px solid var(--mark)}
 .idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted);font-size:.9rem}
-.busy{position:absolute;inset:0;background:rgba(8,11,14,.84);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:.9rem;text-align:center;padding:18px}
+.busy{position:absolute;inset:0;background:rgba(8,11,14,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:.9rem;padding:18px;text-align:center}
 .spin{width:30px;height:30px;border:3px solid var(--edge);border-top-color:var(--mark);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-.view.flash::after{content:"";position:absolute;inset:0;background:#fff;animation:fl .35s ease-out}
-@keyframes fl{from{opacity:.85}to{opacity:0}}
+.view.flash::after{content:"";position:absolute;inset:0;background:#fff;animation:fl .3s ease-out}
+@keyframes fl{from{opacity:.8}to{opacity:0}}
 .tools{position:absolute;right:9px;top:9px;display:flex;flex-direction:column;gap:8px}
-.tools button{width:42px;height:42px;border-radius:50%;border:1px solid var(--edge);background:rgba(16,20,24,.78);color:var(--text);font-size:1.05rem;cursor:pointer}
+.tools button{width:40px;height:40px;border-radius:50%;border:1px solid var(--edge);background:rgba(16,20,24,.78);color:var(--text);font-size:1rem;cursor:pointer}
 .tools button[aria-pressed="true"]{background:var(--warn);color:#241C05;border-color:var(--warn)}
-.zoom{position:absolute;left:12px;right:12px;bottom:11px;display:flex;align-items:center;gap:9px}
+.zoom{position:absolute;left:12px;right:12px;bottom:10px;display:flex;align-items:center;gap:9px}
 .zoom input{flex:1;accent-color:var(--mark)}
-.zoom span{font-size:.72rem;color:var(--muted);font-family:var(--mono);background:rgba(16,20,24,.7);padding:2px 6px;border-radius:4px}
+.zoom span{font-size:.7rem;color:var(--muted);font-family:var(--mono);background:rgba(16,20,24,.7);padding:2px 6px;border-radius:4px}
 
-.shoot{width:100%;margin-top:10px;padding:20px;border:0;border-radius:10px;background:var(--mark);color:#fff;font-size:1.1rem;font-weight:650;cursor:pointer}
+.shoot{width:100%;margin-top:10px;padding:19px;border:0;border-radius:10px;background:var(--mark);color:#fff;font-size:1.08rem;font-weight:650;cursor:pointer}
 .shoot:disabled{opacity:.4}
-.ghost{width:100%;margin-top:8px;padding:14px;border-radius:9px;border:1px solid var(--edge);background:transparent;color:var(--muted);cursor:pointer;font-size:.9rem}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.mini button{padding:12px;border-radius:9px;border:1px solid var(--edge);background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem}
 
-.status{margin:10px 0 0;min-height:36px;display:flex;align-items:center;gap:9px;font-size:.88rem;color:var(--muted)}
+.status{margin:10px 0 0;min-height:34px;display:flex;align-items:center;gap:9px;font-size:.86rem;color:var(--muted)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
 .status.good{color:var(--ok)} .status.good .dot{background:var(--ok)}
 .status.warn{color:var(--warn)} .status.warn .dot{background:var(--warn)}
 .status.bad{color:var(--mark)} .status.bad .dot{background:var(--mark)}
 
 .card{margin-top:12px;background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:14px}
-.card h2{margin:0 0 4px;font-size:1.02rem;font-weight:600}
-.card .lead{margin:0 0 12px;font-size:.84rem;color:var(--muted);line-height:1.45}
-.card .lead.warn{color:var(--warn)}
+.card h2{margin:0 0 10px;font-size:1.02rem;font-weight:600}
 .field{margin-bottom:9px}
 .field label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:3px}
 .field input{width:100%;padding:11px;border-radius:7px;border:1px solid var(--edge);background:#0D1216;color:var(--text);font-family:var(--mono);font-size:.95rem}
 .field.miss input{border-color:var(--warn);background:#241E0B}
-.field.miss label{color:var(--warn)}
 .field.fresh input{border-color:var(--ok)}
 .preview{margin:2px 0 12px;font-family:var(--mono);font-size:.75rem;color:#9BB0BD;background:#0D1216;border:1px solid var(--edge);border-radius:7px;padding:9px;word-break:break-word;line-height:1.6}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -77,8 +88,7 @@ button{font-family:inherit;font-size:1rem}
 .row .stripe{flex:none;width:14px;align-self:stretch;background:repeating-linear-gradient(90deg,#14181B 0 2px,transparent 2px 4px,#14181B 4px 5px,transparent 5px 9px)}
 .row .txt{flex:1;min-width:0;font-family:var(--mono);font-size:.77rem;line-height:1.5;word-break:break-word}
 .row .del{flex:none;width:30px;height:30px;border:0;background:transparent;color:#98A2AA;font-size:1.15rem;cursor:pointer;border-radius:5px}
-.empty{margin:16px 0 0;padding:20px;border:1px dashed var(--edge);border-radius:8px;color:var(--muted);font-size:.85rem;text-align:center}
-
+.empty{margin:16px 0 0;padding:18px;border:1px dashed var(--edge);border-radius:8px;color:var(--muted);font-size:.85rem;text-align:center}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .actions button{padding:15px 10px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--text);cursor:pointer;font-weight:500}
 .actions button:disabled{opacity:.35}
@@ -95,17 +105,24 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
   <div class="top">
     <div class="count"><span id="n">0</span><small id="nlabel">nothing saved yet</small></div>
     <div class="right">
-      <span class="ver">v5</span>
+      <span class="ver">v7</span>
       <label class="mode"><input type="checkbox" id="tabs"><span>Tab columns</span></label>
     </div>
   </div>
 
+  <div class="steps" id="steps"></div>
+  <p class="ask" id="ask">Ready</p>
+  <p class="hint" id="hint">Start the camera to begin.</p>
+
   <div class="view" id="view">
     <video id="video" playsinline muted autoplay></video>
-    <div class="idle" id="idle">Tap “Start camera”, then frame the label and take a photo when it looks sharp.</div>
-    <div class="tools" id="tools" hidden>
-      <button id="torch" aria-pressed="false" title="Torch">☀</button>
+    <div class="mask" id="mask" hidden>
+      <div class="over" id="mover"></div>
+      <div class="band" id="mband"></div>
+      <div class="under" id="munder"></div>
     </div>
+    <div class="idle" id="idle">Tap “Start camera”.</div>
+    <div class="tools" id="tools" hidden><button id="torch" aria-pressed="false" title="Torch">☀</button></div>
     <div class="zoom" id="zoomwrap" hidden>
       <input type="range" id="zoom" min="1" max="1" step="0.1" value="1" aria-label="Zoom">
       <span id="zoomval">1.0×</span>
@@ -114,13 +131,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
   </div>
 
   <button class="shoot" id="shoot">Start camera</button>
-  <button class="ghost" id="stopcam" hidden>Stop camera</button>
+  <div class="mini" id="mini" hidden>
+    <button id="skip">Skip — I'll type it</button>
+    <button id="stopcam">Stop camera</button>
+  </div>
 
   <div class="status" id="status"><span class="dot"></span><span id="msg">Camera off</span></div>
 
   <div class="card" id="card" hidden>
-    <h2 id="cardh">Label</h2>
-    <p class="lead" id="lead"></p>
+    <h2 id="cardh">This label</h2>
     <div class="field"><label>Date</label><input id="f_date" readonly></div>
     <div class="field" id="w_sku"><label>1 · SKU</label><input id="f_sku" autocapitalize="characters" spellcheck="false"></div>
     <div class="field" id="w_qty"><label>2 · Quantity</label><input id="f_qty" inputmode="numeric"></div>
@@ -145,41 +164,92 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
     <button class="clear" id="clear" disabled>Clear list</button>
   </div>
 
-  <p class="foot">Take as many photos as you like for one label — each one fills in whatever it can, and nothing already found is lost. Get in close on the small print. Rows stay on this phone until you copy, send or save them.</p>
+  <p class="foot">Fill the red band with one line of print — the bigger the letters look on screen, the better it reads. Use the zoom slider rather than moving the phone. Everything stays on this phone; nothing is sent anywhere.</p>
 </div>
 
-<canvas id="cv" hidden></canvas>
+<canvas id="cv" hidden></canvas><canvas id="cw" hidden></canvas>
 
 <script>
 (function(){
 "use strict";
 var $=function(i){return document.getElementById(i);};
 var video=$('video'),view=$('view'),idle=$('idle'),busy=$('busy'),busytxt=$('busytxt'),
-    shoot=$('shoot'),stopcam=$('stopcam'),msg=$('msg'),status=$('status'),card=$('card'),
-    cardh=$('cardh'),lead=$('lead'),preview=$('preview'),listEl=$('list'),emptyEl=$('empty'),
-    nEl=$('n'),nLabel=$('nlabel'),tabs=$('tabs'),cv=$('cv'),tools=$('tools'),torchBtn=$('torch'),
-    zoomWrap=$('zoomwrap'),zoom=$('zoom'),zoomVal=$('zoomval');
+    shoot=$('shoot'),mini=$('mini'),msg=$('msg'),status=$('status'),card=$('card'),
+    preview=$('preview'),listEl=$('list'),emptyEl=$('empty'),nEl=$('n'),nLabel=$('nlabel'),
+    tabs=$('tabs'),cv=$('cv'),cw=$('cw'),tools=$('tools'),torchBtn=$('torch'),
+    zoomWrap=$('zoomwrap'),zoom=$('zoom'),zoomVal=$('zoomval'),mask=$('mask'),
+    mover=$('mover'),mband=$('mband'),munder=$('munder'),askEl=$('ask'),hintEl=$('hint'),
+    stepsEl=$('steps'),cardh=$('cardh');
 
 var F={date:$('f_date'),sku:$('f_sku'),qty:$('f_qty'),name:$('f_name'),post:$('f_post'),ref:$('f_ref'),track:$('f_track')};
 var W={sku:$('w_sku'),qty:$('w_qty'),name:$('w_name'),post:$('w_post'),ref:$('w_ref'),track:$('w_track')};
 var KEYS=['sku','qty','name','post','ref','track'];
-var LABELS={sku:'SKU',qty:'quantity',name:'name',post:'postcode',ref:'reference',track:'tracking number'};
-var CODESET='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-/ ';
 
-var rows=[], stream=null, vtrack=null, live=false, working=false,
-    got=null, shots=0, ocrWorker=null, mode='', detector=null;
+var AZ='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var RX_POST=/^([A-Z]{1,2}\d{1,2}[A-Z]?)\s*(\d[A-Z]{2})$/;
+var RX_REF=/(\d{3}-\d{7}-\d{7})/;
+var RX_SKU=/([A-Z]{2}\d{2,6}(?:-[A-Z0-9]{1,6}){2,4})/;
+var RX_S10=/([A-Z]{2}\d{9}[A-Z]{2})/;
 
-/* ---------- patterns ---------- */
-var RX={
-  s10:      /\b([A-Z]{2})\s?(\d{4})\s?(\d{4})\s?(\d)\s?([A-Z]{2})\b/,
-  skuFull:  /\b([A-Z]{2}\d{3,6}(?:-[A-Z0-9]{1,6}){3}-[A-Z]{2})\b/,
-  skuPart:  /\b([A-Z]{2}\d{2,6}(?:-[A-Z0-9]{1,6}){2,4})\b/,
-  ref:      /\b(\d{3}-\d{7}-\d{7})\b/,
-  post:     /\b([A-Z]{1,2}\d{1,2}[A-Z]?)\s*(\d[A-Z]{2})\b/g,
-  mailcode: /^\s*\d{2}-\d{3}\s+\d{3}/
-};
-var OURS=/RETURN|SYNERGY|SINERGY|COMPOSITE|AYLESFORD|STORAGE|OLD MILL|COACHWORKS|ME20/i;
-var CHROME=/ROYAL\s*MAIL|TRACKED|SIGNATURE|POSTAGE|DELIVERED|LARGE LETTER|ACCOUNT GB/i;
+/* Each step: what to aim at, how tall the band is, which characters are
+   possible, and the shape the answer must have. Anything that fails the
+   shape test is thrown away rather than written into your spreadsheet. */
+var STEPS=[
+  { key:'track', ask:'The long barcode',
+    hint:'Fill the band with the barcode. Read straight off the code — this one is exact.',
+    band:.30, chars:AZ+'0123456789 ', parse:function(t){
+      var m=t.replace(/\s+/g,'').match(RX_S10); return m?m[1]:''; } },
+  { key:'name', ask:'The customer\u2019s name',
+    hint:'Just the name line \u2014 not the street below it.',
+    band:.16, chars:AZ+'abcdefghijklmnopqrstuvwxyz\'-. ', parse:function(t){
+      var l=firstLine(t); if(!l) return '';
+      if(/\d/.test(l)) return '';
+      var w=l.split(/\s+/).filter(Boolean);
+      if(w.length<1||w.length>5) return '';
+      if(l.replace(/[^A-Za-z]/g,'').length<3) return '';
+      if(/RETURN|SYNERGY|SINERGY|AYLESFORD|STORAGE|ROYAL|MAIL/i.test(l)) return '';
+      return tidyName(l); } },
+  { key:'post', ask:'The customer\u2019s postcode',
+    hint:'The last line of the address.',
+    band:.16, chars:AZ+'0123456789 ', parse:function(t){
+      var l=firstLine(t).toUpperCase().replace(/[^A-Z0-9 ]/g,'').trim();
+      var m=l.match(RX_POST); if(!m) { m=l.replace(/\s+/g,'').match(/^([A-Z]{1,2}\d{1,2}[A-Z]?)(\d[A-Z]{2})$/); }
+      if(!m) return '';
+      var pc=m[1]+' '+m[2];
+      return /^ME20/.test(pc)? '' : pc; } },
+  { key:'sku', ask:'The bottom line \u2014 SKU and quantity',
+    hint:'The "1x SX7664-..." line. Zoom right in; this is the smallest print on the label.',
+    band:.14, chars:AZ+'0123456789-X ', parse:function(t){
+      var l=firstLine(t).toUpperCase();
+      var m=l.match(RX_SKU); if(!m) return '';
+      var b=l.slice(0,l.indexOf(m[1]));
+      var q=b.match(/(\d{1,3})\s*X/);
+      if(q) pendingQty=String(parseInt(q[1],10));
+      return m[1]; } },
+  { key:'ref', ask:'The customer reference',
+    hint:'The line under "Customer Ref". It takes the code to the right of the slash.',
+    band:.14, chars:'0123456789-/ ', parse:function(t){
+      var l=firstLine(t).replace(/[^0-9\/ -]/g,'');
+      var m=l.match(RX_REF); if(m) return m[1];
+      if(l.indexOf('/')>-1){
+        var r=l.split('/').pop().trim().split(/\s+/)[0];
+        if(r&&r.length>=8) return r;
+      }
+      return ''; } }
+];
+function firstLine(t){
+  var ls=String(t).split(/\r?\n/).map(function(x){return x.replace(/\s+/g,' ').trim();}).filter(Boolean);
+  ls.sort(function(a,b){return b.length-a.length;});
+  return ls[0]||'';
+}
+function tidyName(s){
+  return s.trim().split(/\s+/).map(function(w){
+    return (w.length<=2&&w===w.toUpperCase())?w:w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+var rows=[], stream=null, vtrack=null, capture=null, live=false, working=false,
+    got=null, step=0, pendingQty='', ocrWorker=null, lastChars='', detector=null;
 
 /* ---------- storage ---------- */
 var store={
@@ -203,9 +273,6 @@ function beep(f,ms){ try{ ac=ac||new (window.AudioContext||window.webkitAudioCon
 }catch(e){} }
 function buzz(p){ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
 function say(t,k){ msg.textContent=t; status.className='status'+(k?' '+k:''); }
-function list(a){ return a.length<2?a[0]:a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
-
-/* ---------- helpers ---------- */
 function today(){ var d=new Date();
   return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear(); }
 function fmtTrack(v){
@@ -213,123 +280,84 @@ function fmtTrack(v){
   var m=c.match(/^([A-Z]{2})(\d{4})(\d{4})(\d)([A-Z]{2})$/);
   return m? m[1]+' '+m[2]+' '+m[3]+' '+m[4]+m[5] : c;
 }
-function toDigits(s){ return String(s).replace(/[OQD]/g,'0').replace(/[IL|]/g,'1').replace(/S/g,'5').replace(/B/g,'8').replace(/Z/g,'2').replace(/G/g,'6'); }
-function trackingFrom(raw){
-  var c=String(raw).replace(/\s+/g,'').toUpperCase();
-  var m=c.match(/[A-Z]{2}\d{9}[A-Z]{2}/);
-  if(m) return m[0];
-  m=c.match(/([A-Z]{2})([0-9OISBZGQDL]{9})([A-Z]{2})/);
-  return m? m[1]+toDigits(m[2])+m[3] : '';
-}
-function isName(s){
-  if(!s) return false;
-  var t=s.trim();
-  if(/\d/.test(t)||OURS.test(t)||CHROME.test(t)) return false;
-  var w=t.split(/\s+/).filter(Boolean);
-  if(w.length<1||w.length>5) return false;
-  return t.replace(/[^A-Za-z]/g,'').length>=3;
-}
-function tidyName(s){
-  return s.trim().split(/\s+/).map(function(w){
-    return (w.length<=2&&w===w.toUpperCase())?w:w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
-  }).join(' ');
-}
 
-/* ---------- pull fields out of one photo's text ----------
-   Works on a close-up of one strip as well as the whole label.
-   Never overwrites something already found. Returns the keys it filled. */
-function harvest(text,f){
-  var filled=[];
-  var lines=text.replace(/[\u2013\u2014]/g,'-').split(/\r?\n/).map(function(l){return l.replace(/\s+/g,' ').trim();});
-  var up=lines.map(function(l){return l.toUpperCase();});
-  var joined=up.join('\n');
-
-  if(!f.ref){
-    var m=joined.match(RX.ref);
-    if(m){ f.ref=m[1]; filled.push('ref'); }
-    else for(var i=0;i<up.length;i++){
-      var m2=toDigits(up[i].replace(/[^0-9A-Z\/ -]/g,'')).match(RX.ref);
-      if(m2){ f.ref=m2[1]; filled.push('ref'); break; }
-      if(up[i].indexOf('/')>-1){
-        var r=up[i].split('/').pop().trim().split(/\s+/)[0];
-        if(r&&r.length>=6&&/\d/.test(r)){ f.ref=r; filled.push('ref'); break; }
-      }
-    }
+/* ---------- step display ---------- */
+function drawSteps(){
+  stepsEl.innerHTML='';
+  STEPS.forEach(function(s,i){
+    var d=document.createElement('div');
+    d.className = i<step?'on':(i===step?'now':'');
+    stepsEl.appendChild(d);
+  });
+  if(step>=STEPS.length){
+    askEl.textContent='All done';
+    hintEl.textContent='Check the fields below, then save.';
+    mask.hidden=true;
+    shoot.textContent='Start a new label';
+    return;
   }
-
-  if(!f.sku||!f.qty){
-    for(var j=up.length-1;j>=0;j--){
-      var L=up[j];
-      if(!L||OURS.test(L)) continue;
-      var ms=L.match(RX.skuFull)||L.match(RX.skuPart);
-      if(!ms||RX.ref.test(ms[1])) continue;
-      if(!f.sku){ f.sku=ms[1]; filled.push('sku'); }
-      if(!f.qty){
-        var b=L.slice(0,L.indexOf(ms[1]));
-        var mq=b.match(/(\d{1,3})\s*[X\u00D7]\s*[^A-Z0-9]*$/)||b.match(/(\d{1,3})\s*[X\u00D7]/);
-        if(mq){ f.qty=String(parseInt(mq[1],10)); filled.push('qty'); }
-      }
-      break;
-    }
+  var s=STEPS[step];
+  askEl.textContent=(step+1)+' of '+STEPS.length+' \u2014 '+s.ask;
+  hintEl.textContent=s.hint;
+  shoot.textContent = live? 'Read this line' : 'Start camera';
+  if(live){
+    mask.hidden=false;
+    var pct=s.band*100, top=(100-pct)/2;
+    mover.style.height=top+'%';
+    mband.style.top=top+'%'; mband.style.height=pct+'%';
+    munder.style.height=top+'%';
   }
-
-  var pcIdx=-1;
-  for(var k=0;k<up.length;k++){
-    if(OURS.test(up[k])||CHROME.test(up[k])) continue;
-    RX.post.lastIndex=0;
-    var mp,best=null;
-    while((mp=RX.post.exec(up[k]))!==null){
-      var pc=mp[1]+' '+mp[2];
-      if(/^ME20/.test(pc)) continue;
-      best=pc;
-    }
-    if(best){ pcIdx=k; if(!f.post){ f.post=best; filled.push('post'); } }
-  }
-
-  if(!f.name){
-    if(pcIdx>-1){
-      var st=pcIdx;
-      for(var a=pcIdx-1;a>=0;a--){
-        var u=up[a];
-        if(!u||RX.s10.test(u)||RX.mailcode.test(u)||OURS.test(u)||CHROME.test(u)) break;
-        st=a;
-      }
-      if(isName(lines[st])){ f.name=tidyName(lines[st]); filled.push('name'); }
-      else for(var b2=st;b2<pcIdx;b2++){ if(isName(lines[b2])){ f.name=tidyName(lines[b2]); filled.push('name'); break; } }
-    }else{
-      var c=lines.filter(function(l){return l.length>0;});
-      if(c.length<=4) for(var d2=0;d2<c.length;d2++){
-        if(isName(c[d2])){ f.name=tidyName(c[d2]); filled.push('name'); break; }
-      }
-    }
-  }
-
-  if(!f.track){
-    var mt=joined.match(RX.s10);
-    if(mt){ f.track=mt[1]+mt[2]+mt[3]+mt[4]+mt[5]; filled.push('track'); }
-  }
-  return filled;
 }
 
-/* ---------- capture ---------- */
-function grab(){
-  var w=video.videoWidth,h=video.videoHeight;
-  if(!w||!h) return null;
-  var scale=Math.min(1.5,Math.max(.8,1400/w));
-  cv.width=Math.round(w*scale); cv.height=Math.round(h*scale);
+/* ---------- crop the band, enlarge it, make it pure black and white ---------- */
+function cropBand(bandFrac,scale,binarise){
+  var vw=video.videoWidth, vh=video.videoHeight;
+  if(!vw||!vh) return null;
+  /* the preview uses object-fit:cover, so work out what is actually on screen */
+  var box=video.getBoundingClientRect();
+  var vidAR=vw/vh, boxAR=box.width/box.height, sw,sh,sx,sy;
+  if(vidAR>boxAR){ sh=vh; sw=vh*boxAR; sx=(vw-sw)/2; sy=0; }
+  else{ sw=vw; sh=vw/boxAR; sx=0; sy=(vh-sh)/2; }
+  var bh=sh*bandFrac, by=sy+(sh-bh)/2;
+
+  var outW=Math.min(2400,Math.round(sw*scale));
+  var outH=Math.max(40,Math.round(bh*(outW/sw)));
+  cv.width=outW; cv.height=outH;
   var g=cv.getContext('2d',{willReadFrequently:true});
-  g.drawImage(video,0,0,cv.width,cv.height);
+  g.imageSmoothingEnabled=true; g.imageSmoothingQuality='high';
+  g.drawImage(video,sx,by,sw,bh,0,0,outW,outH);
+
   try{
-    var img=g.getImageData(0,0,cv.width,cv.height),d=img.data,lo=255,hi=0,p;
-    for(p=0;p<d.length;p+=4){
+    var img=g.getImageData(0,0,outW,outH),d=img.data,i,p;
+    var hist=new Array(256).fill(0),n=outW*outH;
+    var gray=new Uint8Array(n);
+    for(i=0,p=0;p<d.length;p+=4,i++){
       var v=(d[p]*.299+d[p+1]*.587+d[p+2]*.114)|0;
-      d[p]=d[p+1]=d[p+2]=v; if(v<lo)lo=v; if(v>hi)hi=v;
+      gray[i]=v; hist[v]++;
     }
-    var span=Math.max(1,hi-lo);
-    for(p=0;p<d.length;p+=4){
-      var n=(d[p]-lo)*255/span;
-      n=n<118?Math.max(0,n*.45):Math.min(255,n*1.35);
-      d[p]=d[p+1]=d[p+2]=n;
+    if(binarise){
+      /* Otsu: pick the threshold that best separates ink from paper */
+      var sum=0,k; for(k=0;k<256;k++) sum+=k*hist[k];
+      var sumB=0,wB=0,mx=0,thr=128;
+      for(k=0;k<256;k++){
+        wB+=hist[k]; if(!wB) continue;
+        var wF=n-wB; if(!wF) break;
+        sumB+=k*hist[k];
+        var mB=sumB/wB, mF=(sum-sumB)/wF, between=wB*wF*(mB-mF)*(mB-mF);
+        if(between>mx){ mx=between; thr=k; }
+      }
+      for(i=0,p=0;p<d.length;p+=4,i++){
+        var b=gray[i]>thr?255:0;
+        d[p]=d[p+1]=d[p+2]=b;
+      }
+    }else{
+      var lo=255,hi=0;
+      for(i=0;i<n;i++){ if(gray[i]<lo)lo=gray[i]; if(gray[i]>hi)hi=gray[i]; }
+      var span=Math.max(1,hi-lo);
+      for(i=0,p=0;p<d.length;p+=4,i++){
+        var c=(gray[i]-lo)*255/span;
+        d[p]=d[p+1]=d[p+2]=c<110?Math.max(0,c*.5):Math.min(255,c*1.3);
+      }
     }
     g.putImageData(img,0,0);
   }catch(e){}
@@ -357,86 +385,101 @@ function getOCR(){
   return p.then(function(){ return Tesseract.createWorker('eng'); })
           .then(function(w){ ocrWorker=w; return w; });
 }
-function setMode(w,m){
-  if(mode===m) return Promise.resolve();
-  mode=m;
-  return w.setParameters(m==='code'
-    ? {tessedit_char_whitelist:CODESET, tessedit_pageseg_mode:'6'}
-    : {tessedit_char_whitelist:'', tessedit_pageseg_mode:'6'});
+function useChars(w,chars){
+  if(lastChars===chars) return Promise.resolve();
+  lastChars=chars;
+  /* page mode 7 = one single line of text, which is exactly what the band holds */
+  return w.setParameters({tessedit_char_whitelist:chars, tessedit_pageseg_mode:'7'});
 }
 
-/* ---------- the one action: take a photo ---------- */
-function takePhoto(){
-  if(!live||working) return;
-  var canvas=grab();
-  if(!canvas){ say('Camera not ready yet','warn'); return; }
+/* ---------- read the current step ---------- */
+function readStep(){
+  if(!live||working||step>=STEPS.length) return;
+  var s=STEPS[step];
   working=true; shoot.disabled=true;
-  view.classList.add('flash'); setTimeout(function(){view.classList.remove('flash');},360);
-  beep(1100,60); buzz(25);
-  if(!got) got={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:''};
-  shots++;
+  view.classList.add('flash'); setTimeout(function(){view.classList.remove('flash');},300);
+  beep(1100,55); buzz(20);
   busy.hidden=false; busytxt.textContent='Reading…';
 
-  var found=[];
-  /* barcode straight off the still — no live loop, no locking */
-  var bc = detector ? detector.detect(canvas).then(function(r){
-      for(var i=0;i<r.length;i++){
-        var t=trackingFrom(r[i].rawValue);
-        if(t && !got.track){ got.track=t; found.push('track'); break; }
-      }
-    }).catch(function(){}) : Promise.resolve();
+  /* the barcode step gets an exact read first; OCR is only the fallback */
+  var pre = (s.key==='track'&&detector)
+    ? detector.detect(video).then(function(r){
+        for(var i=0;i<r.length;i++){
+          var m=String(r[i].rawValue).replace(/\s+/g,'').toUpperCase().match(RX_S10);
+          if(m) return m[1];
+        }
+        return '';
+      }).catch(function(){ return ''; })
+    : Promise.resolve('');
 
-  bc.then(getOCR).then(function(w){
-    return setMode(w,'text').then(function(){ return w.recognize(canvas); })
-      .then(function(r){
-        found=found.concat(harvest(r.data.text,got));
-        if(got.sku&&got.qty&&got.ref) return null;
-        return setMode(w,'code').then(function(){ return w.recognize(canvas); })
-          .then(function(r2){ found=found.concat(harvest(r2.data.text,got)); });
+  pre.then(function(exact){
+    if(exact) return exact;
+    /* three goes at the same strip: black-and-white big, black-and-white bigger,
+       then plain contrast. First one that produces a valid answer wins. */
+    var tries=[{scale:2,bin:true},{scale:3,bin:true},{scale:2,bin:false}];
+    return getOCR().then(function(w){
+      return useChars(w,s.chars).then(function(){
+        var chain=Promise.resolve('');
+        tries.forEach(function(t,idx){
+          chain=chain.then(function(hit){
+            if(hit) return hit;
+            busytxt.textContent='Reading… attempt '+(idx+1);
+            var c=cropBand(s.band,t.scale,t.bin);
+            if(!c) return '';
+            return w.recognize(c).then(function(r){
+              try{ return s.parse(r.data.text)||''; }catch(e){ return ''; }
+            }).catch(function(){ return ''; });
+          });
+        });
+        return chain;
       });
-  }).then(function(){
+    });
+  }).then(function(val){
     busy.hidden=true; working=false; shoot.disabled=false;
-    shoot.textContent='Take another photo';
-    if(found.length){ beep(880,110); buzz(40); }
-    else { beep(260,140); buzz(70); }
-    showCard(found);
+    if(!val){
+      beep(240,150); buzz(80);
+      say('No clean read \u2014 zoom in more, steady the phone and tap again','warn');
+      return;
+    }
+    if(!got) got={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:''};
+    got[s.key]=val;
+    if(s.key==='sku'&&pendingQty){ got.qty=pendingQty; pendingQty=''; }
+    beep(900,110); buzz(40);
+    say('Got it: '+val,'good');
+    step++; drawSteps(); showCard([s.key,'qty']);
   }).catch(function(){
     busy.hidden=true; working=false; shoot.disabled=false;
-    say('The text reader could not start. Check the connection, or type the fields in below.','bad');
-    showCard([]);
+    say('The text reader could not start. Check the connection.','bad');
   });
 }
 
-/* ---------- the card ---------- */
-function showCard(found){
+$('skip').onclick=function(){
+  if(step>=STEPS.length) return;
+  if(!got) got={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:''};
+  step++; drawSteps(); showCard([]);
+  say('Skipped \u2014 type it in below when you\u2019re ready','warn');
+};
+
+/* ---------- card ---------- */
+function showCard(fresh){
+  if(!got) return;
+  card.hidden=false;
   F.date.value=got.date;
   KEYS.forEach(function(k){
-    if(!F[k].value.trim() || found.indexOf(k)>-1)
+    if(!F[k].value.trim()||fresh.indexOf(k)>-1)
       F[k].value = k==='track'? fmtTrack(got[k]) : (got[k]||'');
-    W[k].classList.toggle('fresh',found.indexOf(k)>-1);
+    W[k].classList.toggle('fresh',fresh.indexOf(k)>-1&&!!got[k]);
   });
-  card.hidden=false;
-  cardh.textContent='Label — '+shots+(shots===1?' photo':' photos');
-  var miss=gaps();
-  if(found.length) say('Read the '+list(found.map(function(k){return LABELS[k];})),'good');
-  else if(shots>1) say('Nothing new in that photo','warn');
-  else say('Nothing readable in that photo','warn');
-  if(miss.length){
-    lead.className='lead warn';
-    lead.textContent='Still need the '+list(miss)+'. Move in close on that part and take another photo, or just type it.';
-  }else{
-    lead.className='lead';
-    lead.textContent='All six. Check the line below before saving — the reader can mistake O for 0.';
-  }
+  cardh.textContent = step>=STEPS.length? 'Ready to save' : 'This label so far';
   refresh();
-  setTimeout(function(){ KEYS.forEach(function(k){W[k].classList.remove('fresh');}); },2500);
+  setTimeout(function(){ KEYS.forEach(function(k){W[k].classList.remove('fresh');}); },2200);
 }
 function gaps(){
   var miss=[];
   KEYS.forEach(function(k){
-    var empty=!F[k].value.trim();
-    W[k].classList.toggle('miss',empty);
-    if(empty) miss.push(LABELS[k]);
+    var e=!F[k].value.trim();
+    W[k].classList.toggle('miss',e);
+    if(e) miss.push(k);
   });
   return miss;
 }
@@ -447,9 +490,7 @@ function current(){
 }
 function lineOf(f){ return [f.date,f.sku,f.qty,f.name,f.post,f.ref,f.track].join(tabs.checked?'\t':'  '); }
 function refresh(){ gaps(); preview.textContent=lineOf(current()); }
-KEYS.forEach(function(k){ F[k].addEventListener('input',function(){
-  got[k]=F[k].value.trim(); refresh();
-}); });
+KEYS.forEach(function(k){ F[k].addEventListener('input',function(){ if(got) got[k]=F[k].value.trim(); refresh(); }); });
 tabs.addEventListener('change',function(){ if(!card.hidden) refresh(); });
 
 $('save').onclick=function(){
@@ -464,11 +505,11 @@ $('save').onclick=function(){
   rows.unshift(f); render(); newLabel();
   beep(660,90); say('Saved. Ready for the next label','good');
 };
-$('scrap').onclick=function(){ newLabel(); say('Cleared — ready for the next label'); };
+$('scrap').onclick=function(){ newLabel(); say('Cleared'); };
 function newLabel(){
-  got=null; shots=0; card.hidden=true;
+  got=null; step=0; pendingQty=''; card.hidden=true;
   KEYS.forEach(function(k){ F[k].value=''; W[k].classList.remove('miss','fresh'); });
-  shoot.textContent = live? 'Take photo' : 'Start camera';
+  drawSteps();
 }
 
 /* ---------- list + outputs ---------- */
@@ -497,7 +538,7 @@ $('copy').onclick=function(){
   function fb(){
     var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
     document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,99999);
-    try{ document.execCommand('copy'); ok(); }catch(e){ say('Copy failed — use Save .txt','bad'); }
+    try{ document.execCommand('copy'); ok(); }catch(e){ say('Copy failed \u2014 use Save .txt','bad'); }
     document.body.removeChild(ta);
   }
 };
@@ -523,19 +564,15 @@ function startCam(){
   }
   say('Opening camera…');
   navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},
-    width:{ideal:1920},height:{ideal:1440}}})
+    width:{ideal:2560},height:{ideal:1440}}})
   .then(function(s){ stream=s; video.srcObject=s; return video.play(); })
   .then(function(){
-    live=true; idle.hidden=true; tools.hidden=false;
-    shoot.textContent = got? 'Take another photo' : 'Take photo';
-    stopcam.hidden=false;
-    say('Frame the label, wait for it to look sharp, then tap');
+    live=true; idle.hidden=true; tools.hidden=false; mini.hidden=false;
     vtrack=stream.getVideoTracks()[0];
-    var caps={};
-    try{ caps=vtrack.getCapabilities?vtrack.getCapabilities():{}; }catch(e){}
+    var caps={}; try{ caps=vtrack.getCapabilities?vtrack.getCapabilities():{}; }catch(e){}
     torchBtn.hidden=!('torch' in caps);
     if(caps.zoom){
-      zoom.min=caps.zoom.min; zoom.max=Math.min(caps.zoom.max,caps.zoom.min*6);
+      zoom.min=caps.zoom.min; zoom.max=Math.min(caps.zoom.max,caps.zoom.min*8);
       zoom.step=caps.zoom.step||.1; zoom.value=caps.zoom.min;
       zoomWrap.hidden=false; zoomVal.textContent=(+zoom.value).toFixed(1)+'\u00D7';
     }
@@ -545,6 +582,8 @@ function startCam(){
         if(use.length) detector=new BarcodeDetector({formats:use});
       }).catch(function(){});
     }
+    drawSteps();
+    say('Fill the red band with the line it asks for');
   })
   .catch(function(e){
     if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError')) say('Camera blocked. Allow camera access for this page.','bad');
@@ -556,17 +595,19 @@ function stopCam(){
   live=false;
   if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
   video.srcObject=null; vtrack=null;
-  idle.hidden=false; tools.hidden=true; zoomWrap.hidden=true; stopcam.hidden=true;
+  idle.hidden=false; tools.hidden=true; zoomWrap.hidden=true; mini.hidden=true; mask.hidden=true;
   torchBtn.setAttribute('aria-pressed','false');
-  shoot.textContent='Start camera';
-  say('Camera off');
+  shoot.textContent='Start camera'; say('Camera off');
 }
-shoot.onclick=function(){ live? takePhoto() : startCam(); };
-stopcam.onclick=stopCam;
+shoot.onclick=function(){
+  if(!live) return startCam();
+  if(step>=STEPS.length) return newLabel();
+  readStep();
+};
+$('stopcam').onclick=stopCam;
 torchBtn.onclick=function(){
   var on=torchBtn.getAttribute('aria-pressed')==='true';
-  try{ vtrack.applyConstraints({advanced:[{torch:!on}]});
-       torchBtn.setAttribute('aria-pressed',String(!on)); }catch(e){}
+  try{ vtrack.applyConstraints({advanced:[{torch:!on}]}); torchBtn.setAttribute('aria-pressed',String(!on)); }catch(e){}
 };
 zoom.addEventListener('input',function(){
   zoomVal.textContent=(+zoom.value).toFixed(1)+'\u00D7';
@@ -574,6 +615,7 @@ zoom.addEventListener('input',function(){
 });
 document.addEventListener('visibilitychange',function(){ if(document.hidden&&live&&!working) stopCam(); });
 
+drawSteps();
 store.get().then(function(saved){
   if(saved&&saved.length){ rows=saved; render(); say('Restored '+saved.length+' saved row'+(saved.length>1?'s':'')); }
   else render();
