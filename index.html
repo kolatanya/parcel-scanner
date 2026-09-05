@@ -22,7 +22,14 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 button{font-family:inherit;font-size:1rem}
 [hidden]{display:none!important}
 
-.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.ver{font-family:var(--mono);font-size:.72rem;color:var(--muted);border:1px solid var(--edge);border-radius:20px;padding:2px 9px}
+.view.hunting .frame span{border-color:var(--warn)}
+.tag{position:absolute;left:10px;top:10px;background:rgba(8,11,14,.82);border:1px solid var(--edge);border-radius:6px;padding:5px 9px;font-size:.76rem;max-width:80%}
+.checks li.now b{border-color:var(--warn);animation:pulse 1s infinite}
+.checks li.now{color:var(--warn)}
+@keyframes pulse{50%{background:rgba(242,193,78,.25)}}
 .count{font-size:2rem;font-weight:650;letter-spacing:-.02em;line-height:1}
 .count small{display:block;font-size:.8rem;font-weight:400;color:var(--muted);letter-spacing:0}
 .mode{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);text-align:right}
@@ -110,7 +117,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
 
   <div class="top">
     <div class="count"><span id="n">0</span><small id="nlabel">nothing scanned yet</small></div>
-    <label class="mode"><input type="checkbox" id="tabs"><span>Tab columns<br>for Sheets</span></label>
+    <div class="right">
+      <span class="ver">v2</span>
+      <label class="mode"><input type="checkbox" id="tabs"><span>Tab columns</span></label>
+    </div>
   </div>
 
   <div class="view" id="view">
@@ -118,10 +128,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
     <img id="shot" hidden alt="">
     <div class="idle" id="idle">
       <div class="bars" id="bars"></div>
-      <div>Fill the frame with the whole label</div>
-      <div style="font-size:.76rem">Top edge to the SKU line at the bottom</div>
+      <div>Start with the long barcode</div>
+      <div style="font-size:.76rem">Then move over each part it still needs</div>
     </div>
     <div class="frame"><span></span><span></span><span></span><span></span></div>
+    <div class="tag" id="tag" hidden></div>
     <div class="busy" id="busy" hidden><div class="spin"></div><div id="busytxt">Reading label…</div></div>
     <button class="torch" id="torch" hidden aria-pressed="false" title="Torch">☀</button>
   </div>
@@ -131,8 +142,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
     <p class="sub" id="c_sub">Keep the whole label in the frame.</p>
     <ul class="checks" id="checks"></ul>
     <div class="btns">
-      <button id="useit">Use what I\'ve got</button>
-      <button id="cancelc">Cancel</button>
+      <button id="useit">Stop, I\'ll type the rest</button>
+      <button id="cancelc">Start this label again</button>
     </div>
   </div>
 
@@ -168,7 +179,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
     <button class="clear" id="clear" disabled>Clear list</button>
   </div>
 
-  <p class="foot">Build 3 · keeps reading until every field is found. Rows stay on this phone until you copy, send or save them. The first scan downloads the text-reading engine (about 15&nbsp;MB) — do that on wi-fi.</p>
+  <p class="foot">Get in close on the SKU line and the reference \u2014 small print needs to fill the frame. Rows stay on this phone until you copy, send or save them. The first scan downloads the text-reading engine (about 15&nbsp;MB) — do that on wi-fi.</p>
 </div>
 
 <canvas id="cv" hidden></canvas>
@@ -203,8 +214,8 @@ var bestCv=document.createElement('canvas');
 /* ---- patterns ---- */
 var RX={
   s10:      /\b([A-Z]{2})\s?(\d{4})\s?(\d{4})\s?(\d)\s?([A-Z]{2})\b/,
-  skuTight: /\b([A-Z]{2}\d{3,6}-[A-Z0-9]{1,5}-[A-Z0-9]{1,5}-[A-Z0-9]{1,5}-[A-Z]{2})\b/,
-  skuLoose: /\b([A-Z0-9]{4,8}(?:-[A-Z0-9]{1,5}){2,4})\b/,
+  skuFull:  /\b([A-Z]{2}\d{3,6}(?:-[A-Z0-9]{1,6}){3}-[A-Z]{2})\b/,
+  skuPart:  /\b([A-Z]{2}\d{2,6}(?:-[A-Z0-9]{1,6}){2,4})\b/,
   ref:      /\b(\d{3}-\d{7}-\d{7})\b/,
   post:     /\b([A-Z]{1,2}\d{1,2}[A-Z]?)\s*(\d[A-Z]{2})\b/g,
   mailcode: /^\s*\d{2}-\d{3}\s+\d{3}/
@@ -245,90 +256,93 @@ function fmtTrack(v){
   var m=c.match(/^([A-Z]{2})(\d{4})(\d{4})(\d)([A-Z]{2})$/);
   return m? m[1]+' '+m[2]+' '+m[3]+' '+m[4]+m[5] : c;
 }
-function digits(s){ return String(s).replace(/O/g,'0').replace(/[IL]/g,'1').replace(/S/g,'5').replace(/B/g,'8').replace(/Z/g,'2'); }
+function toDigits(s){ return String(s).replace(/[OQD]/g,'0').replace(/[IL|]/g,'1').replace(/S/g,'5').replace(/B/g,'8').replace(/Z/g,'2').replace(/G/g,'6'); }
 
 /* ---- OCR field extraction ---- */
-function parseLabel(text, trackingFromBarcode){
-  var raw=text.replace(/\u2014|\u2013/g,'-').split(/\r?\n/);
-  var lines=raw.map(function(l){return l.replace(/\s+/g,' ').trim();});
+/* Pull whatever this frame happens to show into f, without ever overwriting a
+   field already found. Written so a close-up of one strip of the label works
+   just as well as a shot of the whole thing. Returns the keys it filled. */
+function harvest(text,f){
+  var filled=[];
+  var lines=text.replace(/[\u2013\u2014]/g,'-').split(/\r?\n/).map(function(l){return l.replace(/\s+/g,' ').trim();});
   var up=lines.map(function(l){return l.toUpperCase();});
-  var out={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:trackingFromBarcode||''};
-
-  /* 5 — customer reference. Prefer the Amazon-style id; else take the right of the slash. */
   var joined=up.join('\n');
-  var mr=joined.match(RX.ref);
-  if(mr) out.ref=mr[1];
-  else {
-    for(var i=0;i<up.length;i++){
-      if(/CUSTOMER\s*REF/.test(up[i])){
-        var blob=(up[i]+' '+(up[i+1]||''));
-        var slash=blob.split('/');
-        if(slash.length>1){
-          var right=slash[slash.length-1].trim().split(/\s+/)[0];
-          if(right.length>4) out.ref=right;
-        } else {
-          var parts=blob.replace(/CUSTOMER\s*REF\.?:?/,'').trim().split(/\s+/);
-          if(parts.length>1) out.ref=parts[parts.length-1];
+
+  /* 5 - customer reference, right of the slash */
+  if(!f.ref){
+    var m=joined.match(RX.ref);
+    if(m){ f.ref=m[1]; filled.push('ref'); }
+    else{
+      for(var i=0;i<up.length;i++){
+        var m2=toDigits(up[i].replace(/[^0-9A-Z\/ -]/g,'')).match(RX.ref);
+        if(m2){ f.ref=m2[1]; filled.push('ref'); break; }
+        if(up[i].indexOf('/')>-1){
+          var right=up[i].split('/').pop().trim().split(/\s+/)[0];
+          if(right && right.length>=6 && /\d/.test(right)){ f.ref=right; filled.push('ref'); break; }
         }
-        break;
       }
     }
   }
-  if(out.ref && /^\d{3}-\d{7}-\d{7}$/.test(digits(out.ref))) out.ref=digits(out.ref);
 
-  /* 1 + 2 — SKU and quantity, on the bottom line together */
-  for(var j=up.length-1;j>=0;j--){
-    var L=up[j];
-    if(!L || OURS.test(L)) continue;
-    var ms=L.match(RX.skuTight)||L.match(RX.skuLoose);
-    if(ms && !RX.ref.test(ms[1]) && ms[1].length>7){
-      out.sku=ms[1];
-      var before=L.slice(0,L.indexOf(ms[1]));
-      var mq=before.match(/(\d{1,3})\s*[X\u00D7]\s*[^A-Z0-9]*$/);
-      if(!mq) mq=before.match(/(\d{1,3})\s*[X\u00D7]/);
-      if(mq) out.qty=String(parseInt(mq[1],10));
+  /* 1 + 2 - SKU and the quantity printed just before it */
+  if(!f.sku || !f.qty){
+    for(var j=up.length-1;j>=0;j--){
+      var L=up[j];
+      if(!L || OURS.test(L)) continue;
+      var ms=L.match(RX.skuFull)||L.match(RX.skuPart);
+      if(!ms || RX.ref.test(ms[1])) continue;
+      if(!f.sku){ f.sku=ms[1]; filled.push('sku'); }
+      if(!f.qty){
+        var before=L.slice(0,L.indexOf(ms[1]));
+        var mq=before.match(/(\d{1,3})\s*[X\u00D7]\s*[^A-Z0-9]*$/)||before.match(/(\d{1,3})\s*[X\u00D7]/);
+        if(mq){ f.qty=String(parseInt(mq[1],10)); filled.push('qty'); }
+      }
       break;
     }
   }
 
-  /* 4 — postcode. Skip our own and anything on a return-address line. */
+  /* 4 - postcode, never our own return address */
   var pcIdx=-1;
   for(var k=0;k<up.length;k++){
     if(OURS.test(up[k])||CHROME.test(up[k])) continue;
     RX.post.lastIndex=0;
-    var mp, best=null;
+    var mp,best=null;
     while((mp=RX.post.exec(up[k]))!==null){
       var pc=mp[1]+' '+mp[2];
       if(/^ME20/.test(pc)) continue;
       best=pc;
     }
-    if(best){ out.post=best; pcIdx=k; }
+    if(best){ pcIdx=k; if(!f.post){ f.post=best; filled.push('post'); } }
   }
 
-  /* 3 — name: top line of the address block sitting above the postcode */
-  if(pcIdx>-1){
-    var start=pcIdx;
-    for(var m2=pcIdx-1;m2>=0;m2--){
-      var u=up[m2];
-      if(!u) break;
-      if(RX.s10.test(u)) break;
-      if(RX.mailcode.test(u)) break;
-      if(OURS.test(u)||CHROME.test(u)) break;
-      start=m2;
-    }
-    var cand=lines[start];
-    if(isName(cand)) out.name=tidyName(cand);
-    else{
-      for(var m3=start;m3<pcIdx;m3++){ if(isName(lines[m3])){ out.name=tidyName(lines[m3]); break; } }
+  /* 3 - name */
+  if(!f.name){
+    if(pcIdx>-1){
+      var st=pcIdx;
+      for(var a=pcIdx-1;a>=0;a--){
+        var u=up[a];
+        if(!u) break;
+        if(RX.s10.test(u)||RX.mailcode.test(u)||OURS.test(u)||CHROME.test(u)) break;
+        st=a;
+      }
+      if(isName(lines[st])){ f.name=tidyName(lines[st]); filled.push('name'); }
+      else for(var b2=st;b2<pcIdx;b2++){ if(isName(lines[b2])){ f.name=tidyName(lines[b2]); filled.push('name'); break; } }
+    }else{
+      var cands=lines.filter(function(l){return l.length>0;});
+      if(cands.length<=4){
+        for(var c2=0;c2<cands.length;c2++){
+          if(isName(cands[c2])){ f.name=tidyName(cands[c2]); filled.push('name'); break; }
+        }
+      }
     }
   }
 
-  /* 6 — fall back to OCR for tracking only if the barcode gave us nothing */
-  if(!out.track){
+  /* 6 - tracking, only if the barcode hasn't given it to us */
+  if(!f.track){
     var mt=joined.match(RX.s10);
-    if(mt) out.track=mt[1]+mt[2]+mt[3]+mt[4]+mt[5];
+    if(mt){ f.track=mt[1]+mt[2]+mt[3]+mt[4]+mt[5]; filled.push('track'); }
   }
-  return out;
+  return filled;
 }
 function isName(s){
   if(!s) return false;
@@ -428,6 +442,16 @@ function keepBest(){
 
 var LABELS={sku:'SKU',qty:'quantity',name:'customer name',post:'postcode',ref:'customer reference',track:'tracking number'};
 
+/* Codes read far better with the alphabet restricted and the page treated as
+   plain lines; ordinary words read better with the defaults. */
+function setMode(w,mode){
+  if(workerMode===mode) return Promise.resolve();
+  workerMode=mode;
+  return w.setParameters(mode==='code'
+    ? {tessedit_char_whitelist:CODESET, tessedit_pageseg_mode:'6'}
+    : {tessedit_char_whitelist:'', tessedit_pageseg_mode:'3'});
+}
+
 /* Sample a burst of frames and hand back the sharpest one. */
 function bestFrame(cb){
   var n=0,bestScore=0,got=false;
@@ -442,90 +466,107 @@ function bestFrame(cb){
 /* Keep taking readings until every field has been found. Fields found on an
    early pass are kept, so you can move the phone to pick up whatever is still
    missing without losing what already worked. */
-var MAX_PASSES=8, collecting=false, collected=null, passNo=0, blurCount=0;
-var NEED=['sku','qty','name','post','ref','track'];
-var collectEl=$('collect'), cHead=$('c_head'), cSub=$('c_sub'), checksEl=$('checks');
+var collecting=false, got=null;
+var NEED=['track','name','post','sku','qty','ref'];
 
-function missingOf(f){ return NEED.filter(function(k){ return !f[k]; }); }
+function missing(){ return NEED.filter(function(k){ return !got[k]; }); }
 
 function drawChecks(){
+  var miss=missing(), first=miss[0];
   checksEl.innerHTML='';
   NEED.forEach(function(k){
     var li=document.createElement('li');
-    if(collected[k]) li.className='on';
+    li.className = got[k] ? 'on' : (k===first ? 'now' : '');
     var t=document.createElement('b'); t.textContent='\u2713'; li.appendChild(t);
-    var s2=document.createElement('span'); s2.textContent=LABELS[k]; li.appendChild(s2);
+    var sp=document.createElement('span'); sp.textContent=LABELS[k]; li.appendChild(sp);
     checksEl.appendChild(li);
   });
-}
-function setHead(h,sub,warn){
-  cHead.textContent=h;
-  cSub.textContent=sub;
-  cSub.className='sub'+(warn?' warn':'');
+  if(!miss.length){
+    cHead.textContent='Got everything';
+    cSub.className='sub done'; cSub.textContent='Saving\u2026';
+    tag.hidden=true;
+  }else{
+    cHead.textContent=miss.length+' still to find';
+    cSub.className='sub';
+    cSub.textContent='Point at '+WHERE[first]+'.';
+    tag.hidden=false;
+    tag.textContent='Looking for: '+list(miss.map(function(k){return LABELS[k];}));
+  }
 }
 
 function startCollect(t){
-  paused=true; collecting=true; passNo=0; blurCount=0;
-  collected={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:t||''};
-  collectEl.hidden=false; drawChecks();
-  setHead('Reading label…','Hold the phone steady with the whole label in frame.');
-  say('Reading — nothing is saved until every field is found');
+  collecting=true;
+  got={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:t||''};
+  lastShot=null;
+  collectEl.hidden=false; view.classList.add('hunting');
+  drawChecks();
+  say('Move over each part \u2014 it keeps whatever it finds');
   collectEl.scrollIntoView({behavior:'smooth',block:'nearest'});
-  nextPass();
+  beep(660,80); buzz(35);
+  cycle();
 }
 
-function nextPass(){
-  if(!collecting) return;
-  setHead('Hold steady…','Checking the picture is sharp enough.');
+/* One reading. Runs over and over on whatever the camera is pointed at, so you
+   can roam across the label and each part gets picked up as it comes into shot. */
+function cycle(){
+  if(!collecting || busyOCR) return;
   bestFrame(function(canvas,score){
     if(!collecting) return;
     if(!canvas || score<SHARP_MIN){
-      blurCount++;
-      if(blurCount<10){
-        setHead('Too blurry','Hold still, about 25 cm away, and let the camera focus.',true);
-        setTimeout(nextPass,500);
-        return;
-      }
-      /* give up on waiting for sharp and read what we have */
+      cSub.textContent='Too blurry \u2014 hold still and let it focus.';
+      setTimeout(cycle,350);
+      return;
     }
-    passNo++;
-    setHead('Reading… pass '+passNo,'Fields found so far are kept.');
-    getOCR().then(function(w){ return w.recognize(canvas||bestCv); })
-    .then(function(r){
+    busyOCR=true;
+    try{ lastShot=canvas.toDataURL('image/jpeg',.8); }catch(e){}
+    var miss=missing();
+    var wantCodes = miss.indexOf('sku')>-1 || miss.indexOf('qty')>-1 || miss.indexOf('ref')>-1;
+    var wantWords = miss.indexOf('name')>-1 || miss.indexOf('post')>-1 || miss.indexOf('track')>-1;
+
+    getOCR().then(function(w){
+      var chain=Promise.resolve([]);
+      if(wantWords) chain=chain.then(function(acc){
+        return setMode(w,'text').then(function(){ return w.recognize(canvas); })
+               .then(function(r){ return acc.concat(harvest(r.data.text,got)); });
+      });
+      if(wantCodes) chain=chain.then(function(acc){
+        return setMode(w,'code').then(function(){ return w.recognize(canvas); })
+               .then(function(r){ return acc.concat(harvest(r.data.text,got)); });
+      });
+      return chain;
+    }).then(function(filled){
+      busyOCR=false;
       if(!collecting) return;
-      var f=parseLabel(r.data.text, collected.track);
-      NEED.forEach(function(k){ if(!collected[k] && f[k]) collected[k]=f[k]; });
-      drawChecks();
-      var missing=missingOf(collected);
-      if(!missing.length){ beep(880,110); buzz(45); flash(); finishCollect(canvas); return; }
-      if(passNo>=MAX_PASSES){
-        setHead('Gave up after '+passNo+' tries','Still missing the '+list(missing.map(function(k){return LABELS[k];}))+'.',true);
-        beep(300,140); buzz(70);
-        finishCollect(canvas);
-        return;
+      if(filled.length){
+        beep(880,90); buzz(35); flash();
+        say('Got '+list(filled.map(function(k){return LABELS[k];})),'good');
       }
-      setHead('Still looking…','Need the '+list(missing.map(function(k){return LABELS[k];}))+' — move so that part is clear.',true);
-      beep(520,60);
-      setTimeout(nextPass,400);
-    })
-    .catch(function(){
-      collecting=false; collectEl.hidden=true; busy.hidden=true;
-      say('Couldn\'t start the text reader — check the connection. You can still type the fields in.','bad');
-      showReview(collected);
+      drawChecks();
+      if(!missing().length){ finishCollect(); return; }
+      setTimeout(cycle,250);
+    }).catch(function(){
+      busyOCR=false; collecting=false;
+      view.classList.remove('hunting'); collectEl.hidden=true; tag.hidden=true; busy.hidden=true;
+      say('Couldn\'t start the text reader \u2014 check the connection. Type the fields in below.','bad');
+      showReview(got);
     });
   });
 }
 
-function finishCollect(canvas){
-  collecting=false; collectEl.hidden=true; busy.hidden=true;
-  if(canvas){ try{ shot.src=canvas.toDataURL('image/jpeg',.85); shot.hidden=false; video.hidden=true; }catch(e){} }
-  showReview(collected);
+function finishCollect(){
+  collecting=false; busyOCR=false;
+  view.classList.remove('hunting'); collectEl.hidden=true; tag.hidden=true; busy.hidden=true;
+  if(lastShot){ shot.src=lastShot; shot.hidden=false; video.hidden=true; }
+  beep(990,140); buzz([50,40,50]);
+  showReview(got);
 }
-$('useit').onclick=function(){ if(collecting) finishCollect(null); };
+
+$('useit').onclick=function(){ if(collecting) finishCollect(); };
 $('cancelc').onclick=function(){
-  collecting=false; collectEl.hidden=true; busy.hidden=true;
-  arm={code:'',hits:0}; last={v:'',t:0}; paused=false;
-  say('Cancelled — line the label up again');
+  collecting=false; busyOCR=false;
+  view.classList.remove('hunting'); collectEl.hidden=true; tag.hidden=true; busy.hidden=true;
+  arm={code:'',hits:0}; last={v:'',t:0};
+  say('Start again \u2014 point at the barcode');
 };
 
 /* ---- review ---- */
@@ -590,7 +631,7 @@ $('retake').onclick=function(){ closeReview(); say('Line the label up again'); }
 function closeReview(){
   review.hidden=true; pending=null;
   shot.hidden=true; video.hidden=false; shot.removeAttribute('src');
-  last={v:'',t:0}; arm={code:'',hits:0}; paused=false; collecting=false; collectEl.hidden=true;
+  last={v:'',t:0}; arm={code:'',hits:0}; collecting=false; busyOCR=false; collectEl.hidden=true; tag.hidden=true;
 }
 
 /* ---- list + outputs ---- */
@@ -643,11 +684,15 @@ $('clear').onclick=function(){
 
 /* ---- camera ---- */
 function onBarcode(v){
-  if(paused) return;
   var c=String(v).replace(/\s+/g,'').toUpperCase(), now=Date.now();
   var m=c.match(/[A-Z]{2}\d{9}[A-Z]{2}/);
   if(!m){ return; }                       /* ignore the other barcodes on the label */
   var t=m[0];
+  if(collecting){
+    if(!got.track){ got.track=t; drawChecks(); beep(880,90); buzz(35); flash(); say('Got tracking number','good'); }
+    return;
+  }
+  if(!review.hidden) return;
   if(t===last.v && now-last.t<3000) return;
 
   /* Don't shoot on the first sighting — the same code has to hold across
@@ -696,7 +741,7 @@ function start(){
   .then(function(){
     live(); setupTorch();
     timer=setInterval(function(){
-      if(!running||paused) return;
+      if(!running) return;
       detector.detect(video).then(function(r){
         for(var i=0;i<r.length;i++) onBarcode(r[i].rawValue);
       }).catch(function(){});
@@ -712,7 +757,7 @@ function start(){
     .then(function(){
       zx=new ZXing.BrowserMultiFormatReader();
       return zx.decodeFromConstraints({video:{facingMode:{ideal:'environment'},width:{ideal:1920}}},video,function(res){
-        if(res&&running&&!paused) onBarcode(res.getText());
+        if(res&&running) onBarcode(res.getText());
       });
     }).then(function(){ live(); setupTorch(); })
     .catch(function(e){
@@ -725,10 +770,10 @@ function start(){
 function live(){
   running=true; paused=false; idle.hidden=true; arm={code:'',hits:0};
   go.textContent='Stop scanning'; go.classList.add('stop');
-  say('Scanning — fill the frame with the whole label');
+  say('Point at the long barcode to start a label');
 }
 function stop(){
-  running=false; paused=false; arm={code:'',hits:0}; busy.hidden=true; collecting=false; collectEl.hidden=true;
+  running=false; arm={code:'',hits:0}; busy.hidden=true; collecting=false; busyOCR=false; collectEl.hidden=true; tag.hidden=true; view.classList.remove('hunting');
   if(timer){clearInterval(timer);timer=null;}
   if(zx){ try{zx.reset();}catch(e){} zx=null; }
   if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
@@ -738,7 +783,7 @@ function stop(){
   say('Camera off');
 }
 go.onclick=function(){ running?stop():start(); };
-document.addEventListener('visibilitychange',function(){ if(document.hidden&&running&&!paused) stop(); });
+document.addEventListener('visibilitychange',function(){ if(document.hidden&&running&&!collecting) stop(); });
 
 store.get().then(function(saved){
   if(saved&&saved.length){ rows=saved; render(); say('Restored '+saved.length+' row'+(saved.length>1?'s':'')+' from earlier'); }
