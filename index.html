@@ -120,7 +120,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
   <div class="top">
     <div class="count"><span id="n">0</span><small id="nlabel">nothing scanned yet</small></div>
     <div class="right">
-      <span class="ver">v3</span>
+      <span class="ver">v4</span>
       <label class="mode"><input type="checkbox" id="tabs"><span>Tab columns</span></label>
     </div>
   </div>
@@ -209,9 +209,9 @@ var rows=[], running=false, paused=false, stream=null, timer=null, detector=null
     last={v:'',t:0}, pending=null, ocrWorker=null;
 
 /* steadiness gate */
-var LOCK_HITS=4;        /* consecutive sightings of the same barcode before we commit */
-var SAMPLES=6;          /* frames sampled during the hold, sharpest one wins */
-var SHARP_MIN=45;       /* below this the picture is too soft to trust */
+var LOCK_HITS=2;        /* consecutive sightings of the same barcode before we commit */
+var SAMPLES=3;          /* frames sampled during the hold, sharpest one wins */
+var SHARP_MIN=32;       /* below this the picture is too soft to trust */
 var arm={code:'',hits:0};
 var scratch=document.createElement('canvas');
 var bestCv=document.createElement('canvas');
@@ -368,7 +368,7 @@ function tidyName(s){
 function grab(){
   var w=video.videoWidth,h=video.videoHeight;
   if(!w||!h) return null;
-  var scale=Math.min(2, Math.max(1, 1600/w));
+  var scale=Math.min(1.4,Math.max(.7,1250/w));
   cv.width=Math.round(w*scale); cv.height=Math.round(h*scale);
   var g=cv.getContext('2d',{willReadFrequently:true});
   g.drawImage(video,0,0,cv.width,cv.height);
@@ -454,7 +454,7 @@ function setMode(w,mode){
   workerMode=mode;
   return w.setParameters(mode==='code'
     ? {tessedit_char_whitelist:CODESET, tessedit_pageseg_mode:'6'}
-    : {tessedit_char_whitelist:'', tessedit_pageseg_mode:'3'});
+    : {tessedit_char_whitelist:'', tessedit_pageseg_mode:'6'});
 }
 
 /* Sample a burst of frames and hand back the sharpest one. */
@@ -519,7 +519,7 @@ function cycle(){
     if(!collecting) return;
     if(!canvas || score<SHARP_MIN){
       cSub.textContent='Too blurry \u2014 hold still and let it focus.';
-      setTimeout(cycle,350);
+      setTimeout(cycle,200);
       return;
     }
     busyOCR=true;
@@ -548,7 +548,7 @@ function cycle(){
       }
       drawChecks();
       if(!missing().length){ finishCollect(); return; }
-      setTimeout(cycle,250);
+      setTimeout(cycle,120);
     }).catch(function(){
       busyOCR=false; collecting=false;
       view.classList.remove('hunting'); collectEl.hidden=true; tag.hidden=true; busy.hidden=true;
@@ -707,10 +707,22 @@ function trackingFrom(raw){
   return '';
 }
 
-function onBarcode(v){
-  var raw=String(v).trim(), now=Date.now();
-  seen++; lastRaw=raw; diagUpdate();
-  var t=trackingFrom(raw);
+/* A label carries several barcodes and the detector hands back all of them each
+   tick. Judge the whole batch together, preferring whichever one actually holds
+   a tracking number — otherwise they cancel each other out and nothing locks. */
+function onFrame(values){
+  if(!values.length) return;
+  var picked='',raw=values[0];
+  for(var i=0;i<values.length;i++){
+    var cand=trackingFrom(values[i]);
+    if(cand){ picked=cand; raw=values[i]; break; }
+  }
+  seen++; lastRaw=String(raw).trim(); diagUpdate();
+  onBarcode(picked, lastRaw);
+}
+
+function onBarcode(t, raw){
+  var now=Date.now();
 
   if(collecting){
     if(!got.track && t){ got.track=t; drawChecks(); beep(880,90); buzz(35); flash(); say('Got tracking number','good'); }
@@ -767,9 +779,9 @@ function start(){
     timer=setInterval(function(){
       if(!running) return;
       detector.detect(video).then(function(r){
-        for(var i=0;i<r.length;i++) onBarcode(r[i].rawValue);
+        onFrame(r.map(function(x){return x.rawValue;}));
       }).catch(function(){});
-    },200);
+    },120);
   })
   .catch(function(err){
     if(err&&(err.name==='NotAllowedError'||err.name==='SecurityError')){
@@ -781,7 +793,7 @@ function start(){
     .then(function(){
       zx=new ZXing.BrowserMultiFormatReader(); engine='zxing';
       return zx.decodeFromConstraints({video:{facingMode:{ideal:'environment'},width:{ideal:1920}}},video,function(res){
-        if(res&&running) onBarcode(res.getText());
+        if(res&&running) onFrame([res.getText()]);
       });
     }).then(function(){ live(); setupTorch(); })
     .catch(function(e){
