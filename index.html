@@ -89,6 +89,17 @@ button{font-family:inherit;font-size:1rem}
 .actions button:disabled{opacity:.35}
 .actions .wa{background:#1F3A2E;border-color:#2C5343;color:#8FE3B4}
 .actions .clear{color:#E88A82}
+.collect{margin-top:10px;background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:13px}
+.collect h3{margin:0 0 3px;font-size:.95rem;font-weight:600}
+.collect .sub{margin:0 0 10px;font-size:.8rem;color:var(--muted)}
+.collect .sub.warn{color:var(--warn)}
+.checks{list-style:none;margin:0 0 11px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
+.checks li{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--muted)}
+.checks li b{flex:none;width:17px;height:17px;border-radius:50%;border:1px solid var(--edge);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:transparent}
+.checks li.on{color:var(--ok)}
+.checks li.on b{background:var(--ok);border-color:var(--ok);color:#05130C}
+.collect .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.collect .btns button{padding:12px;border-radius:8px;border:1px solid var(--edge);background:#0D1216;color:var(--text);cursor:pointer;font-size:.9rem}
 .foot{margin-top:18px;font-size:.74rem;color:#5D6970;line-height:1.6}
 button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -113,6 +124,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
     <div class="frame"><span></span><span></span><span></span><span></span></div>
     <div class="busy" id="busy" hidden><div class="spin"></div><div id="busytxt">Reading label…</div></div>
     <button class="torch" id="torch" hidden aria-pressed="false" title="Torch">☀</button>
+  </div>
+
+  <div class="collect" id="collect" hidden>
+    <h3 id="c_head">Reading label…</h3>
+    <p class="sub" id="c_sub">Keep the whole label in the frame.</p>
+    <ul class="checks" id="checks"></ul>
+    <div class="btns">
+      <button id="useit">Use what I\'ve got</button>
+      <button id="cancelc">Cancel</button>
+    </div>
   </div>
 
   <div class="status" id="status"><span class="dot"></span><span id="msg">Camera off</span></div>
@@ -147,7 +168,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-o
     <button class="clear" id="clear" disabled>Clear list</button>
   </div>
 
-  <p class="foot">Rows stay on this phone until you copy, send or save them. The first scan downloads the text-reading engine (about 15&nbsp;MB) — do that on wi-fi.</p>
+  <p class="foot">Build 3 · keeps reading until every field is found. Rows stay on this phone until you copy, send or save them. The first scan downloads the text-reading engine (about 15&nbsp;MB) — do that on wi-fi.</p>
 </div>
 
 <canvas id="cv" hidden></canvas>
@@ -405,60 +426,109 @@ function keepBest(){
   return true;
 }
 
-/* Wait for the picture to settle, sample several frames, keep the sharpest. */
-function holdAndCapture(trackingNo,attempt){
-  paused=true;
-  busy.hidden=false;
-  busytxt.textContent='Hold steady…';
-  say('Hold still — checking the picture is sharp enough');
+var LABELS={sku:'SKU',qty:'quantity',name:'customer name',post:'postcode',ref:'customer reference',track:'tracking number'};
+
+/* Sample a burst of frames and hand back the sharpest one. */
+function bestFrame(cb){
   var n=0,bestScore=0,got=false;
   var iv=setInterval(function(){
     n++;
-    var s=sharpness();
-    if(s>bestScore && keepBest()){ bestScore=s; got=true; }
-    busytxt.textContent='Hold steady… '+n+'/'+SAMPLES;
-    if(n<SAMPLES) return;
-    clearInterval(iv);
-    if(!got || bestScore<SHARP_MIN){
-      busy.hidden=true; paused=false; arm={code:'',hits:0}; last={v:'',t:0};
-      beep(220,160); buzz(90);
-      say('Too blurry to read. Rest your elbows, get about 25&nbsp;cm away and let it focus.','warn');
-      return;
-    }
-    readIt(bestCv,trackingNo,attempt||0);
-  },150);
+    var sc2=sharpness();
+    if(sc2>bestScore && keepBest()){ bestScore=sc2; got=true; }
+    if(n>=SAMPLES){ clearInterval(iv); cb(got?bestCv:null,bestScore); }
+  },130);
 }
 
-function readIt(canvas,trackingNo,attempt){
-  try{ shot.src=canvas.toDataURL('image/jpeg',.85); shot.hidden=false; video.hidden=true; }catch(e){}
-  busy.hidden=false; busytxt.textContent='Reading label…';
-  say('Reading the printed text…');
+/* Keep taking readings until every field has been found. Fields found on an
+   early pass are kept, so you can move the phone to pick up whatever is still
+   missing without losing what already worked. */
+var MAX_PASSES=8, collecting=false, collected=null, passNo=0, blurCount=0;
+var NEED=['sku','qty','name','post','ref','track'];
+var collectEl=$('collect'), cHead=$('c_head'), cSub=$('c_sub'), checksEl=$('checks');
 
-  getOCR().then(function(w){ return w.recognize(canvas); })
-  .then(function(r){
-    var f=parseLabel(r.data.text, trackingNo);
-    var gaps=['sku','qty','name','post','ref'].filter(function(k){return !f[k];}).length;
-    /* Most of the label missing usually means it wasn't all in shot. Try once more. */
-    if(gaps>=3 && attempt<1){
-      shot.hidden=true; video.hidden=false; shot.removeAttribute('src');
-      busytxt.textContent='Only caught part of it — line it up again…';
-      say('Only caught part of the label — fit the whole thing in the frame','warn');
-      beep(300,120); buzz(60);
-      setTimeout(function(){ holdAndCapture(trackingNo,attempt+1); },900);
-      return;
+function missingOf(f){ return NEED.filter(function(k){ return !f[k]; }); }
+
+function drawChecks(){
+  checksEl.innerHTML='';
+  NEED.forEach(function(k){
+    var li=document.createElement('li');
+    if(collected[k]) li.className='on';
+    var t=document.createElement('b'); t.textContent='\u2713'; li.appendChild(t);
+    var s2=document.createElement('span'); s2.textContent=LABELS[k]; li.appendChild(s2);
+    checksEl.appendChild(li);
+  });
+}
+function setHead(h,sub,warn){
+  cHead.textContent=h;
+  cSub.textContent=sub;
+  cSub.className='sub'+(warn?' warn':'');
+}
+
+function startCollect(t){
+  paused=true; collecting=true; passNo=0; blurCount=0;
+  collected={date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:t||''};
+  collectEl.hidden=false; drawChecks();
+  setHead('Reading label…','Hold the phone steady with the whole label in frame.');
+  say('Reading — nothing is saved until every field is found');
+  collectEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+  nextPass();
+}
+
+function nextPass(){
+  if(!collecting) return;
+  setHead('Hold steady…','Checking the picture is sharp enough.');
+  bestFrame(function(canvas,score){
+    if(!collecting) return;
+    if(!canvas || score<SHARP_MIN){
+      blurCount++;
+      if(blurCount<10){
+        setHead('Too blurry','Hold still, about 25 cm away, and let the camera focus.',true);
+        setTimeout(nextPass,500);
+        return;
+      }
+      /* give up on waiting for sharp and read what we have */
     }
-    busy.hidden=true;
-    showReview(f);
-  })
-  .catch(function(){
-    busy.hidden=true;
-    say('Couldn\'t start the text reader — check the connection. You can still type the fields in.','bad');
-    showReview({date:today(),sku:'',qty:'',name:'',post:'',ref:'',track:trackingNo||''});
+    passNo++;
+    setHead('Reading… pass '+passNo,'Fields found so far are kept.');
+    getOCR().then(function(w){ return w.recognize(canvas||bestCv); })
+    .then(function(r){
+      if(!collecting) return;
+      var f=parseLabel(r.data.text, collected.track);
+      NEED.forEach(function(k){ if(!collected[k] && f[k]) collected[k]=f[k]; });
+      drawChecks();
+      var missing=missingOf(collected);
+      if(!missing.length){ beep(880,110); buzz(45); flash(); finishCollect(canvas); return; }
+      if(passNo>=MAX_PASSES){
+        setHead('Gave up after '+passNo+' tries','Still missing the '+list(missing.map(function(k){return LABELS[k];}))+'.',true);
+        beep(300,140); buzz(70);
+        finishCollect(canvas);
+        return;
+      }
+      setHead('Still looking…','Need the '+list(missing.map(function(k){return LABELS[k];}))+' — move so that part is clear.',true);
+      beep(520,60);
+      setTimeout(nextPass,400);
+    })
+    .catch(function(){
+      collecting=false; collectEl.hidden=true; busy.hidden=true;
+      say('Couldn\'t start the text reader — check the connection. You can still type the fields in.','bad');
+      showReview(collected);
+    });
   });
 }
 
+function finishCollect(canvas){
+  collecting=false; collectEl.hidden=true; busy.hidden=true;
+  if(canvas){ try{ shot.src=canvas.toDataURL('image/jpeg',.85); shot.hidden=false; video.hidden=true; }catch(e){} }
+  showReview(collected);
+}
+$('useit').onclick=function(){ if(collecting) finishCollect(null); };
+$('cancelc').onclick=function(){
+  collecting=false; collectEl.hidden=true; busy.hidden=true;
+  arm={code:'',hits:0}; last={v:'',t:0}; paused=false;
+  say('Cancelled — line the label up again');
+};
+
 /* ---- review ---- */
-var LABELS={sku:'SKU',qty:'quantity',name:'customer name',post:'postcode',ref:'customer reference',track:'tracking number'};
 function showReview(f){
   pending=f;
   F.date.value=f.date;
@@ -520,7 +590,7 @@ $('retake').onclick=function(){ closeReview(); say('Line the label up again'); }
 function closeReview(){
   review.hidden=true; pending=null;
   shot.hidden=true; video.hidden=false; shot.removeAttribute('src');
-  last={v:'',t:0}; arm={code:'',hits:0}; paused=false;
+  last={v:'',t:0}; arm={code:'',hits:0}; paused=false; collecting=false; collectEl.hidden=true;
 }
 
 /* ---- list + outputs ---- */
@@ -592,7 +662,7 @@ function onBarcode(v){
 
   arm={code:'',hits:0};
   last={v:t,t:now};
-  holdAndCapture(t,0);
+  startCollect(t);
 }
 function setupTorch(){
   try{
@@ -658,7 +728,7 @@ function live(){
   say('Scanning — fill the frame with the whole label');
 }
 function stop(){
-  running=false; paused=false; arm={code:'',hits:0}; busy.hidden=true;
+  running=false; paused=false; arm={code:'',hits:0}; busy.hidden=true; collecting=false; collectEl.hidden=true;
   if(timer){clearInterval(timer);timer=null;}
   if(zx){ try{zx.reset();}catch(e){} zx=null; }
   if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
