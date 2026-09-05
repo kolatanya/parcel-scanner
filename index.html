@@ -171,6 +171,14 @@ var W={sku:$('w_sku'),qty:$('w_qty'),name:$('w_name'),post:$('w_post'),ref:$('w_
 var rows=[], running=false, paused=false, stream=null, timer=null, detector=null, zx=null, track=null,
     last={v:'',t:0}, pending=null, ocrWorker=null;
 
+/* steadiness gate */
+var LOCK_HITS=4;        /* consecutive sightings of the same barcode before we commit */
+var SAMPLES=6;          /* frames sampled during the hold, sharpest one wins */
+var SHARP_MIN=45;       /* below this the picture is too soft to trust */
+var arm={code:'',hits:0};
+var scratch=document.createElement('canvas');
+var bestCv=document.createElement('canvas');
+
 /* ---- patterns ---- */
 var RX={
   s10:      /\b([A-Z]{2})\s?(\d{4})\s?(\d{4})\s?(\d)\s?([A-Z]{2})\b/,
@@ -367,18 +375,80 @@ function getOCR(){
   }).then(function(w){ ocrWorker=w; return w; });
 }
 
-function capture(trackingNo){
+/* How much fine detail is in the frame right now. A blurred photo has soft edges
+   and scores low, so this is a decent proxy for "is it actually in focus". */
+function sharpness(){
+  if(!video.videoWidth) return 0;
+  var w=320,h=Math.round(320*video.videoHeight/video.videoWidth);
+  scratch.width=w; scratch.height=h;
+  var g=scratch.getContext('2d',{willReadFrequently:true});
+  g.drawImage(video,0,0,w,h);
+  var d;
+  try{ d=g.getImageData(0,0,w,h).data; }catch(e){ return 0; }
+  var gray=new Float32Array(w*h),i,p;
+  for(i=0,p=0;p<d.length;p+=4,i++) gray[i]=d[p]*.299+d[p+1]*.587+d[p+2]*.114;
+  var sum=0,sum2=0,n=0,x,y;
+  for(y=1;y<h-1;y++) for(x=1;x<w-1;x++){
+    var k=y*w+x;
+    var lap=4*gray[k]-gray[k-1]-gray[k+1]-gray[k-w]-gray[k+w];
+    sum+=lap; sum2+=lap*lap; n++;
+  }
+  if(!n) return 0;
+  var mean=sum/n;
+  return sum2/n-mean*mean;
+}
+
+function keepBest(){
+  var c=grab(); if(!c) return false;
+  bestCv.width=c.width; bestCv.height=c.height;
+  bestCv.getContext('2d').drawImage(c,0,0);
+  return true;
+}
+
+/* Wait for the picture to settle, sample several frames, keep the sharpest. */
+function holdAndCapture(trackingNo,attempt){
   paused=true;
-  var canvas=grab();
-  if(!canvas){ paused=false; return; }
-  try{ shot.src=canvas.toDataURL('image/jpeg',.8); shot.hidden=false; video.hidden=true; }catch(e){}
+  busy.hidden=false;
+  busytxt.textContent='Hold steady…';
+  say('Hold still — checking the picture is sharp enough');
+  var n=0,bestScore=0,got=false;
+  var iv=setInterval(function(){
+    n++;
+    var s=sharpness();
+    if(s>bestScore && keepBest()){ bestScore=s; got=true; }
+    busytxt.textContent='Hold steady… '+n+'/'+SAMPLES;
+    if(n<SAMPLES) return;
+    clearInterval(iv);
+    if(!got || bestScore<SHARP_MIN){
+      busy.hidden=true; paused=false; arm={code:'',hits:0}; last={v:'',t:0};
+      beep(220,160); buzz(90);
+      say('Too blurry to read. Rest your elbows, get about 25&nbsp;cm away and let it focus.','warn');
+      return;
+    }
+    readIt(bestCv,trackingNo,attempt||0);
+  },150);
+}
+
+function readIt(canvas,trackingNo,attempt){
+  try{ shot.src=canvas.toDataURL('image/jpeg',.85); shot.hidden=false; video.hidden=true; }catch(e){}
   busy.hidden=false; busytxt.textContent='Reading label…';
   say('Reading the printed text…');
 
   getOCR().then(function(w){ return w.recognize(canvas); })
   .then(function(r){
+    var f=parseLabel(r.data.text, trackingNo);
+    var gaps=['sku','qty','name','post','ref'].filter(function(k){return !f[k];}).length;
+    /* Most of the label missing usually means it wasn't all in shot. Try once more. */
+    if(gaps>=3 && attempt<1){
+      shot.hidden=true; video.hidden=false; shot.removeAttribute('src');
+      busytxt.textContent='Only caught part of it — line it up again…';
+      say('Only caught part of the label — fit the whole thing in the frame','warn');
+      beep(300,120); buzz(60);
+      setTimeout(function(){ holdAndCapture(trackingNo,attempt+1); },900);
+      return;
+    }
     busy.hidden=true;
-    showReview(parseLabel(r.data.text, trackingNo));
+    showReview(f);
   })
   .catch(function(){
     busy.hidden=true;
@@ -450,7 +520,7 @@ $('retake').onclick=function(){ closeReview(); say('Line the label up again'); }
 function closeReview(){
   review.hidden=true; pending=null;
   shot.hidden=true; video.hidden=false; shot.removeAttribute('src');
-  last={v:'',t:0}; paused=false;
+  last={v:'',t:0}; arm={code:'',hits:0}; paused=false;
 }
 
 /* ---- list + outputs ---- */
@@ -509,8 +579,20 @@ function onBarcode(v){
   if(!m){ return; }                       /* ignore the other barcodes on the label */
   var t=m[0];
   if(t===last.v && now-last.t<3000) return;
+
+  /* Don't shoot on the first sighting — the same code has to hold across
+     several frames, which means the phone is pointed steadily at one label. */
+  if(arm.code!==t){
+    arm={code:t,hits:1};
+    say('Found <code>'+fmtTrack(t)+'</code> — keep the whole label in the frame');
+    return;
+  }
+  arm.hits++;
+  if(arm.hits<LOCK_HITS){ say('Locking on… '+arm.hits+' of '+LOCK_HITS); return; }
+
+  arm={code:'',hits:0};
   last={v:t,t:now};
-  capture(t);
+  holdAndCapture(t,0);
 }
 function setupTorch(){
   try{
@@ -571,12 +653,12 @@ function start(){
   });
 }
 function live(){
-  running=true; paused=false; idle.hidden=true;
+  running=true; paused=false; idle.hidden=true; arm={code:'',hits:0};
   go.textContent='Stop scanning'; go.classList.add('stop');
   say('Scanning — fill the frame with the whole label');
 }
 function stop(){
-  running=false; paused=false;
+  running=false; paused=false; arm={code:'',hits:0}; busy.hidden=true;
   if(timer){clearInterval(timer);timer=null;}
   if(zx){ try{zx.reset();}catch(e){} zx=null; }
   if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
