@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#101418">
+<meta name="theme-color" content="#F4EEE2">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,30 +12,38 @@
 <title>Ecomflex</title>
 <style>
 :root{
-  --ground:#101418; --panel:#191F25; --edge:#2B343C;
-  --text:#EDF1F3; --muted:#8A99A5; --mark:#E23B2E; --ok:#3FBF7F;
+  /* ecomFLEX brand */
+  --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
+  --ink:#33334E; --navy:#48486C; --muted:#7C7C93;
+  --red:#EA3D49; --blue:#45B0C8; --deep:#2E8FA8;
+  --ok:#2E8FA8; --warn:#B0761A; --bad:#D62F3C;
+  --stock:#FFFFFF; --stock-ink:#33334E;
+  /* the viewfinder stays dark, it is live video */
+  --lens:#0B0E12;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
   --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans)}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans)}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
 .wrap{max-width:560px;margin:0 auto;padding:26px 16px 40px}
 
-header{margin-bottom:26px}
+header{margin-bottom:26px;padding-bottom:18px;border-bottom:2px solid var(--edge2)}
 .brand{display:flex;align-items:center;gap:12px}
+.brand img{height:38px;width:auto;display:block}
 .brand .bars{display:flex;gap:2px;height:30px;align-items:stretch}
-.brand .bars i{display:block;background:var(--text);border-radius:1px}
-.brand .bars i.a{background:var(--mark)}
-h1{margin:0;font-size:1.6rem;font-weight:650;letter-spacing:-.02em}
+.brand .bars i{display:block;background:var(--ink);border-radius:1px}
+.brand .bars i.a{background:var(--red)}
+h1{margin:0;font-size:1.6rem;font-weight:650;letter-spacing:-.02em;color:var(--navy)}
 .sub{margin:7px 0 0;color:var(--muted);font-size:.87rem}
 
 .tools{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .tools a{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;
-  background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:16px}
-.tools a:active{border-color:var(--mark)}
-.glyph{flex:none;width:46px;height:46px;border-radius:9px;background:#0D1216;border:1px solid var(--edge);
+  background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:16px;
+  box-shadow:0 1px 0 rgba(72,72,108,.05)}
+.tools a:active{border-color:var(--red);background:#FFF7F1}
+.glyph{flex:none;width:46px;height:46px;border-radius:9px;background:#EFF7F9;border:1px solid #CDE4EA;color:var(--deep);
   display:flex;align-items:center;justify-content:center;font-size:1.25rem}
 .tools .name{font-weight:600;font-size:1.02rem}
 .tools .desc{color:var(--muted);font-size:.82rem;margin-top:2px;line-height:1.35}
@@ -45,11 +53,11 @@ h1{margin:0;font-size:1.6rem;font-weight:650;letter-spacing:-.02em}
 .install h2{margin:0 0 5px;font-size:.95rem;font-weight:600}
 .install p{margin:0;font-size:.83rem;color:var(--muted);line-height:1.5}
 .install button{margin-top:11px;width:100%;padding:14px;border:0;border-radius:9px;
-  background:var(--mark);color:#fff;font-weight:600;font-size:.95rem;cursor:pointer;font-family:inherit}
+  background:var(--red);color:#fff;font-weight:600;font-size:.95rem;cursor:pointer;font-family:inherit}
 
-.foot{margin-top:26px;font-size:.74rem;color:#5D6970;line-height:1.6}
+.foot{margin-top:26px;font-size:.74rem;color:#8E8EA3;line-height:1.6}
 .foot code{font-family:var(--mono)}
-a:focus-visible,button:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -57,8 +65,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--mark);outline-offse
 
   <header>
     <div class="brand">
-      <div class="bars" id="bars"></div>
-      <h1>Ecomflex</h1>
+      <img src="logo.png" alt="ecomFLEX">
     </div>
     <p class="sub">Warehouse tools</p>
   </header>
@@ -99,14 +106,6 @@ var TOOLS = [
 
 (function(){
 "use strict";
-var bars=document.getElementById('bars');
-[3,1,2,1,1,3,1,2].forEach(function(w,i){
-  var b=document.createElement('i');
-  b.style.width=(w*2)+'px';
-  if(i===2||i===6) b.className='a';
-  bars.appendChild(b);
-});
-
 var ul=document.getElementById('tools');
 TOOLS.forEach(function(t){
   var li=document.createElement('li');
@@ -139,7 +138,7 @@ document.getElementById('installbtn').onclick=function(){
   deferred.prompt();
   deferred.userChoice.then(function(){ deferred=null; box.hidden=true; });
 };
-var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
 if(!standalone && !deferred && /iPhone|iPad|iPod/.test(navigator.userAgent)){
   box.hidden=false;
   box.querySelector('p').textContent='In Safari, tap the Share button, then “Add to Home Screen”.';
