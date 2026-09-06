@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4EEE2">
+<title>Panel — ecomFLEX</title>
+<style>
+:root{
+  --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
+  --ink:#33334E; --navy:#48486C; --muted:#7C7C93;
+  --red:#EA3D49; --blue:#45B0C8; --deep:#2E8FA8;
+  --ok:#2E8FA8; --warn:#B0761A; --bad:#D62F3C;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans)}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:480px;margin:0 auto;padding:26px 16px 44px}
+button{font-family:inherit;font-size:1rem}
+[hidden]{display:none!important}
+
+header{padding-bottom:18px;border-bottom:2px solid var(--edge2);margin-bottom:22px}
+header img{height:38px;width:auto;display:block}
+header p{margin:10px 0 0;color:var(--muted);font-size:.87rem}
+
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:20px;
+  box-shadow:0 1px 0 rgba(72,72,108,.05)}
+h2{margin:0 0 6px;font-size:1.15rem;font-weight:650;color:var(--navy)}
+p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
+
+.choice{display:grid;gap:10px}
+.btn{display:block;width:100%;padding:16px;border-radius:9px;border:0;cursor:pointer;
+  font-size:1rem;font-weight:600;text-align:center}
+.btn.primary{background:var(--red);color:#fff}
+.btn.second{background:var(--panel);color:var(--navy);border:1px solid var(--edge2)}
+.btn.blue{background:var(--deep);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;
+  font-size:.85rem;padding:0;margin-top:14px;display:block;width:100%;text-align:center}
+
+.f{margin-bottom:12px}
+.f label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px}
+.f input,.f textarea{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge2);
+  background:#FFFDF8;color:var(--ink);font-family:inherit;font-size:1rem}
+.f textarea{min-height:74px;resize:vertical}
+.f input:focus-visible,.f textarea:focus-visible,.btn:focus-visible,.linkbtn:focus-visible{
+  outline:2px solid var(--red);outline-offset:2px}
+.f .err{font-size:.76rem;color:var(--bad);margin-top:4px;display:none}
+.f.bad input,.f.bad textarea{border-color:var(--bad);background:#FDF1F0}
+.f.bad .err{display:block}
+.remember{display:flex;align-items:center;gap:9px;font-size:.85rem;color:var(--muted);margin:4px 0 14px}
+.remember input{width:18px;height:18px;accent-color:var(--red)}
+
+.note{margin-top:14px;padding:13px;border-radius:9px;font-size:.86rem;line-height:1.5}
+.note.info{background:#EFF7F9;border:1px solid #CDE4EA;color:#1F5F70}
+.note.good{background:#E9F4EC;border:1px solid #B7D8C4;color:#1E6B4A}
+.note.warn{background:#FDF6E1;border:1px solid #E4D3A0;color:#7A5210}
+.note.bad{background:#FDEFEE;border:1px solid #F2C4C0;color:#8E2A2F}
+
+.msg{margin-top:14px;min-height:22px;font-size:.87rem;color:var(--muted)}
+.msg.bad{color:var(--bad)} .msg.good{color:var(--ok)}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--edge2);
+  border-top-color:var(--red);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.foot{margin-top:22px;font-size:.75rem;color:#8E8EA3;line-height:1.6;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <img src="logo.png" alt="ecomFLEX">
+    <p>Müşteri Paneli</p>
+  </header>
+
+  <!-- loading -->
+  <div class="card" id="v_load">
+    <p class="lead"><span class="spin"></span>Yükleniyor…</p>
+  </div>
+
+  <!-- choose -->
+  <div class="card" id="v_choice" hidden>
+    <h2>Panele hoş geldiniz</h2>
+    <p class="lead">Hesabınız varsa giriş yapın. Yoksa kayıt talebi oluşturun.</p>
+    <div class="choice">
+      <button class="btn primary" id="b_signup">Kayıt Ol</button>
+      <button class="btn second" id="b_login">Giriş Yap</button>
+    </div>
+  </div>
+
+  <!-- signup request -->
+  <div class="card" id="v_signup" hidden>
+    <h2>Kayıt talebi</h2>
+    <p class="lead">Bilgilerinizi bırakın; ekibimiz talebinizi inceleyip size dönüş yapacak.</p>
+    <div class="f" id="w_name"><label>Ad Soyad</label><input id="i_name" autocomplete="name"><div class="err">Lütfen ad ve soyadınızı yazın.</div></div>
+    <div class="f" id="w_phone"><label>Telefon numarası</label><input id="i_phone" type="tel" autocomplete="tel"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+    <div class="f" id="w_email"><label>E-posta adresi</label><input id="i_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"><div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
+    <div class="f" id="w_biz"><label>İşletme adı</label><input id="i_biz" autocomplete="organization"><div class="err">Lütfen işletme adınızı yazın.</div></div>
+    <div class="f" id="w_addr"><label>İşletme adresi</label><textarea id="i_addr" autocomplete="street-address"></textarea><div class="err">Lütfen işletme adresinizi yazın.</div></div>
+    <button class="btn primary" id="b_send">Talebi Gönder</button>
+    <button class="linkbtn" id="b_back1">Geri</button>
+    <div class="msg" id="m_signup"></div>
+  </div>
+
+  <!-- pending -->
+  <div class="card" id="v_pending" hidden>
+    <h2>Talebiniz alındı</h2>
+    <div class="note info">
+      Ekibimiz talebiniz üzerinde çalışıyor. Onaylandığında size e-posta ile bilgi verilecek.
+      Onay e-postasını aldıktan sonra bu sayfaya geri dönün ve şifrenizi oluşturun.
+    </div>
+    <div class="msg" id="m_pending"></div>
+    <button class="btn second" id="b_recheck" style="margin-top:14px">Durumu Yenile</button>
+    <button class="linkbtn" id="b_other1">Başka bir hesapla giriş yap</button>
+  </div>
+
+  <!-- rejected -->
+  <div class="card" id="v_rejected" hidden>
+    <h2>Talebiniz onaylanmadı</h2>
+    <div class="note bad">
+      Bu talep şu anda onaylanmadı. Sorularınız için
+      <a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a> adresinden bize yazabilirsiniz.
+    </div>
+    <button class="linkbtn" id="b_other2">Başka bir hesapla giriş yap</button>
+  </div>
+
+  <!-- approved: set a password -->
+  <div class="card" id="v_approved" hidden>
+    <h2>Talebiniz onaylandı</h2>
+    <div class="note good">Ekibimiz talebinizi onayladı. Bilgilerinizi doğrulayıp bir şifre belirleyin.</div>
+    <div style="height:16px"></div>
+    <div class="f" id="w2_name"><label>Ad Soyad</label><input id="a_name" autocomplete="name"><div class="err">Lütfen ad ve soyadınızı yazın.</div></div>
+    <div class="f" id="w2_phone"><label>Telefon numarası</label><input id="a_phone" type="tel" autocomplete="tel"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+    <div class="f" id="w2_email"><label>E-posta adresi</label><input id="a_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"><div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
+    <div class="f" id="w2_biz"><label>İşletme adı</label><input id="a_biz" autocomplete="organization"><div class="err">Lütfen işletme adınızı yazın.</div></div>
+    <div class="f" id="w2_addr"><label>İşletme adresi</label><textarea id="a_addr" autocomplete="street-address"></textarea><div class="err">Lütfen işletme adresinizi yazın.</div></div>
+    <div class="f" id="w2_pw"><label>Şifreniz (en az 8 karakter)</label><input id="a_pw" type="password" autocomplete="new-password"><div class="err">Şifre en az 8 karakter olmalıdır.</div></div>
+    <div class="f" id="w2_pw2"><label>Şifreyi tekrar yazın</label><input id="a_pw2" type="password" autocomplete="new-password"><div class="err">Şifreler aynı değil.</div></div>
+    <label class="remember"><input type="checkbox" id="a_remember" checked> Bu cihazı 30 gün hatırla</label>
+    <button class="btn primary" id="b_create">Şifreyi Kaydet ve Panele Gir</button>
+    <div class="msg" id="m_approved"></div>
+  </div>
+
+  <!-- login -->
+  <div class="card" id="v_login" hidden>
+    <h2>Giriş yap</h2>
+    <p class="lead">Panel hesabınızla giriş yapın.</p>
+    <div class="f" id="w_lemail"><label>E-posta adresi</label><input id="l_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"><div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
+    <div class="f" id="w_lpw"><label>Şifre</label><input id="l_pw" type="password" autocomplete="current-password"><div class="err">Lütfen şifrenizi yazın.</div></div>
+    <label class="remember"><input type="checkbox" id="l_remember" checked> Bu cihazı 30 gün hatırla</label>
+    <button class="btn primary" id="b_dologin">Giriş Yap</button>
+    <button class="linkbtn" id="b_back2">Geri</button>
+    <div class="msg" id="m_login"></div>
+  </div>
+
+  <!-- the panel itself -->
+  <div class="card" id="v_panel" hidden>
+    <h2 id="p_hello">Panel</h2>
+    <p class="lead" id="p_sub"></p>
+    <div class="note info">Panel içeriği yakında eklenecek.</div>
+    <button class="btn second" id="b_logout" style="margin-top:16px">Çıkış Yap</button>
+  </div>
+
+  <div class="card" id="v_error" hidden>
+    <h2>Bağlantı kurulamadı</h2>
+    <div class="note bad" id="e_text">Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.</div>
+  </div>
+
+  <p class="foot">ecomFLEX · <a href="mailto:info@ecomflex.co.uk" style="color:#8E8EA3">info@ecomflex.co.uk</a></p>
+</div>
+
+<script src="ecomflex-config.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i);};
+var VIEWS=['v_load','v_choice','v_signup','v_pending','v_rejected','v_approved','v_login','v_panel','v_error'];
+function show(id){ VIEWS.forEach(function(v){ $(v).hidden = (v!==id); }); window.scrollTo(0,0); }
+function msg(el,t,k){ var e=$(el); e.innerHTML=t; e.className='msg'+(k?' '+k:''); }
+function busy(el,t){ msg(el,'<span class="spin"></span>'+t); }
+
+/* remember the email on this device so a returning visitor is recognised */
+function remembered(){ try{ return localStorage.getItem('ecomflex:email')||''; }catch(e){ return ''; } }
+function remember(v){ try{ localStorage.setItem('ecomflex:email',v); }catch(e){} }
+function forget(){ try{ localStorage.removeItem('ecomflex:email'); }catch(e){} }
+
+var sb=null;
+function loadScript(urls){
+  return new Promise(function(res,rej){
+    (function next(i){
+      if(i>=urls.length) return rej(new Error('cdn'));
+      var s=document.createElement('script'); s.src=urls[i];
+      s.onload=function(){res();}; s.onerror=function(){next(i+1);};
+      document.head.appendChild(s);
+    })(0);
+  });
+}
+function connect(){
+  var cfg=window.ECOMFLEX||{};
+  if(!cfg.SUPABASE_URL||/PASTE_/.test(cfg.SUPABASE_URL)){
+    $('e_text').textContent='Ayarlar tamamlanmamış. (ecomflex-config.js)';
+    show('v_error'); return Promise.reject(new Error('config'));
+  }
+  return loadScript([
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+    'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+  ]).then(function(){
+    sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{
+      auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}
+    });
+  });
+}
+
+/* ---------- validation ---------- */
+function bad(w,on){ $(w).classList.toggle('bad',!!on); return !on; }
+var EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function checkForm(pfx,ids){
+  var ok=true;
+  ids.forEach(function(x){
+    var v=$(x.i).value.trim(), good;
+    if(x.type==='email') good=EMAIL.test(v);
+    else if(x.type==='phone') good=v.replace(/[^\d]/g,'').length>=7;
+    else good=v.length>=2;
+    if(!bad(x.w,!good)) ok=false;
+  });
+  return ok;
+}
+var REQ_FIELDS=[
+  {i:'i_name',w:'w_name'},{i:'i_phone',w:'w_phone',type:'phone'},
+  {i:'i_email',w:'w_email',type:'email'},{i:'i_biz',w:'w_biz'},{i:'i_addr',w:'w_addr'}
+];
+var APP_FIELDS=[
+  {i:'a_name',w:'w2_name'},{i:'a_phone',w:'w2_phone',type:'phone'},
+  {i:'a_email',w:'w2_email',type:'email'},{i:'a_biz',w:'w2_biz'},{i:'a_addr',w:'w2_addr'}
+];
+
+/* ---------- routing ---------- */
+function statusOf(email){
+  return sb.rpc('request_status',{p_email:email}).then(function(r){
+    if(r.error) throw r.error;
+    return r.data||'';
+  });
+}
+function route(){
+  return sb.auth.getSession().then(function(r){
+    var s=r.data&&r.data.session;
+    if(s&&s.user){ return openPanel(s.user); }
+    var em=remembered();
+    if(!em){ show('v_choice'); return; }
+    return statusOf(em).then(function(st){
+      if(st==='approved'){ $('a_email').value=em; show('v_approved'); }
+      else if(st==='rejected'){ show('v_rejected'); }
+      else if(st==='pending'){ show('v_pending'); }
+      else { show('v_choice'); }
+    }).catch(function(){ show('v_choice'); });
+  });
+}
+function openPanel(user){
+  return statusOf(user.email).then(function(st){
+    if(st!=='approved'){
+      show('v_pending');
+      msg('m_pending','Hesabınız henüz onaylanmadı.','bad');
+      return;
+    }
+    var m=user.user_metadata||{};
+    $('p_hello').textContent='Merhaba'+(m.full_name?', '+m.full_name:'');
+    $('p_sub').textContent=(m.business_name?m.business_name+' · ':'')+user.email;
+    show('v_panel');
+  }).catch(function(){ show('v_panel'); });
+}
+
+/* ---------- actions ---------- */
+$('b_signup').onclick=function(){ show('v_signup'); };
+$('b_login').onclick=function(){ show('v_login'); };
+$('b_back1').onclick=function(){ show('v_choice'); };
+$('b_back2').onclick=function(){ show('v_choice'); };
+$('b_other1').onclick=function(){ forget(); show('v_login'); };
+$('b_other2').onclick=function(){ forget(); show('v_choice'); };
+
+$('b_send').onclick=function(){
+  if(!checkForm('',REQ_FIELDS)){ msg('m_signup','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var row={
+    full_name:$('i_name').value.trim(),
+    phone:$('i_phone').value.trim(),
+    email:$('i_email').value.trim(),
+    business_name:$('i_biz').value.trim(),
+    business_address:$('i_addr').value.trim(),
+    status:'pending'
+  };
+  $('b_send').disabled=true; busy('m_signup','Gönderiliyor…');
+  sb.from('signup_requests').insert(row).then(function(r){
+    $('b_send').disabled=false;
+    if(r.error){ msg('m_signup','Gönderilemedi. Lütfen tekrar deneyin.','bad'); return; }
+    remember(row.email);
+    show('v_pending');
+  });
+};
+
+$('b_recheck').onclick=function(){
+  var em=remembered();
+  if(!em){ show('v_choice'); return; }
+  busy('m_pending','Kontrol ediliyor…');
+  statusOf(em).then(function(st){
+    if(st==='approved'){ $('a_email').value=em; show('v_approved'); }
+    else if(st==='rejected'){ show('v_rejected'); }
+    else msg('m_pending','Talebiniz hâlâ inceleniyor.','');
+  }).catch(function(){ msg('m_pending','Kontrol edilemedi.','bad'); });
+};
+
+$('b_create').onclick=function(){
+  var ok=checkForm('',APP_FIELDS);
+  var pw=$('a_pw').value, pw2=$('a_pw2').value;
+  if(!bad('w2_pw',pw.length<8)) ok=false;
+  if(!bad('w2_pw2',pw!==pw2||!pw2)) ok=false;
+  if(!ok){ msg('m_approved','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var email=$('a_email').value.trim();
+  $('b_create').disabled=true; busy('m_approved','Hesabınız oluşturuluyor…');
+
+  statusOf(email).then(function(st){
+    if(st!=='approved') throw new Error('not-approved');
+    return sb.auth.signUp({email:email,password:pw,options:{data:{
+      full_name:$('a_name').value.trim(),
+      phone:$('a_phone').value.trim(),
+      business_name:$('a_biz').value.trim(),
+      business_address:$('a_addr').value.trim()
+    }}});
+  }).then(function(r){
+    if(r.error){
+      if(/already/i.test(r.error.message||'')){
+        return sb.auth.signInWithPassword({email:email,password:pw}).then(function(r2){
+          if(r2.error) throw r2.error;
+          return r2;
+        });
+      }
+      throw r.error;
+    }
+    return r;
+  }).then(function(r){
+    $('b_create').disabled=false;
+    remember(email);
+    if(!$('a_remember').checked) forget();
+    if(r.data&&r.data.session&&r.data.user) return openPanel(r.data.user);
+    msg('m_approved','Hesabınız oluşturuldu. Şimdi giriş yapabilirsiniz.','good');
+    $('l_email').value=email;
+    setTimeout(function(){ show('v_login'); },1200);
+  }).catch(function(e){
+    $('b_create').disabled=false;
+    if(e&&e.message==='not-approved'){ show('v_pending'); return; }
+    msg('m_approved','Hesap oluşturulamadı. Lütfen tekrar deneyin.','bad');
+  });
+};
+
+$('b_dologin').onclick=function(){
+  var ok=true;
+  if(!bad('w_lemail',!EMAIL.test($('l_email').value.trim()))) ok=false;
+  if(!bad('w_lpw',!$('l_pw').value)) ok=false;
+  if(!ok){ msg('m_login','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var email=$('l_email').value.trim();
+  $('b_dologin').disabled=true; busy('m_login','Giriş yapılıyor…');
+  sb.auth.signInWithPassword({email:email,password:$('l_pw').value}).then(function(r){
+    $('b_dologin').disabled=false;
+    if(r.error){ msg('m_login','E-posta veya şifre hatalı.','bad'); return; }
+    if($('l_remember').checked) remember(email); else forget();
+    msg('m_login','');
+    return openPanel(r.data.user);
+  });
+};
+
+$('b_logout').onclick=function(){
+  sb.auth.signOut().then(function(){ forget(); show('v_choice'); });
+};
+
+/* enter key submits the visible form */
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return;
+  if(!$('v_signup').hidden) $('b_send').click();
+  else if(!$('v_login').hidden) $('b_dologin').click();
+  else if(!$('v_approved').hidden) $('b_create').click();
+});
+
+connect().then(route).catch(function(){
+  if($('v_error').hidden){
+    $('e_text').textContent='Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.';
+    show('v_error');
+  }
+});
+})();
+</script>
+</body>
+</html>
