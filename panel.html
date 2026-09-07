@@ -66,6 +66,63 @@ p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
   border-top-color:var(--red);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .foot{margin-top:22px;font-size:.75rem;color:#8E8EA3;line-height:1.6;text-align:center}
+
+/* ---------- panel shell ---------- */
+.shell{display:block}
+.nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.nav .grp{display:none}
+.navitem{flex:none;padding:11px 15px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);
+  color:var(--muted);cursor:pointer;font-size:.88rem;white-space:nowrap}
+.navitem.on{background:#EFF7F9;border-color:#CDE4EA;color:var(--deep);font-weight:650}
+.me{background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:14px;margin-bottom:14px}
+.me .nm{font-weight:650;color:var(--navy)}
+.me .sm{font-size:.82rem;color:var(--muted);margin-top:2px;word-break:break-word}
+.me button{margin-top:11px;width:100%;padding:11px;border-radius:8px;border:1px solid var(--edge2);
+  background:var(--panel);color:var(--navy);cursor:pointer;font-size:.86rem}
+
+.grid2{display:block}
+.hint{font-size:.76rem;color:var(--muted);margin-top:4px}
+
+/* ---------- enquiry list ---------- */
+.oli{background:var(--panel);border:1px solid var(--edge);border-radius:11px;overflow:hidden;margin-bottom:9px}
+.oli.pending{border-left:4px solid var(--warn)}
+.oli.answered{border-left:4px solid var(--ok)}
+.ohead{padding:13px 15px;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.ohead .t{flex:1;min-width:0}
+.ohead .p{font-weight:650;color:var(--navy)}
+.ohead .s{font-size:.81rem;color:var(--muted);margin-top:2px}
+.badge{flex:none;font-size:.68rem;padding:3px 9px;border-radius:20px;letter-spacing:.03em}
+.badge.pending{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
+.badge.answered{background:#E9F4EC;color:#1E6B4A;border:1px solid #B7D8C4}
+.obody{padding:0 15px 15px;border-top:1px solid #F0EADD}
+.kv{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed #EFE9DC;font-size:.88rem}
+.kv:last-child{border-bottom:0}
+.kv .k{flex:none;width:118px;color:var(--muted);font-size:.78rem;padding-top:2px}
+.kv .v{flex:1;min-width:0;word-break:break-word}
+.reply{margin-top:12px;background:#EFF7F9;border:1px solid #CDE4EA;border-radius:9px;padding:13px}
+.reply h4{margin:0 0 8px;font-size:.86rem;color:#1F5F70}
+.trk{display:flex;gap:8px;align-items:center;margin-top:9px}
+.trk code{flex:1;font-family:var(--mono);font-size:.95rem;background:#fff;border:1px solid #CDE4EA;
+  border-radius:7px;padding:10px;word-break:break-all;color:var(--ink)}
+.trk button{flex:none;padding:10px 14px;border-radius:7px;border:1px solid #CDE4EA;background:#fff;
+  color:var(--deep);cursor:pointer;font-size:.85rem;font-weight:600}
+
+@media (min-width:860px){
+  .wrap{max-width:1040px;padding:32px 22px 56px}
+  #v_panel{background:none;border:0;padding:0;box-shadow:none}
+  .shell{display:grid;grid-template-columns:250px 1fr;gap:24px;align-items:start}
+  .nav{display:flex;flex-direction:column;gap:4px;overflow:visible;margin-bottom:0}
+  .nav .grp{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--muted);padding:14px 6px 6px}
+  .navitem{width:100%;text-align:left}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+  .grid2 .full{grid-column:1/-1}
+  .kv .k{width:150px}
+}
+@media (min-width:640px){
+  .wrap{max-width:620px}
+}
+
 </style>
 </head>
 <body>
@@ -158,10 +215,57 @@ p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
 
   <!-- the panel itself -->
   <div class="card" id="v_panel" hidden>
-    <h2 id="p_hello">Panel</h2>
-    <p class="lead" id="p_sub"></p>
-    <div class="note info">Panel içeriği yakında eklenecek.</div>
-    <button class="btn second" id="b_logout" style="margin-top:16px">Çıkış Yap</button>
+    <div class="shell">
+      <aside>
+        <div class="me">
+          <div class="nm" id="p_hello">Panel</div>
+          <div class="sm" id="p_sub"></div>
+          <button id="b_logout">Çıkış Yap</button>
+        </div>
+        <nav class="nav" id="nav">
+          <div class="grp">Sipariş Talepleri</div>
+          <button class="navitem on" data-p="new">Geçici 1</button>
+          <button class="navitem" data-p="mine">Taleplerim</button>
+        </nav>
+      </aside>
+
+      <main>
+        <!-- new enquiry -->
+        <section id="pg_new">
+          <h2>Geçici 1 — Yeni sipariş talebi</h2>
+          <p class="lead">Gönderilecek ürün ve alıcı bilgilerini girin. Ekibimiz kargo bilgisiyle size dönüş yapacak.</p>
+          <div class="grid2">
+            <div class="f" id="w_rname"><label>Alıcı adı</label><input id="o_rname" autocomplete="off"><div class="err">Lütfen alıcının adını yazın.</div></div>
+            <div class="f" id="w_rphone"><label>Alıcı telefon numarası</label><input id="o_rphone" type="tel" autocomplete="off"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+            <div class="f full" id="w_raddr"><label>Alıcı adresi</label><textarea id="o_raddr" autocomplete="off"></textarea><div class="err">Lütfen alıcının açık adresini yazın.</div></div>
+            <div class="f" id="w_rcountry"><label>Ülke</label><input id="o_rcountry" list="ulkeler" value="Birleşik Krallık"><div class="err">Lütfen ülkeyi yazın.</div>
+              <div class="hint">Birleşik Krallık veya Avrupa’daki başka bir ülke olabilir.</div></div>
+            <div class="f" id="w_qty"><label>Adet</label><input id="o_qty" type="number" min="1" step="1" value="1" inputmode="numeric"><div class="err">Adet en az 1 olmalıdır.</div></div>
+            <div class="f full" id="w_prod"><label>Ürün adı</label><input id="o_prod" autocomplete="off"><div class="err">Lütfen ürün adını yazın.</div></div>
+            <div class="f full"><label>Ek not (isteğe bağlı)</label><textarea id="o_note" placeholder="Belirtmek istediğiniz bir şey varsa buraya yazın."></textarea></div>
+          </div>
+          <datalist id="ulkeler">
+            <option value="Birleşik Krallık"><option value="Almanya"><option value="Fransa">
+            <option value="Hollanda"><option value="Belçika"><option value="İtalya">
+            <option value="İspanya"><option value="İrlanda"><option value="Polonya">
+            <option value="Avusturya"><option value="İsveç"><option value="Danimarka">
+            <option value="Portekiz"><option value="Çekya"><option value="Romanya">
+          </datalist>
+          <button class="btn primary" id="b_order">Talebi Gönder</button>
+          <div class="msg" id="m_order"></div>
+        </section>
+
+        <!-- their enquiries -->
+        <section id="pg_mine" hidden>
+          <h2>Taleplerim</h2>
+          <p class="lead">Gönderdiğiniz talepler ve ekibimizin yanıtları.</p>
+          <div class="msg" id="m_mine"></div>
+          <div id="olist"></div>
+          <div class="note info" id="o_empty" hidden>Henüz bir talep göndermediniz.</div>
+          <button class="btn second" id="b_reload" style="margin-top:12px">Yenile</button>
+        </section>
+      </main>
+    </div>
   </div>
 
   <div class="card" id="v_error" hidden>
@@ -172,6 +276,7 @@ p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
   <p class="foot">ecomFLEX · <a href="mailto:info@ecomflex.co.uk" style="color:#8E8EA3">info@ecomflex.co.uk</a></p>
 </div>
 
+<script src="_shared.js"></script>
 <script src="ecomflex-config.js"></script>
 <script>
 (function(){
@@ -258,6 +363,7 @@ function route(){
     }).catch(function(){ show('v_choice'); });
   });
 }
+var ME=null;
 function openPanel(user){
   return statusOf(user.email).then(function(st){
     if(st!=='approved'){
@@ -265,12 +371,129 @@ function openPanel(user){
       msg('m_pending','Hesabınız henüz onaylanmadı.','bad');
       return;
     }
+    ME=user;
     var m=user.user_metadata||{};
     $('p_hello').textContent='Merhaba'+(m.full_name?', '+m.full_name:'');
-    $('p_sub').textContent=(m.business_name?m.business_name+' · ':'')+user.email;
+    $('p_sub').textContent=(m.business_name?m.business_name+'\n':'')+user.email;
     show('v_panel');
+    page('new');
+    loadOrders();
   }).catch(function(){ show('v_panel'); });
 }
+
+/* ---------- pages ---------- */
+function page(p){
+  $('pg_new').hidden = (p!=='new');
+  $('pg_mine').hidden = (p!=='mine');
+  Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
+    b.classList.toggle('on', b.getAttribute('data-p')===p);
+  });
+  if(p==='mine') loadOrders();
+}
+Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
+  b.onclick=function(){ page(b.getAttribute('data-p')); };
+});
+
+/* ---------- new enquiry ---------- */
+var ORDER_FIELDS=[
+  {i:'o_rname',w:'w_rname'},{i:'o_rphone',w:'w_rphone',type:'phone'},
+  {i:'o_raddr',w:'w_raddr'},{i:'o_rcountry',w:'w_rcountry'},{i:'o_prod',w:'w_prod'}
+];
+$('b_order').onclick=function(){
+  var ok=checkForm('',ORDER_FIELDS);
+  var q=parseInt($('o_qty').value,10);
+  if(!bad('w_qty',!(q>=1))) ok=false;
+  if(!ok){ msg('m_order','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var m=(ME&&ME.user_metadata)||{};
+  var row={
+    user_id:ME.id, user_email:ME.email, business_name:m.business_name||null, form_key:'temp1',
+    recipient_name:$('o_rname').value.trim(),
+    recipient_address:$('o_raddr').value.trim(),
+    recipient_country:$('o_rcountry').value.trim(),
+    recipient_phone:$('o_rphone').value.trim(),
+    product_name:$('o_prod').value.trim(),
+    quantity:q,
+    note:$('o_note').value.trim()||null,
+    status:'pending'
+  };
+  $('b_order').disabled=true; busy('m_order','Gönderiliyor…');
+  sb.from('orders').insert(row).then(function(r){
+    $('b_order').disabled=false;
+    if(r.error){ msg('m_order','Gönderilemedi. Lütfen tekrar deneyin.','bad'); return; }
+    msg('m_order','Talebiniz alındı.','good');
+    ['o_rname','o_rphone','o_raddr','o_prod','o_note'].forEach(function(x){ $(x).value=''; });
+    $('o_qty').value='1';
+    loadOrders().then(function(){ page('mine'); });
+  });
+};
+
+/* ---------- their enquiries ---------- */
+function dt(iso){
+  var d=new Date(iso);
+  return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear()
+    +' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+function kv(k,v){
+  var r=document.createElement('div'); r.className='kv';
+  var a=document.createElement('div'); a.className='k'; a.textContent=k;
+  var b=document.createElement('div'); b.className='v'; b.textContent=v;
+  r.appendChild(a); r.appendChild(b); return r;
+}
+function loadOrders(){
+  if(!ME) return Promise.resolve();
+  busy('m_mine','Yükleniyor…');
+  return sb.from('orders').select('*').order('created_at',{ascending:false}).then(function(r){
+    if(r.error){ msg('m_mine','Talepler yüklenemedi.','bad'); return; }
+    msg('m_mine','');
+    var list=r.data||[], box=$('olist');
+    box.innerHTML=''; $('o_empty').hidden=list.length>0;
+    list.forEach(function(o){
+      var li=document.createElement('div'); li.className='oli '+o.status;
+      var head=document.createElement('div'); head.className='ohead';
+      var t=document.createElement('div'); t.className='t';
+      var p=document.createElement('div'); p.className='p';
+      p.textContent=o.product_name+' × '+o.quantity;
+      var sline=document.createElement('div'); sline.className='s';
+      sline.textContent=o.recipient_name+' · '+o.recipient_country+' · '+dt(o.created_at);
+      t.appendChild(p); t.appendChild(sline);
+      var bg=document.createElement('span'); bg.className='badge '+o.status;
+      bg.textContent = o.status==='answered'?'yanıtlandı':'beklemede';
+      head.appendChild(t); head.appendChild(bg);
+      li.appendChild(head);
+
+      var body=document.createElement('div'); body.className='obody'; body.hidden=(o.status!=='answered');
+      body.appendChild(kv('Ürün',o.product_name));
+      body.appendChild(kv('Adet',String(o.quantity)));
+      body.appendChild(kv('Alıcı',o.recipient_name));
+      body.appendChild(kv('Telefon',o.recipient_phone));
+      body.appendChild(kv('Adres',o.recipient_address));
+      body.appendChild(kv('Ülke',o.recipient_country));
+      if(o.note) body.appendChild(kv('Not',o.note));
+
+      if(o.status==='answered'){
+        var rep=document.createElement('div'); rep.className='reply';
+        var h=document.createElement('h4'); h.textContent='ecomFLEX yanıtı'; rep.appendChild(h);
+        if(o.courier) rep.appendChild(kv('Kargo firması',o.courier));
+        if(o.service) rep.appendChild(kv('Servis',o.service));
+        if(o.eta)     rep.appendChild(kv('Tahmini süre',o.eta));
+        if(o.tracking){
+          var lab=document.createElement('div'); lab.className='k'; lab.textContent='Takip numarası';
+          lab.style.width='auto'; lab.style.paddingTop='10px'; rep.appendChild(lab);
+          var w=document.createElement('div'); w.className='trk';
+          var c=document.createElement('code'); c.textContent=o.tracking;
+          var cb=document.createElement('button'); cb.textContent='Kopyala';
+          cb.onclick=function(){ EFCopy(o.tracking,'Takip numarası kopyalandı',cb); };
+          w.appendChild(c); w.appendChild(cb); rep.appendChild(w);
+        }
+        body.appendChild(rep);
+      }
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+    });
+  });
+}
+$('b_reload').onclick=loadOrders;
 
 /* ---------- actions ---------- */
 $('b_signup').onclick=function(){ show('v_signup'); };

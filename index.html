@@ -58,6 +58,24 @@ h1{margin:0;font-size:1.6rem;font-weight:650;letter-spacing:-.02em;color:var(--n
 .foot{margin-top:26px;font-size:.74rem;color:#8E8EA3;line-height:1.6}
 .foot code{font-family:var(--mono)}
 a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+/* shared: copy feedback + desktop widths */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);
+  background:var(--navy);color:#fff;padding:11px 18px;border-radius:24px;font-size:.88rem;font-weight:600;
+  box-shadow:0 6px 20px rgba(51,51,78,.28);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:99}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .tick{display:inline-block;margin-right:8px;animation:pop .32s ease-out}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+.copied{animation:flashok .55s ease-out}
+@keyframes flashok{0%{background:#D7F0E2;border-color:#66C99A}100%{}}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}.copied{animation:none}}
+
+
+@media (min-width:820px){
+  .wrap{max-width:760px;padding-top:38px}
+  .tools{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .install{grid-column:1/-1}
+}
+
 </style>
 </head>
 <body>
@@ -82,6 +100,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   To add a tool: upload its <code>.html</code> file, then add one line to the <code>TOOLS</code> list at the top of <code>index.html</code>.</p>
 </div>
 
+<script src="_shared.js"></script>
 <script>
 /* ===========================================================
    ADD A NEW TOOL HERE

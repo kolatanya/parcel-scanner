@@ -82,6 +82,28 @@ h1{margin:0;font-size:1.35rem;font-weight:650;letter-spacing:-.02em;color:var(--
 .actions .clear{color:var(--bad)}
 .foot{margin-top:20px;font-size:.74rem;color:#8E8EA3;line-height:1.6}
 button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+/* shared: copy feedback + desktop widths */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);
+  background:var(--navy);color:#fff;padding:11px 18px;border-radius:24px;font-size:.88rem;font-weight:600;
+  box-shadow:0 6px 20px rgba(51,51,78,.28);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:99}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .tick{display:inline-block;margin-right:8px;animation:pop .32s ease-out}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+.copied{animation:flashok .55s ease-out}
+@keyframes flashok{0%{background:#D7F0E2;border-color:#66C99A}100%{}}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}.copied{animation:none}}
+
+
+@media (min-width:820px){
+  .wrap{max-width:900px}
+  .drop{padding:46px 20px}
+  .actions{grid-template-columns:repeat(4,1fr)}
+  .edit{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  .edit .f{margin-top:9px}
+  .edit .drop-row{grid-column:1/-1}
+  .edit > label{grid-column:1/-1}
+}
+
 </style>
 </head>
 <body>
@@ -124,6 +146,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   Tap any row to check or correct it. Rows with something missing are marked in amber.</p>
 </div>
 
+<script src="_shared.js"></script>
 <script>
 (function(){
 "use strict";
@@ -427,14 +450,11 @@ tabs.onchange=function(){
 try{ var pref=localStorage.getItem('labels:tabs'); if(pref!==null) tabs.checked=(pref==='1'); }catch(e){}
 
 $('copy').onclick=function(){
-  var t=allText(), ok=function(){ say(rows.length+' row'+(rows.length>1?'s':'')+' copied','good'); };
-  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok,fb); else fb();
-  function fb(){
-    var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,99999);
-    try{ document.execCommand('copy'); ok(); }catch(e){ say('Copy failed — use Save .txt','bad'); }
-    document.body.removeChild(ta);
-  }
+  var t=allText();
+  EFCopy(t,rows.length+' row'+(rows.length>1?'s':'')+' copied',$('copy')).then(function(ok){
+    if(ok) say(rows.length+' row'+(rows.length>1?'s':'')+' copied','good');
+    else say('Copy failed \u2014 use Save .txt','bad');
+  });
 };
 $('wa').onclick=function(){
   window.open('https://wa.me/?text='+encodeURIComponent(today()+' — '+rows.length+' parcels\n\n'+allText()),'_blank');

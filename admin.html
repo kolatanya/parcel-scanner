@@ -82,6 +82,70 @@ p.lead{margin:0 0 14px;color:var(--muted);font-size:.86rem}
   border:1px dashed var(--edge2);border-radius:10px}
 .foot{margin-top:20px;font-size:.74rem;color:#8E8EA3;line-height:1.6}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+/* shared: copy feedback + desktop widths */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);
+  background:var(--navy);color:#fff;padding:11px 18px;border-radius:24px;font-size:.88rem;font-weight:600;
+  box-shadow:0 6px 20px rgba(51,51,78,.28);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:99}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .tick{display:inline-block;margin-right:8px;animation:pop .32s ease-out}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+.copied{animation:flashok .55s ease-out}
+@keyframes flashok{0%{background:#D7F0E2;border-color:#66C99A}100%{}}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}.copied{animation:none}}
+
+/* ---------- admin sections + desktop ---------- */
+.secnav{display:flex;gap:8px;margin-bottom:14px}
+.secnav button{flex:1;padding:12px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);
+  color:var(--muted);cursor:pointer;font-size:.9rem}
+.secnav button.on{background:#EFF7F9;border-color:#CDE4EA;color:var(--deep);font-weight:650}
+.secnav .count{display:inline-block;min-width:19px;padding:0 5px;margin-left:6px;border-radius:10px;
+  background:var(--red);color:#fff;font-size:.7rem;line-height:19px;font-weight:700}
+
+.cust{background:#fff;border:1px solid var(--edge);border-radius:10px;overflow:hidden;margin-bottom:9px}
+.cust.has{border-left:4px solid var(--warn)}
+.custhead{padding:13px 14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.custhead .who{flex:1;min-width:0}
+.custhead .nm{font-weight:650;color:var(--navy)}
+.custhead .bz{font-size:.82rem;color:var(--muted);margin-top:1px;word-break:break-word}
+.custbody{padding:0 14px 14px;border-top:1px solid #F0EADD}
+.ord{border:1px solid var(--edge);border-radius:9px;margin-top:11px;overflow:hidden}
+.ord.pending{border-left:4px solid var(--warn)}
+.ord.answered{border-left:4px solid var(--ok)}
+.ordhead{padding:11px 13px;display:flex;gap:9px;align-items:flex-start;cursor:pointer;background:#FFFDF8}
+.ordhead .t{flex:1;min-width:0}
+.ordhead .p{font-weight:650;color:var(--navy);font-size:.93rem}
+.ordhead .s{font-size:.78rem;color:var(--muted);margin-top:1px}
+.ordbody{padding:2px 13px 13px}
+.reply{margin-top:11px;background:#F7F4EC;border:1px solid var(--edge);border-radius:9px;padding:12px}
+.reply h4{margin:0 0 9px;font-size:.84rem;color:var(--navy)}
+.reply .g{display:grid;grid-template-columns:1fr;gap:0 12px}
+.reply input{width:100%;padding:10px;border-radius:7px;border:1px solid var(--edge2);background:#fff;
+  color:var(--ink);font-family:inherit;font-size:.92rem}
+.reply label{display:block;font-size:.74rem;color:var(--muted);margin:8px 0 3px}
+.reply .save{margin-top:11px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--ok);
+  color:#fff;font-weight:650;cursor:pointer}
+.answered-box{margin-top:11px;background:#E9F4EC;border:1px solid #B7D8C4;border-radius:9px;padding:12px}
+.answered-box h4{margin:0 0 8px;font-size:.84rem;color:#1E6B4A}
+.trk{display:flex;gap:8px;align-items:center;margin-top:8px}
+.trk code{flex:1;font-family:var(--mono);font-size:.92rem;background:#fff;border:1px solid #B7D8C4;
+  border-radius:7px;padding:9px;word-break:break-all;color:var(--ink)}
+.trk button{flex:none;padding:9px 13px;border-radius:7px;border:1px solid #B7D8C4;background:#fff;
+  color:#1E6B4A;cursor:pointer;font-size:.84rem;font-weight:600}
+.editagain{margin-top:9px;width:100%;padding:10px;border-radius:7px;border:1px solid var(--edge2);
+  background:#fff;color:var(--navy);cursor:pointer;font-size:.85rem}
+
+@media (min-width:860px){
+  .wrap{max-width:960px;padding:26px 22px 56px}
+  .list,#custlist{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+  .req,.cust{margin-bottom:0}
+  .reply .g{grid-template-columns:1fr 1fr}
+  .kv .k{width:130px}
+}
+@media (min-width:1200px){
+  .wrap{max-width:1160px}
+  .list,#custlist{grid-template-columns:1fr 1fr 1fr}
+}
+
 </style>
 </head>
 <body>
@@ -108,6 +172,19 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 
   <!-- requests -->
   <div id="v_main" hidden>
+    <div class="secnav" id="secnav">
+      <button data-s="access" class="on">Access requests<span class="count" id="c_access" hidden></span></button>
+      <button data-s="needs">Customer needs<span class="count" id="c_needs" hidden></span></button>
+    </div>
+
+    <div id="sec_needs" hidden>
+      <div class="msg" id="m_needs"></div>
+      <div id="custlist"></div>
+      <div class="empty" id="needs_empty" hidden>No customers yet.</div>
+      <button class="btn second" id="b_refresh2" style="margin-top:14px">Refresh</button>
+    </div>
+
+    <div id="sec_access">
     <div class="tabs">
       <button data-f="pending" class="on">Waiting</button>
       <button data-f="approved">Approved</button>
@@ -117,6 +194,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
     <ul class="list" id="list"></ul>
     <div class="empty" id="empty" hidden>Nothing here.</div>
     <button class="btn second" id="b_refresh" style="margin-top:14px">Refresh</button>
+    </div>
     <button class="btn second" id="b_out" style="margin-top:8px">Sign out</button>
   </div>
 
@@ -128,7 +206,9 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
   <p class="foot">Approving a request lets that customer set a password and enter the panel.
   Use the email button to tell them it's been approved.</p>
 </div>
+<datalist id="couriers"><option value="Royal Mail"><option value="DPD"><option value="Evri"><option value="UPS"><option value="DHL"><option value="FedEx"><option value="Parcelforce"><option value="Yodel"></datalist>
 
+<script src="_shared.js"></script>
 <script src="ecomflex-config.js"></script>
 <script>
 (function(){
@@ -266,10 +346,11 @@ function load(){
       msg('m_main','Could not load requests. Is this account listed as an admin?','bad');
       return;
     }
-    rows=r.data||[]; msg('m_main',''); render();
+    rows=r.data||[]; msg('m_main',''); render(); counts();
   });
 }
-function enter(){ $('v_login').hidden=true; $('v_main').hidden=false; load(); }
+function enter(){ $('v_login').hidden=true; $('v_main').hidden=false;
+  load().then(loadNeeds).then(counts); }
 
 $('b_in').onclick=function(){
   var em=$('e').value.trim(), pw=$('p').value;
@@ -287,6 +368,199 @@ $('b_in').onclick=function(){
     });
   });
 };
+
+/* =====================  CUSTOMER NEEDS  ===================== */
+var customers=[], orders=[], section='access';
+
+function setSection(sec){
+  section=sec;
+  $('sec_access').hidden = (sec!=='access');
+  $('sec_needs').hidden  = (sec!=='needs');
+  Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
+    b.classList.toggle('on', b.getAttribute('data-s')===sec);
+  });
+  if(sec==='needs') loadNeeds();
+}
+Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
+  b.onclick=function(){ setSection(b.getAttribute('data-s')); };
+});
+
+function counts(){
+  var pend=rows.filter(function(r){return r.status==='pending';}).length;
+  var need=orders.filter(function(o){return o.status==='pending';}).length;
+  $('c_access').hidden=!pend; $('c_access').textContent=pend;
+  $('c_needs').hidden=!need;  $('c_needs').textContent=need;
+}
+
+function loadNeeds(){
+  busy('m_needs','Loading…');
+  return Promise.all([
+    sb.from('signup_requests').select('*').eq('status','approved').order('created_at',{ascending:false}),
+    sb.from('orders').select('*').order('created_at',{ascending:false})
+  ]).then(function(res){
+    if(res[0].error||res[1].error){ msg('m_needs','Could not load. Try Refresh.','bad'); return; }
+    customers=res[0].data||[]; orders=res[1].data||[];
+    msg('m_needs',''); renderNeeds(); counts();
+  });
+}
+
+function kvRow(k,v){
+  var r=document.createElement('div'); r.className='kv';
+  var a=document.createElement('div'); a.className='k'; a.textContent=k;
+  var b=document.createElement('div'); b.className='v'; b.textContent=v;
+  r.appendChild(a); r.appendChild(b); return r;
+}
+
+function saveReply(o,fields,btn,rerender){
+  var patch={
+    courier:fields.courier.value.trim()||null,
+    service:fields.service.value.trim()||null,
+    eta:fields.eta.value.trim()||null,
+    tracking:fields.tracking.value.trim()||null,
+    status:'answered',
+    responded_at:new Date().toISOString()
+  };
+  if(!patch.courier&&!patch.tracking){
+    msg('m_needs','Add at least the courier or the tracking number.','bad'); return;
+  }
+  btn.disabled=true; btn.textContent='Saving…';
+  sb.auth.getUser().then(function(u){
+    patch.responded_by=(u.data&&u.data.user&&u.data.user.email)||null;
+    return sb.from('orders').update(patch).eq('id',o.id);
+  }).then(function(r){
+    btn.disabled=false; btn.textContent='Send response';
+    if(r.error){ msg('m_needs','Could not save. Try again.','bad'); return; }
+    Object.keys(patch).forEach(function(k){ o[k]=patch[k]; });
+    msg('m_needs','Response sent. The customer sees it in their panel.','good');
+    rerender(); counts();
+  });
+}
+
+function orderCard(o){
+  var box=document.createElement('div'); box.className='ord '+o.status;
+
+  var head=document.createElement('div'); head.className='ordhead';
+  var t=document.createElement('div'); t.className='t';
+  var p=document.createElement('div'); p.className='p'; p.textContent=o.product_name+' \u00D7 '+o.quantity;
+  var sl=document.createElement('div'); sl.className='s';
+  sl.textContent=o.recipient_name+' \u00B7 '+o.recipient_country+' \u00B7 '+when(o.created_at);
+  t.appendChild(p); t.appendChild(sl);
+  var bg=document.createElement('span'); bg.className='tag '+(o.status==='answered'?'approved':'pending');
+  bg.textContent = o.status==='answered'?'answered':'waiting';
+  head.appendChild(t); head.appendChild(bg);
+  box.appendChild(head);
+
+  var body=document.createElement('div'); body.className='ordbody'; body.hidden=(o.status==='answered');
+  body.appendChild(kvRow('Product',o.product_name));
+  body.appendChild(kvRow('Quantity',String(o.quantity)));
+  body.appendChild(kvRow('Recipient',o.recipient_name));
+  body.appendChild(kvRow('Phone',o.recipient_phone));
+  body.appendChild(kvRow('Address',o.recipient_address));
+  body.appendChild(kvRow('Country',o.recipient_country));
+  if(o.note) body.appendChild(kvRow('Note',o.note));
+
+  function drawReply(){
+    var old=body.querySelector('.reply,.answered-box');
+    if(old) old.remove();
+
+    if(o.status==='answered'){
+      var done=document.createElement('div'); done.className='answered-box';
+      var h=document.createElement('h4'); h.textContent='Sent to the customer'; done.appendChild(h);
+      if(o.courier) done.appendChild(kvRow('Courier',o.courier));
+      if(o.service) done.appendChild(kvRow('Service',o.service));
+      if(o.eta)     done.appendChild(kvRow('Takes',o.eta));
+      if(o.tracking){
+        var w=document.createElement('div'); w.className='trk';
+        var c=document.createElement('code'); c.textContent=o.tracking;
+        var cb=document.createElement('button'); cb.textContent='Copy';
+        cb.onclick=function(e){ e.stopPropagation(); EFCopy(o.tracking,'Tracking number copied',cb); };
+        w.appendChild(c); w.appendChild(cb); done.appendChild(w);
+      }
+      var again=document.createElement('button'); again.className='editagain'; again.textContent='Change the response';
+      again.onclick=function(){ o.status='pending'; drawReply(); };
+      done.appendChild(again);
+      body.appendChild(done);
+      return;
+    }
+
+    var rep=document.createElement('div'); rep.className='reply';
+    var h2=document.createElement('h4'); h2.textContent='Respond'; rep.appendChild(h2);
+    var g=document.createElement('div'); g.className='g';
+    var F={};
+    [['courier','Courier','Royal Mail / DPD / Evri …'],
+     ['service','Service','Tracked 48 / Next Day …'],
+     ['eta','How long it will take','2–3 working days'],
+     ['tracking','Tracking number','']].forEach(function(f){
+      var lab=document.createElement('label'); lab.textContent=f[1];
+      var inp=document.createElement('input'); inp.placeholder=f[2]; inp.value=o[f[0]]||'';
+      if(f[0]==='courier') inp.setAttribute('list','couriers');
+      if(f[0]==='tracking') inp.style.fontFamily='var(--mono)';
+      var cell=document.createElement('div'); cell.appendChild(lab); cell.appendChild(inp);
+      g.appendChild(cell); F[f[0]]=inp;
+    });
+    rep.appendChild(g);
+    var save=document.createElement('button'); save.className='save'; save.textContent='Send response';
+    save.onclick=function(){ saveReply(o,F,save,drawReply); };
+    rep.appendChild(save);
+    body.appendChild(rep);
+  }
+  drawReply();
+
+  box.appendChild(body);
+  head.onclick=function(){ body.hidden=!body.hidden; };
+  return box;
+}
+
+function renderNeeds(){
+  var box=$('custlist'); box.innerHTML='';
+  var byEmail={};
+  orders.forEach(function(o){
+    var k=(o.user_email||'').toLowerCase();
+    (byEmail[k]=byEmail[k]||[]).push(o);
+  });
+  /* anyone who has ordered but is not in the approved list still gets shown */
+  var seen={};
+  var people=customers.map(function(c){
+    seen[(c.email||'').toLowerCase()]=1;
+    return {name:c.full_name,biz:c.business_name,email:c.email,phone:c.phone};
+  });
+  Object.keys(byEmail).forEach(function(k){
+    if(!seen[k]) people.push({name:byEmail[k][0].user_email,biz:byEmail[k][0].business_name||'',email:byEmail[k][0].user_email,phone:''});
+  });
+
+  var any=false;
+  people.forEach(function(pp){
+    var mine=byEmail[(pp.email||'').toLowerCase()]||[];
+    var waiting=mine.filter(function(o){return o.status==='pending';}).length;
+    var li=document.createElement('div'); li.className='cust'+(waiting?' has':'');
+
+    var head=document.createElement('div'); head.className='custhead';
+    var who=document.createElement('div'); who.className='who';
+    var nm=document.createElement('div'); nm.className='nm'; nm.textContent=pp.name;
+    var bz=document.createElement('div'); bz.className='bz';
+    bz.textContent=(pp.biz?pp.biz+' \u00B7 ':'')+pp.email+' \u00B7 '+mine.length+' enquir'+(mine.length===1?'y':'ies');
+    who.appendChild(nm); who.appendChild(bz);
+    head.appendChild(who);
+    if(waiting){
+      var tg=document.createElement('span'); tg.className='tag pending'; tg.textContent=waiting+' waiting';
+      head.appendChild(tg);
+    }
+    li.appendChild(head);
+
+    var body=document.createElement('div'); body.className='custbody'; body.hidden=!waiting;
+    if(!mine.length){
+      var none=document.createElement('div'); none.className='kv';
+      none.innerHTML='<div class="v" style="color:#7C7C93">No enquiries yet.</div>';
+      body.appendChild(none);
+    } else mine.forEach(function(o){ body.appendChild(orderCard(o)); });
+    li.appendChild(body);
+    head.onclick=function(){ body.hidden=!body.hidden; };
+    box.appendChild(li); any=true;
+  });
+  $('needs_empty').hidden=any;
+}
+$('b_refresh2').onclick=loadNeeds;
+
 $('b_out').onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
 $('b_refresh').onclick=load;
 Array.prototype.forEach.call(document.querySelectorAll('.tabs button'),function(b){

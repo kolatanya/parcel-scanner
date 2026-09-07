@@ -89,6 +89,28 @@ button{font-family:inherit;font-size:1rem}
 .foot{margin-top:18px;font-size:.74rem;color:#8E8EA3;line-height:1.6}
 button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+/* shared: copy feedback + desktop widths */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);
+  background:var(--navy);color:#fff;padding:11px 18px;border-radius:24px;font-size:.88rem;font-weight:600;
+  box-shadow:0 6px 20px rgba(51,51,78,.28);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:99}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .tick{display:inline-block;margin-right:8px;animation:pop .32s ease-out}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+.copied{animation:flashok .55s ease-out}
+@keyframes flashok{0%{background:#D7F0E2;border-color:#66C99A}100%{}}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}.copied{animation:none}}
+
+
+@media (min-width:820px){
+  .wrap{max-width:900px;display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start;
+    padding-top:22px}
+  .wrap > .top{grid-column:1/-1}
+  .view,.status,.primary,.manual{grid-column:1}
+  .list,.empty,.actions,.foot{grid-column:2;margin-top:0}
+  .list{max-height:none}
+  .actions{grid-template-columns:repeat(4,1fr)}
+}
+
 </style>
 </head>
 <body>
@@ -140,6 +162,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   <p class="foot">Scans Royal Mail and DPD. One code per line when copied, so it pastes straight down a column. Duplicates are refused. Everything stays on this phone.</p>
 </div>
 
+<script src="_shared.js"></script>
 <script>
 (function(){
 "use strict";
@@ -249,14 +272,11 @@ spaces.addEventListener('change',render);
 
 /* ---------- outputs ---------- */
 $('copy').onclick=function(){
-  var t=text(), ok=function(){ say(codes.length+' code'+(codes.length>1?'s':'')+' copied','good'); beep(660,80); };
-  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok,fb); else fb();
-  function fb(){
-    var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,99999);
-    try{ document.execCommand('copy'); ok(); }catch(e){ say('Copy failed \u2014 use Save .txt','bad'); }
-    document.body.removeChild(ta);
-  }
+  var t=text();
+  EFCopy(t,codes.length+' code'+(codes.length>1?'s':'')+' copied',$('copy')).then(function(ok){
+    if(ok) say(codes.length+' code'+(codes.length>1?'s':'')+' copied','good');
+    else say('Copy failed \u2014 use Save .txt','bad');
+  });
 };
 $('wa').onclick=function(){
   window.open('https://wa.me/?text='+encodeURIComponent(today()+' \u2014 '+codes.length+' parcels\n\n'+text()),'_blank');
