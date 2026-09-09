@@ -159,6 +159,29 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
 .boxtbl th{font-size:.7rem;color:var(--muted);text-transform:uppercase;background:#F4FAFB}
 .boxtbl tr:last-child td{border-bottom:0}
 .boxtbl td{font-variant-numeric:tabular-nums}
+
+/* ---------- wide screens: use the whole monitor ---------- */
+@media (min-width:1100px){
+  .wrap{max-width:1360px;padding:34px 30px 60px}
+  .shell{grid-template-columns:290px 1fr;gap:30px}
+  .navitem{padding:12px 16px;font-size:.92rem}
+  #pg_mine #olist,#retlist,#fwdlist,#fbalist,#inlist{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+  #pg_mine #olist .oli,#retlist .oli,#fwdlist .oli,#fbalist .oli,#inlist .oli{margin-bottom:0}
+  .grid2{grid-template-columns:1fr 1fr 1fr;gap:0 18px}
+  .grid2 .full{grid-column:1/-1}
+  .grid2 .f textarea{min-height:64px}
+  #pg_new .grid2 .f:nth-child(1),#pg_new .grid2 .f:nth-child(2){grid-column:span 1}
+  .kv .k{width:170px}
+}
+@media (min-width:1560px){
+  .wrap{max-width:1600px}
+  #pg_mine #olist,#retlist,#fwdlist,#fbalist,#inlist{grid-template-columns:1fr 1fr 1fr}
+}
+/* the signed-out screens stay a readable column even on a big monitor */
+#v_load,#v_choice,#v_signup,#v_pending,#v_rejected,#v_approved,#v_login,#v_error{
+  max-width:520px;margin-left:auto;margin-right:auto}
+
 </style>
 </head>
 <body>
