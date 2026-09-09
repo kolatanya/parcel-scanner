@@ -146,7 +146,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   Tap any row to check or correct it. Rows with something missing are marked in amber.</p>
 </div>
 
-<script src="_shared.js"></script>
+<script src="shared.js"></script>
 <script>
 (function(){
 "use strict";
@@ -172,7 +172,7 @@ var RX={
   post:     /\b([A-Z]{1,2}\d{1,2}[A-Z]?)\s*(\d[A-Z]{2})\b/g,
   mailcode: /^\s*\d{2}-\d{3}\s+\d{3}/
 };
-var OURS=/RETURN|SYNERGY|SINERGY|COMPOSITE|AYLESFORD|COACHWORKS|OLD MILL/i;
+var OURS=/RETURN\s*ADDRESS|SYNERGY|SINERGY|COMPOSITE|KOSAR|AYLESFORD|COACH\s*WORKS|OLD\s*MILL|ME20\s?7DT/i;
 var CHROME=/ROYAL\s*MAIL|TRACKED|SIGNATURE|POSTAGE|DELIVERED|LARGE LETTER|ACCOUNT GB|CUSTOMER REF|DELIVER TO/i;
 
 function today(){ var d=new Date();
@@ -189,6 +189,16 @@ function isName(s){
   var w=t.split(/\s+/).filter(Boolean);
   if(w.length<1||w.length>5) return false;
   return t.replace(/[^A-Za-z]/g,'').length>=3;
+}
+function looksLikeSku(v){
+  if(!v) return false;
+  var t=String(v).toUpperCase();
+  if(RX.ref.test(t)) return false;                 /* customer reference */
+  if(RX.s10.test(t)) return false;                 /* tracking number */
+  if(RX.mailcode.test(t)) return false;            /* the Royal Mail routing line */
+  if(/^\d{1,2}$/.test(t)) return false;
+  if(t.indexOf('-')>-1) return t.replace(/[^0-9A-Z]/g,'').length>=4;
+  return /^[0-9A-Z]{6,}$/.test(t);
 }
 function tidyName(s){
   return s.trim().split(/\s+/).map(function(w){
@@ -251,17 +261,29 @@ function readPage(lines){
     }
   }
 
-  /* 1 + 2 - SKU and quantity, from the bottom upwards */
+  /* 1 + 2 - quantity and SKU.
+     They are printed together at the bottom as "1x CODE". Anchoring on the
+     quantity rather than on the shape of the code means it works for every
+     client: 1x SX7664-100-L3-W63-UK and 1x 004-LGG-G both read the same way. */
   for(var j=up.length-1;j>=0;j--){
     var L=up[j];
-    if(!L||OURS.test(L)) continue;
-    var ms=L.match(RX.skuFull)||L.match(RX.skuPart);
-    if(!ms||RX.ref.test(ms[1])) continue;
-    f.sku=ms[1];
-    var b=L.slice(0,L.indexOf(ms[1]));
-    var mq=b.match(/(\d{1,3})\s*[X\u00D7]\s*[^A-Z0-9]*$/)||b.match(/(\d{1,3})\s*[X\u00D7]/);
-    f.qty=mq? String(parseInt(mq[1],10)) : '1';
-    break;
+    if(!L||OURS.test(L)||CHROME.test(L)||RX.ref.test(L)) continue;
+    var mqs=L.match(/(?:^|[^0-9A-Z])(\d{1,3})\s*[X\u00D7]\s*[^0-9A-Z]{0,2}([0-9A-Z][0-9A-Z\-\/\.]{2,})/);
+    if(mqs && looksLikeSku(mqs[2])){
+      f.qty=String(parseInt(mqs[1],10));
+      f.sku=mqs[2].replace(/[.,;:]+$/,'');
+      break;
+    }
+  }
+  /* no quantity printed: fall back to the shape of the code, quantity 1 */
+  if(!f.sku){
+    for(var j2=up.length-1;j2>=0;j2--){
+      var L2=up[j2];
+      if(!L2||OURS.test(L2)||CHROME.test(L2)) continue;
+      var ms=L2.match(RX.skuFull)||L2.match(RX.skuPart);
+      if(!ms||RX.ref.test(ms[1])) continue;
+      f.sku=ms[1]; f.qty='1'; break;
+    }
   }
 
   /* 4 - postcode */

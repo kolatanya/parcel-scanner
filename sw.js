@@ -1,8 +1,8 @@
 /* Ecomflex offline cache.
    Pages are fetched from the network first so an update always lands,
    with the cached copy used only when the phone is offline. */
-var CACHE = 'ecomflex-v5';
-var CORE = ['./', 'index.html', 'scanner.html', 'labels.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'logo.png', 'admin.html', 'panel.html', 'ecomflex-config.js', '_shared.js'];
+var CACHE = 'ecomflex-v6';
+var CORE = ['./', 'index.html', 'scanner.html', 'labels.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'logo.png', 'admin.html', 'panel.html', 'ecomflex-config.js', 'shared.js'];
 
 self.addEventListener('install', function(e){
   self.skipWaiting();
