@@ -123,6 +123,37 @@ p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
   .wrap{max-width:620px}
 }
 
+
+/* ---------- stock table ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem;background:var(--panel);border:1px solid var(--edge);border-radius:10px;overflow:hidden}
+.tbl th,.tbl td{padding:10px 11px;text-align:left;border-bottom:1px solid #F0EADD;vertical-align:middle}
+.tbl th{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;background:#FAF6ED}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .sku{font-family:var(--mono);font-weight:600;color:var(--navy)}
+.tbl .qty{font-weight:650;font-variant-numeric:tabular-nums}
+.tbl .low{color:#8E2A2F}
+.tbl input{width:74px;padding:7px;border-radius:6px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.86rem;color:var(--ink)}
+.lowbadge{display:inline-block;font-size:.66rem;padding:2px 7px;border-radius:12px;background:#FDEFEE;color:#8E2A2F;border:1px solid #F2C4C0;margin-left:6px;vertical-align:middle}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* ---------- inbound item rows ---------- */
+.items{margin:6px 0 10px}
+.item{display:grid;grid-template-columns:1fr 1fr 70px 34px;gap:6px;margin-bottom:6px;align-items:center}
+.item input{width:100%;padding:10px;border-radius:7px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.9rem;color:var(--ink)}
+.item .rm{width:34px;height:38px;border-radius:7px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer;font-size:1.05rem}
+.addrow{width:100%;padding:10px;border-radius:7px;border:1px dashed var(--edge2);background:transparent;color:var(--deep);cursor:pointer;font-size:.86rem}
+.ihead{font-size:.74rem;color:var(--muted);display:grid;grid-template-columns:1fr 1fr 70px 34px;gap:6px;margin-bottom:4px}
+.ihead span:nth-child(4){visibility:hidden}
+.oli.expected{border-left:4px solid var(--warn)}
+.oli.received{border-left:4px solid var(--ok)}
+.badge.expected{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
+.badge.received{background:#E9F4EC;color:#1E6B4A;border:1px solid #B7D8C4}
+.diff{color:#8E2A2F;font-weight:600}
+select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;color:var(--ink);font-family:inherit;font-size:1rem}
+.avail{font-size:.78rem;color:var(--deep);margin-top:4px}
+.avail.none{color:#8E2A2F}
+@media (max-width:480px){ .item{grid-template-columns:1fr 60px 34px} .item .pn{display:none} .ihead{grid-template-columns:1fr 60px 34px} .ihead span:nth-child(2){display:none} }
+
 </style>
 </head>
 <body>
@@ -226,6 +257,9 @@ p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
           <div class="grp">Sipariş Talepleri</div>
           <button class="navitem on" data-p="new">Geçici 1</button>
           <button class="navitem" data-p="mine">Taleplerim</button>
+          <div class="grp">Depo</div>
+          <button class="navitem" data-p="stock">Stok</button>
+          <button class="navitem" data-p="inbound">Gelen Kargo Bildirimi</button>
         </nav>
       </aside>
 
@@ -241,7 +275,12 @@ p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
             <div class="f" id="w_rcountry"><label>Ülke</label><input id="o_rcountry" list="ulkeler" value="Birleşik Krallık"><div class="err">Lütfen ülkeyi yazın.</div>
               <div class="hint">Birleşik Krallık veya Avrupa’daki başka bir ülke olabilir.</div></div>
             <div class="f" id="w_qty"><label>Adet</label><input id="o_qty" type="number" min="1" step="1" value="1" inputmode="numeric"><div class="err">Adet en az 1 olmalıdır.</div></div>
+            <div class="f full" id="w_pick" hidden><label>Ürün (stoktan seçin)</label>
+              <select class="sel" id="o_pick"></select>
+              <div class="avail" id="o_avail"></div></div>
             <div class="f full" id="w_prod"><label>Ürün adı</label><input id="o_prod" autocomplete="off"><div class="err">Lütfen ürün adını yazın.</div></div>
+            <div class="f full"><label>Pazar yeri (isteğe bağlı)</label>
+              <select class="sel" id="o_market"><option value="">Seçin…</option><option>Amazon</option><option>eBay</option><option>Etsy</option><option>Shopify</option><option>Trendyol</option><option>Diğer</option></select></div>
             <div class="f full"><label>Ek not (isteğe bağlı)</label><textarea id="o_note" placeholder="Belirtmek istediğiniz bir şey varsa buraya yazın."></textarea></div>
           </div>
           <datalist id="ulkeler">
@@ -253,6 +292,51 @@ p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
           </datalist>
           <button class="btn primary" id="b_order">Talebi Gönder</button>
           <div class="msg" id="m_order"></div>
+        </section>
+
+        <!-- stock -->
+        <section id="pg_stock" hidden>
+          <h2>Stok</h2>
+          <p class="lead">Depomuzda sizin adınıza tuttuğumuz ürünler. Miktarlar her sevkiyatta ve teslim alındığında güncellenir.</p>
+          <div class="msg" id="m_stock"></div>
+          <div class="tblwrap"><table class="tbl" id="stocktbl" hidden>
+            <thead><tr><th>SKU</th><th>Ürün</th><th>Adet</th><th>Uyarı eşiği</th></tr></thead>
+            <tbody id="stockbody"></tbody>
+          </table></div>
+          <div class="note info" id="stock_empty" hidden>Henüz depoda ürününüz yok. Bir gelen kargo bildirimi oluşturun; teslim alındığında burada görünür.</div>
+          <p class="hint" style="margin-top:10px">Uyarı eşiği: adet bu sayıya düşünce ürün kırmızı işaretlenir. 0 = uyarı yok.</p>
+          <button class="btn second" id="b_stockreload" style="margin-top:12px">Yenile</button>
+        </section>
+
+        <!-- inbound notices -->
+        <section id="pg_inbound" hidden>
+          <h2>Gelen Kargo Bildirimi</h2>
+          <p class="lead">Depomuza ürün göndermeden önce bildirin. Teslim alındığında sayım yapılır ve stoğunuza eklenir.</p>
+
+          <div class="card" style="margin-bottom:16px">
+            <h2 style="font-size:1rem">Yeni bildirim</h2>
+            <div class="grid2">
+              <div class="f"><label>Kargo firması</label><input id="i_courier" list="kargolar" autocomplete="off"></div>
+              <div class="f"><label>Takip numarası</label><input id="i_track" autocomplete="off" spellcheck="false"></div>
+              <div class="f" id="w_iboxes"><label>Koli sayısı</label><input id="i_boxes" type="number" min="1" step="1" inputmode="numeric"><div class="err">En az 1 koli.</div></div>
+              <div class="f"><label>Tahmini varış tarihi</label><input id="i_date" type="date"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="i_note"></textarea></div>
+            </div>
+            <datalist id="kargolar"><option value="UPS"><option value="DHL"><option value="FedEx"><option value="Royal Mail"><option value="DPD"><option value="Parcelforce"><option value="Evri"><option value="Aras Kargo"><option value="Yurtiçi Kargo"><option value="MNG Kargo"></datalist>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin:8px 0 6px">Kolilerdeki ürünler</label>
+            <div class="ihead"><span>SKU</span><span>Ürün adı</span><span>Adet</span><span>x</span></div>
+            <div class="items" id="items"></div>
+            <button class="addrow" id="b_addrow" type="button">+ Ürün satırı ekle</button>
+            <div class="err" id="items_err" style="display:none;font-size:.76rem;color:var(--bad);margin-top:6px">En az bir ürün satırı doldurun (SKU ve adet).</div>
+            <button class="btn primary" id="b_inbound" style="margin-top:14px">Bildirimi Gönder</button>
+            <div class="msg" id="m_inbound"></div>
+          </div>
+
+          <h2 style="font-size:1rem">Bildirimlerim</h2>
+          <div class="msg" id="m_inlist"></div>
+          <div id="inlist"></div>
+          <div class="note info" id="in_empty" hidden>Henüz bildirim yok.</div>
+          <button class="btn second" id="b_inreload" style="margin-top:12px">Yenile</button>
         </section>
 
         <!-- their enquiries -->
@@ -376,42 +460,82 @@ function openPanel(user){
     $('p_hello').textContent='Merhaba'+(m.full_name?', '+m.full_name:'');
     $('p_sub').textContent=(m.business_name?m.business_name+'\n':'')+user.email;
     show('v_panel');
+    sb.rpc('link_my_account').then(function(){},function(){});
     page('new');
-    loadOrders();
+    loadOrders(); loadStock();
   }).catch(function(){ show('v_panel'); });
 }
 
 /* ---------- pages ---------- */
 function page(p){
-  $('pg_new').hidden = (p!=='new');
-  $('pg_mine').hidden = (p!=='mine');
+  ['new','mine','stock','inbound'].forEach(function(k){ $('pg_'+k).hidden = (p!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
     b.classList.toggle('on', b.getAttribute('data-p')===p);
   });
   if(p==='mine') loadOrders();
+  if(p==='stock') loadStock();
+  if(p==='inbound') loadInbounds();
 }
 Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
   b.onclick=function(){ page(b.getAttribute('data-p')); };
 });
 
 /* ---------- new enquiry ---------- */
+var STOCK=[];
+function pickedSku(){
+  var v=$('o_pick').value;
+  if(!v||v==='__other') return null;
+  for(var i=0;i<STOCK.length;i++) if(STOCK[i].sku===v) return STOCK[i];
+  return null;
+}
+function drawPicker(){
+  var sel=$('o_pick'); sel.innerHTML='';
+  if(!STOCK.length){ $('w_pick').hidden=true; $('w_prod').hidden=false; return; }
+  var o0=document.createElement('option'); o0.value=''; o0.textContent='Seçin…'; sel.appendChild(o0);
+  STOCK.forEach(function(r){
+    var o=document.createElement('option'); o.value=r.sku;
+    o.textContent=r.sku+(r.product_name?' — '+r.product_name:'')+'  (mevcut: '+r.qty+')';
+    sel.appendChild(o);
+  });
+  var ox=document.createElement('option'); ox.value='__other'; ox.textContent='Listede yok — elle yazacağım'; sel.appendChild(ox);
+  $('w_pick').hidden=false; $('w_prod').hidden=true; $('o_avail').textContent='';
+}
+$('o_pick').onchange=function(){
+  var v=$('o_pick').value, r=pickedSku();
+  $('w_prod').hidden = (v!=='__other');
+  if(r){
+    $('o_prod').value=r.product_name||r.sku;
+    var q=parseInt($('o_qty').value,10)||1;
+    $('o_avail').className='avail'+(r.qty<q?' none':'');
+    $('o_avail').textContent = r.qty<=0 ? 'Bu üründen depoda stok yok.' : 'Depoda '+r.qty+' adet var.';
+  } else { $('o_avail').textContent=''; if(v==='__other') $('o_prod').value=''; }
+};
+$('o_qty').addEventListener('input',function(){ if(pickedSku()) $('o_pick').onchange(); });
+
 var ORDER_FIELDS=[
   {i:'o_rname',w:'w_rname'},{i:'o_rphone',w:'w_rphone',type:'phone'},
-  {i:'o_raddr',w:'w_raddr'},{i:'o_rcountry',w:'w_rcountry'},{i:'o_prod',w:'w_prod'}
+  {i:'o_raddr',w:'w_raddr'},{i:'o_rcountry',w:'w_rcountry'}
 ];
 $('b_order').onclick=function(){
   var ok=checkForm('',ORDER_FIELDS);
   var q=parseInt($('o_qty').value,10);
   if(!bad('w_qty',!(q>=1))) ok=false;
+  var picked=pickedSku();
+  var needText = !STOCK.length || $('o_pick').value==='__other';
+  if(needText){ if(!bad('w_prod',$('o_prod').value.trim().length<2)) ok=false; }
+  else if(!picked){ $('o_avail').className='avail none'; $('o_avail').textContent='Lütfen bir ürün seçin.'; ok=false; }
   if(!ok){ msg('m_order','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  if(picked && picked.qty<q && !confirm('Depoda sadece '+picked.qty+' adet var. Yine de '+q+' adet talep etmek istiyor musunuz?')) return;
   var m=(ME&&ME.user_metadata)||{};
   var row={
+    sku: picked? picked.sku : null,
+    marketplace: $('o_market').value||null,
     user_id:ME.id, user_email:ME.email, business_name:m.business_name||null, form_key:'temp1',
     recipient_name:$('o_rname').value.trim(),
     recipient_address:$('o_raddr').value.trim(),
     recipient_country:$('o_rcountry').value.trim(),
     recipient_phone:$('o_rphone').value.trim(),
-    product_name:$('o_prod').value.trim(),
+    product_name: picked? (picked.product_name||picked.sku) : $('o_prod').value.trim(),
     quantity:q,
     note:$('o_note').value.trim()||null,
     status:'pending'
@@ -422,7 +546,8 @@ $('b_order').onclick=function(){
     if(r.error){ msg('m_order','Gönderilemedi. Lütfen tekrar deneyin.','bad'); return; }
     msg('m_order','Talebiniz alındı.','good');
     ['o_rname','o_rphone','o_raddr','o_prod','o_note'].forEach(function(x){ $(x).value=''; });
-    $('o_qty').value='1';
+    $('o_qty').value='1'; $('o_pick').value=''; $('o_avail').textContent=''; $('o_market').value='';
+    if(STOCK.length) $('w_prod').hidden=true;
     loadOrders().then(function(){ page('mine'); });
   });
 };
@@ -462,7 +587,8 @@ function loadOrders(){
       li.appendChild(head);
 
       var body=document.createElement('div'); body.className='obody'; body.hidden=(o.status!=='answered');
-      body.appendChild(kv('Ürün',o.product_name));
+      body.appendChild(kv('Ürün',o.product_name+(o.sku?' ('+o.sku+')':'')));
+      if(o.marketplace) body.appendChild(kv('Pazar yeri',o.marketplace));
       body.appendChild(kv('Adet',String(o.quantity)));
       body.appendChild(kv('Alıcı',o.recipient_name));
       body.appendChild(kv('Telefon',o.recipient_phone));
@@ -494,6 +620,157 @@ function loadOrders(){
   });
 }
 $('b_reload').onclick=loadOrders;
+
+/* ---------- stock ---------- */
+function loadStock(){
+  if(!ME) return Promise.resolve();
+  busy('m_stock','Yükleniyor…');
+  return sb.from('stock').select('*').order('sku').then(function(r){
+    if(r.error){ msg('m_stock','Stok yüklenemedi.','bad'); return; }
+    msg('m_stock','');
+    STOCK=r.data||[];
+    drawPicker();
+    var tb=$('stockbody'); tb.innerHTML='';
+    $('stocktbl').hidden=!STOCK.length; $('stock_empty').hidden=STOCK.length>0;
+    STOCK.forEach(function(r){
+      var tr=document.createElement('tr');
+      var low = r.low_at>0 && r.qty<=r.low_at;
+      var td1=document.createElement('td'); td1.className='sku'; td1.textContent=r.sku;
+      if(low){ var b=document.createElement('span'); b.className='lowbadge'; b.textContent='düşük stok'; td1.appendChild(b); }
+      var td2=document.createElement('td'); td2.textContent=r.product_name||'';
+      var td3=document.createElement('td'); td3.className='qty'+(low?' low':''); td3.textContent=r.qty;
+      var td4=document.createElement('td');
+      var inp=document.createElement('input'); inp.type='number'; inp.min='0'; inp.value=r.low_at||0; inp.inputMode='numeric';
+      inp.onchange=function(){
+        sb.rpc('set_low_at',{p_sku:r.sku,p_low:parseInt(inp.value,10)||0}).then(function(x){
+          if(x.error){ msg('m_stock','Kaydedilemedi.','bad'); return; }
+          msg('m_stock','Uyarı eşiği kaydedildi.','good'); loadStock();
+        });
+      };
+      td4.appendChild(inp);
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4);
+      tb.appendChild(tr);
+    });
+  });
+}
+$('b_stockreload').onclick=loadStock;
+
+/* ---------- inbound notices ---------- */
+function itemRow(v){
+  v=v||{};
+  var row=document.createElement('div'); row.className='item';
+  var sku=document.createElement('input'); sku.placeholder='SKU'; sku.value=v.sku||''; sku.setAttribute('list','skulist'); sku.autocapitalize='characters';
+  var pn=document.createElement('input'); pn.className='pn'; pn.placeholder='Ürün adı'; pn.value=v.product_name||'';
+  var q=document.createElement('input'); q.type='number'; q.min='1'; q.placeholder='Adet'; q.inputMode='numeric'; q.value=v.qty||'';
+  var rm=document.createElement('button'); rm.type='button'; rm.className='rm'; rm.textContent='\u00D7';
+  rm.onclick=function(){ row.remove(); };
+  sku.onchange=function(){
+    var k=sku.value.trim().toUpperCase();
+    for(var i=0;i<STOCK.length;i++) if(STOCK[i].sku===k && !pn.value) pn.value=STOCK[i].product_name||'';
+  };
+  row.appendChild(sku); row.appendChild(pn); row.appendChild(q); row.appendChild(rm);
+  return row;
+}
+function readItems(){
+  var out=[];
+  Array.prototype.forEach.call($('items').querySelectorAll('.item'),function(row){
+    var i=row.querySelectorAll('input');
+    var sku=i[0].value.trim().toUpperCase(), pn=i[1].value.trim(), q=parseInt(i[2].value,10);
+    if(sku && q>0) out.push({sku:sku,product_name:pn||null,qty_declared:q});
+  });
+  return out;
+}
+$('b_addrow').onclick=function(){ $('items').appendChild(itemRow()); };
+if(!$('items').children.length){ $('items').appendChild(itemRow()); }
+(function(){ var dl=document.createElement('datalist'); dl.id='skulist'; document.body.appendChild(dl); })();
+function refreshSkuList(){
+  var dl=document.getElementById('skulist'); dl.innerHTML='';
+  STOCK.forEach(function(r){ var o=document.createElement('option'); o.value=r.sku; dl.appendChild(o); });
+}
+
+$('b_inbound').onclick=function(){
+  var items=readItems();
+  var boxes=parseInt($('i_boxes').value,10);
+  var ok=true;
+  if(!bad('w_iboxes',!(boxes>=1))) ok=false;
+  $('items_err').style.display = items.length? 'none':'block';
+  if(!items.length) ok=false;
+  if(!ok){ msg('m_inbound','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var m=(ME&&ME.user_metadata)||{};
+  var head={
+    user_id:ME.id, user_email:ME.email, business_name:m.business_name||null,
+    courier:$('i_courier').value.trim()||null, tracking:$('i_track').value.trim()||null,
+    boxes:boxes, expected_on:$('i_date').value||null, note:$('i_note').value.trim()||null, status:'expected'
+  };
+  $('b_inbound').disabled=true; busy('m_inbound','Gönderiliyor…');
+  sb.from('inbounds').insert(head).select('id').single().then(function(r){
+    if(r.error) throw r.error;
+    var id=r.data.id;
+    return sb.from('inbound_items').insert(items.map(function(it){ it.inbound_id=id; return it; }));
+  }).then(function(r){
+    if(r.error) throw r.error;
+    $('b_inbound').disabled=false;
+    msg('m_inbound','Bildiriminiz alındı.','good');
+    ['i_courier','i_track','i_boxes','i_date','i_note'].forEach(function(x){ $(x).value=''; });
+    $('items').innerHTML=''; $('items').appendChild(itemRow());
+    loadInbounds();
+  }).catch(function(){
+    $('b_inbound').disabled=false;
+    msg('m_inbound','Gönderilemedi. Lütfen tekrar deneyin.','bad');
+  });
+};
+
+function loadInbounds(){
+  if(!ME) return Promise.resolve();
+  refreshSkuList();
+  busy('m_inlist','Yükleniyor…');
+  return Promise.all([
+    sb.from('inbounds').select('*').order('created_at',{ascending:false}),
+    sb.from('inbound_items').select('*')
+  ]).then(function(res){
+    if(res[0].error||res[1].error){ msg('m_inlist','Yüklenemedi.','bad'); return; }
+    msg('m_inlist','');
+    var list=res[0].data||[], items=res[1].data||[], box=$('inlist');
+    box.innerHTML=''; $('in_empty').hidden=list.length>0;
+    list.forEach(function(ib){
+      var mine=items.filter(function(it){return it.inbound_id===ib.id;});
+      var tot=mine.reduce(function(a,b){return a+(b.qty_declared||0);},0);
+      var li=document.createElement('div'); li.className='oli '+ib.status;
+      var head=document.createElement('div'); head.className='ohead';
+      var t=document.createElement('div'); t.className='t';
+      var p=document.createElement('div'); p.className='p';
+      p.textContent=(ib.boxes||'?')+' koli · '+tot+' adet · '+mine.length+' ürün';
+      var sl=document.createElement('div'); sl.className='s';
+      sl.textContent=(ib.courier?ib.courier+' · ':'')+(ib.expected_on?'beklenen '+ib.expected_on.split('-').reverse().join('/')+' · ':'')+dt(ib.created_at);
+      t.appendChild(p); t.appendChild(sl);
+      var bg=document.createElement('span'); bg.className='badge '+ib.status;
+      bg.textContent= ib.status==='received'?'teslim alındı':'bekleniyor';
+      head.appendChild(t); head.appendChild(bg); li.appendChild(head);
+
+      var body=document.createElement('div'); body.className='obody'; body.hidden=true;
+      if(ib.tracking) body.appendChild(kv('Takip',ib.tracking));
+      if(ib.note) body.appendChild(kv('Not',ib.note));
+      mine.forEach(function(it){
+        var v = it.qty_declared+' adet';
+        if(ib.status==='received' && it.qty_received!==null && it.qty_received!==undefined){
+          v = 'bildirilen '+it.qty_declared+' · sayılan '+it.qty_received;
+        }
+        var row=kv(it.sku,(it.product_name?it.product_name+' — ':'')+v);
+        if(ib.status==='received' && it.qty_received!==it.qty_declared) row.querySelector('.v').className='v diff';
+        body.appendChild(row);
+      });
+      if(ib.status==='received'){
+        body.appendChild(kv('Teslim alındı',dt(ib.received_at)));
+        if(ib.receive_note) body.appendChild(kv('Depo notu',ib.receive_note));
+      }
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+    });
+  });
+}
+$('b_inreload').onclick=loadInbounds;
+
 
 /* ---------- actions ---------- */
 $('b_signup').onclick=function(){ show('v_signup'); };

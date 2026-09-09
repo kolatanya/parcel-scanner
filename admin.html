@@ -146,6 +146,50 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
   .list,#custlist{grid-template-columns:1fr 1fr 1fr}
 }
 
+
+/* ---------- today ---------- */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.tile{background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:14px;cursor:pointer;text-align:left;font-family:inherit}
+.tile .n{font-size:1.9rem;font-weight:700;color:var(--navy);line-height:1}
+.tile .l{font-size:.78rem;color:var(--muted);margin-top:4px}
+.tile.hot{border-color:#E4D3A0;background:#FDF9EC}
+.tile.hot .n{color:#7A5210}
+.tile.bad{border-color:#F2C4C0;background:#FDF1F0}
+.tile.bad .n{color:#8E2A2F}
+.tile.zero .n{color:#B8B8C6}
+.grouph{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 8px}
+.mini{background:#fff;border:1px solid var(--edge);border-radius:9px;padding:11px 13px;margin-bottom:7px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.mini.overdue{border-left:4px solid var(--bad)}
+.mini .t{flex:1;min-width:0}
+.mini .p{font-weight:600;color:var(--navy);font-size:.92rem}
+.mini .s{font-size:.78rem;color:var(--muted)}
+.mini .go{color:var(--muted)}
+
+/* ---------- inbound + stock ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:.87rem;background:#fff;border:1px solid var(--edge);border-radius:10px;overflow:hidden}
+.tbl th,.tbl td{padding:9px 10px;text-align:left;border-bottom:1px solid #F0EADD;vertical-align:middle}
+.tbl th{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;background:#FAF6ED}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .sku{font-family:var(--mono);font-weight:600;color:var(--navy)}
+.tbl input{width:100%;min-width:60px;padding:8px;border-radius:6px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.86rem;color:var(--ink)}
+.tbl input.n{width:76px;text-align:right;font-variant-numeric:tabular-nums}
+.tbl .low td:first-child{border-left:4px solid var(--bad)}
+.tbl .dirty input{border-color:var(--warn);background:#FDF9EC}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.rowbtn{padding:7px 11px;border-radius:6px;border:1px solid var(--edge2);background:#fff;color:var(--navy);cursor:pointer;font-size:.8rem}
+.rowbtn.save{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
+.rowbtn.del{color:#8E2A2F}
+.receive{margin-top:10px;width:100%;padding:12px;border-radius:8px;border:0;background:var(--ok);color:#fff;font-weight:650;cursor:pointer}
+.receive:disabled{opacity:.5}
+.short{color:#8E2A2F;font-weight:600}
+.custsel{width:100%;padding:12px;border-radius:9px;border:1px solid var(--edge2);background:var(--panel);color:var(--ink);font-family:inherit;font-size:.95rem;margin-bottom:12px}
+.addline{display:grid;grid-template-columns:1fr 1fr 80px 1fr auto;gap:6px;margin-top:10px;align-items:center}
+.addline input{padding:9px;border-radius:6px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.86rem;color:var(--ink);min-width:0}
+.secnav{flex-wrap:wrap}
+.secnav button{flex:1 1 30%;padding:10px 6px;font-size:.84rem}
+@media (max-width:520px){ .addline{grid-template-columns:1fr 1fr} .addline button{grid-column:1/-1} }
+@media (min-width:860px){ .tiles{grid-template-columns:repeat(5,1fr)} .secnav button{flex:1} }
+
 </style>
 </head>
 <body>
@@ -173,8 +217,46 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
   <!-- requests -->
   <div id="v_main" hidden>
     <div class="secnav" id="secnav">
-      <button data-s="access" class="on">Access requests<span class="count" id="c_access" hidden></span></button>
-      <button data-s="needs">Customer needs<span class="count" id="c_needs" hidden></span></button>
+      <button data-s="today" class="on">Today</button>
+      <button data-s="needs">Orders<span class="count" id="c_needs" hidden></span></button>
+      <button data-s="inbound">Inbound<span class="count" id="c_inbound" hidden></span></button>
+      <button data-s="stock">Stock<span class="count" id="c_stock" hidden></span></button>
+      <button data-s="access">Access<span class="count" id="c_access" hidden></span></button>
+    </div>
+
+    <div id="sec_today">
+      <div class="tiles" id="tiles"></div>
+      <div class="msg" id="m_today"></div>
+      <div id="todaylist"></div>
+      <button class="btn second" id="b_refresh_today" style="margin-top:10px">Refresh</button>
+    </div>
+
+    <div id="sec_inbound" hidden>
+      <div class="tabs" id="intabs">
+        <button data-f="expected" class="on">Expected</button>
+        <button data-f="received">Received</button>
+      </div>
+      <div class="msg" id="m_inbound"></div>
+      <div id="inbox"></div>
+      <div class="empty" id="in_empty" hidden>Nothing expected.</div>
+      <button class="btn second" id="b_refresh_in" style="margin-top:14px">Refresh</button>
+    </div>
+
+    <div id="sec_stock" hidden>
+      <select class="custsel" id="stockcust"><option value="">Choose a customer…</option></select>
+      <div class="msg" id="m_stock"></div>
+      <div class="tblwrap"><table class="tbl" id="stocktbl" hidden>
+        <thead><tr><th>SKU</th><th>Product</th><th>Qty</th><th>Location</th><th>Warn at</th><th></th></tr></thead>
+        <tbody id="stockbody"></tbody></table></div>
+      <div class="empty" id="stock_empty" hidden>No stock for this customer yet.</div>
+      <div class="addline" id="addline" hidden>
+        <input id="a_sku" placeholder="SKU" autocapitalize="characters" spellcheck="false">
+        <input id="a_pn" placeholder="Product name">
+        <input id="a_qty" type="number" min="0" placeholder="Qty" inputmode="numeric">
+        <input id="a_loc" placeholder="Location (bay/shelf)">
+        <button class="rowbtn save" id="b_addstock">Add</button>
+      </div>
+      <p class="foot" style="margin-top:12px">Received deliveries add to stock automatically; answering an order with a tracking number takes it off. Use this screen for corrections, counts, and locations.</p>
     </div>
 
     <div id="sec_needs" hidden>
@@ -184,7 +266,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <button class="btn second" id="b_refresh2" style="margin-top:14px">Refresh</button>
     </div>
 
-    <div id="sec_access">
+    <div id="sec_access" hidden>
     <div class="tabs">
       <button data-f="pending" class="on">Waiting</button>
       <button data-f="approved">Approved</button>
@@ -350,7 +432,7 @@ function load(){
   });
 }
 function enter(){ $('v_login').hidden=true; $('v_main').hidden=false;
-  load().then(loadNeeds).then(counts); }
+  setSection('today'); load().then(loadNeeds).then(counts); }
 
 $('b_in').onclick=function(){
   var em=$('e').value.trim(), pw=$('p').value;
@@ -374,12 +456,14 @@ var customers=[], orders=[], section='access';
 
 function setSection(sec){
   section=sec;
-  $('sec_access').hidden = (sec!=='access');
-  $('sec_needs').hidden  = (sec!=='needs');
+  ['today','needs','inbound','stock','access'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
     b.classList.toggle('on', b.getAttribute('data-s')===sec);
   });
   if(sec==='needs') loadNeeds();
+  if(sec==='today') loadToday();
+  if(sec==='inbound') loadInbound();
+  if(sec==='stock') loadStockCustomers();
 }
 Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
   b.onclick=function(){ setSection(b.getAttribute('data-s')); };
@@ -451,7 +535,8 @@ function orderCard(o){
   box.appendChild(head);
 
   var body=document.createElement('div'); body.className='ordbody'; body.hidden=(o.status==='answered');
-  body.appendChild(kvRow('Product',o.product_name));
+  body.appendChild(kvRow('Product',o.product_name+(o.sku?'  ['+o.sku+']':'')));
+  if(o.marketplace) body.appendChild(kvRow('Marketplace',o.marketplace));
   body.appendChild(kvRow('Quantity',String(o.quantity)));
   body.appendChild(kvRow('Recipient',o.recipient_name));
   body.appendChild(kvRow('Phone',o.recipient_phone));
@@ -560,6 +645,208 @@ function renderNeeds(){
   $('needs_empty').hidden=any;
 }
 $('b_refresh2').onclick=loadNeeds;
+
+
+/* =====================  TODAY  ===================== */
+var inbounds=[], inItems=[], stockAll=[];
+function tile(n,label,go,cls){
+  var b=document.createElement('button'); b.className='tile '+(n?cls:'zero');
+  b.innerHTML='<div class="n">'+n+'</div><div class="l">'+label+'</div>';
+  b.onclick=function(){ setSection(go); if(go==='inbound') setInTab('expected'); };
+  return b;
+}
+function mini(p,sline,go,cls){
+  var d=document.createElement('div'); d.className='mini'+(cls?' '+cls:'');
+  d.innerHTML='<div class="t"><div class="p"></div><div class="s"></div></div><div class="go">\u203A</div>';
+  d.querySelector('.p').textContent=p; d.querySelector('.s').textContent=sline;
+  d.onclick=function(){ setSection(go); };
+  return d;
+}
+function loadToday(){
+  busy('m_today','Loading\u2026');
+  return Promise.all([
+    sb.rpc('today_counts'),
+    sb.from('orders').select('*').eq('status','pending').order('created_at',{ascending:true}),
+    sb.from('inbounds').select('*').eq('status','expected').order('expected_on',{ascending:true,nullsFirst:false}),
+    sb.from('stock').select('*').gt('low_at',0)
+  ]).then(function(res){
+    if(res[0].error){ msg('m_today','Could not load. Is the Phase 1 script run?','bad'); return; }
+    msg('m_today','');
+    var c=res[0].data||{};
+    var t=$('tiles'); t.innerHTML='';
+    t.appendChild(tile(c.orders_waiting||0,'orders to pack','needs','hot'));
+    t.appendChild(tile(c.inbound_expected||0,'deliveries expected','inbound','hot'));
+    t.appendChild(tile(c.inbound_overdue||0,'deliveries overdue','inbound','bad'));
+    t.appendChild(tile(c.low_stock||0,'SKUs low on stock','stock','bad'));
+    t.appendChild(tile(c.access_waiting||0,'access requests','access','hot'));
+    var L=$('todaylist'); L.innerHTML='';
+    var today=new Date().toISOString().slice(0,10);
+    var od=(res[1].data||[]);
+    if(od.length){ var h=document.createElement('div'); h.className='grouph'; h.textContent='Orders waiting'; L.appendChild(h);
+      od.slice(0,12).forEach(function(o){ L.appendChild(mini(o.product_name+' \u00D7 '+o.quantity,(o.business_name||o.user_email)+' \u00B7 '+o.recipient_country+' \u00B7 '+when(o.created_at),'needs')); }); }
+    var ib=(res[2].data||[]);
+    if(ib.length){ var h2=document.createElement('div'); h2.className='grouph'; h2.textContent='Deliveries expected'; L.appendChild(h2);
+      ib.slice(0,12).forEach(function(i){
+        var late=i.expected_on&&i.expected_on<today;
+        L.appendChild(mini((i.boxes||'?')+' boxes from '+(i.business_name||i.user_email),
+          (i.courier?i.courier+' \u00B7 ':'')+(i.expected_on?(late?'was due ':'due ')+i.expected_on.split('-').reverse().join('/'):'no date given'),'inbound',late?'overdue':'')); }); }
+    var lo=(res[3].data||[]).filter(function(r){return r.qty<=r.low_at;});
+    if(lo.length){ var h3=document.createElement('div'); h3.className='grouph'; h3.textContent='Low stock'; L.appendChild(h3);
+      lo.slice(0,12).forEach(function(r){ L.appendChild(mini(r.sku+(r.product_name?' \u2014 '+r.product_name:''),r.qty+' left (warn at '+r.low_at+') \u00B7 '+r.user_email,'stock','overdue')); }); }
+    if(!od.length&&!ib.length&&!lo.length){ var e=document.createElement('div'); e.className='empty'; e.textContent='Nothing waiting. Nice.'; L.appendChild(e); }
+    $('c_inbound').hidden=!(c.inbound_expected); $('c_inbound').textContent=c.inbound_expected||'';
+    $('c_stock').hidden=!(c.low_stock); $('c_stock').textContent=c.low_stock||'';
+    $('c_needs').hidden=!(c.orders_waiting); $('c_needs').textContent=c.orders_waiting||'';
+    $('c_access').hidden=!(c.access_waiting); $('c_access').textContent=c.access_waiting||'';
+  });
+}
+$('b_refresh_today').onclick=loadToday;
+
+/* =====================  INBOUND  ===================== */
+var inTab='expected';
+function setInTab(t){ inTab=t;
+  Array.prototype.forEach.call($('intabs').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.getAttribute('data-f')===t); });
+  renderInbound(); }
+Array.prototype.forEach.call($('intabs').querySelectorAll('button'),function(b){ b.onclick=function(){ setInTab(b.getAttribute('data-f')); }; });
+
+function loadInbound(){
+  busy('m_inbound','Loading\u2026');
+  return Promise.all([
+    sb.from('inbounds').select('*').order('created_at',{ascending:false}),
+    sb.from('inbound_items').select('*')
+  ]).then(function(res){
+    if(res[0].error||res[1].error){ msg('m_inbound','Could not load.','bad'); return; }
+    inbounds=res[0].data||[]; inItems=res[1].data||[]; msg('m_inbound',''); renderInbound();
+  });
+}
+function renderInbound(){
+  var box=$('inbox'); box.innerHTML='';
+  var show=inbounds.filter(function(i){return i.status===inTab;});
+  $('in_empty').hidden=show.length>0; $('in_empty').textContent= inTab==='expected'?'Nothing expected.':'Nothing received yet.';
+  var today=new Date().toISOString().slice(0,10);
+  show.forEach(function(ib){
+    var items=inItems.filter(function(it){return it.inbound_id===ib.id;});
+    var tot=items.reduce(function(a,b){return a+(b.qty_declared||0);},0);
+    var late=ib.status==='expected'&&ib.expected_on&&ib.expected_on<today;
+    var li=document.createElement('div'); li.className='req '+(ib.status==='received'?'approved':'pending');
+    var head=document.createElement('div'); head.className='reqhead';
+    var who=document.createElement('div'); who.className='who';
+    var nm=document.createElement('div'); nm.className='nm'; nm.textContent=(ib.business_name||ib.user_email)+' \u2014 '+(ib.boxes||'?')+' box'+(ib.boxes===1?'':'es')+', '+tot+' units';
+    var bz=document.createElement('div'); bz.className='bz';
+    bz.textContent=(ib.courier?ib.courier+' \u00B7 ':'')+(ib.tracking?ib.tracking+' \u00B7 ':'')+(ib.expected_on?(late?'was due ':'due ')+ib.expected_on.split('-').reverse().join('/'):'no date')+' \u00B7 filed '+when(ib.created_at);
+    who.appendChild(nm); who.appendChild(bz);
+    var tg=document.createElement('span'); tg.className='tag '+(ib.status==='received'?'approved':(late?'rejected':'pending'));
+    tg.textContent= ib.status==='received'?'received':(late?'overdue':'expected');
+    head.appendChild(who); head.appendChild(tg); li.appendChild(head);
+
+    var body=document.createElement('div'); body.className='body'; body.hidden=(ib.status==='received');
+    if(ib.note){ var n=kvRow('Customer note',ib.note); body.appendChild(n); }
+    var wrap=document.createElement('div'); wrap.className='tblwrap';
+    var tbl=document.createElement('table'); tbl.className='tbl';
+    tbl.innerHTML='<thead><tr><th>SKU</th><th>Product</th><th>Declared</th><th>'+(ib.status==='received'?'Counted':'Counted (edit)')+'</th></tr></thead>';
+    var tb=document.createElement('tbody'); var inputs=[];
+    items.forEach(function(it){
+      var tr=document.createElement('tr');
+      var c1=document.createElement('td'); c1.className='sku'; c1.textContent=it.sku;
+      var c2=document.createElement('td'); c2.textContent=it.product_name||'';
+      var c3=document.createElement('td'); c3.textContent=it.qty_declared;
+      var c4=document.createElement('td');
+      if(ib.status==='received'){
+        c4.textContent=it.qty_received; if(it.qty_received!==it.qty_declared) c4.className='short';
+      }else{
+        var inp=document.createElement('input'); inp.type='number'; inp.min='0'; inp.className='n'; inp.value=it.qty_declared; inp.inputMode='numeric';
+        inp.oninput=function(){ inp.style.borderColor = (parseInt(inp.value,10)!==it.qty_declared)?'var(--bad)':''; };
+        c4.appendChild(inp); inputs.push({item_id:it.id,inp:inp});
+      }
+      tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4); tb.appendChild(tr);
+    });
+    tbl.appendChild(tb); wrap.appendChild(tbl); body.appendChild(wrap);
+    if(ib.status==='expected'){
+      var note=document.createElement('input'); note.placeholder='Note for the customer (optional) \u2014 e.g. 2 units short, box 3 damaged';
+      note.style.cssText='width:100%;margin-top:9px;padding:10px;border-radius:7px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.88rem';
+      body.appendChild(note);
+      var btn=document.createElement('button'); btn.className='receive'; btn.textContent='Mark received \u2014 add counted units to stock';
+      btn.onclick=function(){
+        var counts=inputs.map(function(x){return {item_id:x.item_id,qty:parseInt(x.inp.value,10)||0};});
+        var short=inputs.filter(function(x){return parseInt(x.inp.value,10)!==parseInt(x.inp.defaultValue,10);}).length;
+        if(!confirm('Receive this delivery and add the counted units to '+(ib.business_name||ib.user_email)+"'s stock?"+(short?'\n\n'+short+' line'+(short>1?'s':'')+' differ from what was declared.':''))) return;
+        btn.disabled=true; btn.textContent='Saving\u2026';
+        sb.rpc('receive_inbound',{p_inbound:ib.id,p_counts:counts,p_note:note.value.trim()||null}).then(function(r){
+          if(r.error){ btn.disabled=false; btn.textContent='Mark received'; msg('m_inbound','Could not save: '+r.error.message,'bad'); return; }
+          msg('m_inbound','Received. Stock updated.','good'); loadInbound(); loadToday();
+        });
+      };
+      body.appendChild(btn);
+    }else{
+      body.appendChild(kvRow('Received',when(ib.received_at)+(ib.received_by?' by '+ib.received_by:'')));
+      if(ib.receive_note) body.appendChild(kvRow('Note',ib.receive_note));
+    }
+    li.appendChild(body);
+    head.onclick=function(){ body.hidden=!body.hidden; };
+    box.appendChild(li);
+  });
+}
+$('b_refresh_in').onclick=loadInbound;
+
+/* =====================  STOCK  ===================== */
+var stockCust=null;
+function loadStockCustomers(){
+  return sb.from('signup_requests').select('full_name,business_name,email,user_id').eq('status','approved').order('business_name').then(function(r){
+    if(r.error){ msg('m_stock','Could not load customers.','bad'); return; }
+    var sel=$('stockcust'); var keep=sel.value; sel.innerHTML='<option value="">Choose a customer\u2026</option>';
+    (r.data||[]).forEach(function(c){
+      var o=document.createElement('option');
+      o.value=c.user_id||''; o.textContent=(c.business_name||c.full_name)+' \u2014 '+c.email+(c.user_id?'':' (has not logged in yet)');
+      o.disabled=!c.user_id; o.setAttribute('data-email',c.email); sel.appendChild(o);
+    });
+    if(keep) sel.value=keep;
+    if(sel.value) loadStock();
+  });
+}
+$('stockcust').onchange=function(){ loadStock(); };
+function loadStock(){
+  var sel=$('stockcust'); stockCust=sel.value; 
+  var email=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].getAttribute('data-email'):'';
+  $('addline').hidden=!stockCust;
+  if(!stockCust){ $('stocktbl').hidden=true; $('stock_empty').hidden=true; return Promise.resolve(); }
+  busy('m_stock','Loading\u2026');
+  return sb.from('stock').select('*').eq('user_id',stockCust).order('sku').then(function(r){
+    if(r.error){ msg('m_stock','Could not load stock.','bad'); return; }
+    msg('m_stock','');
+    var rows_=r.data||[]; var tb=$('stockbody'); tb.innerHTML='';
+    $('stocktbl').hidden=!rows_.length; $('stock_empty').hidden=rows_.length>0;
+    rows_.forEach(function(row){
+      var tr=document.createElement('tr'); if(row.low_at>0&&row.qty<=row.low_at) tr.className='low';
+      var c1=document.createElement('td'); c1.className='sku'; c1.textContent=row.sku;
+      var c2=document.createElement('td'); var pn=document.createElement('input'); pn.value=row.product_name||''; c2.appendChild(pn);
+      var c3=document.createElement('td'); var q=document.createElement('input'); q.type='number'; q.className='n'; q.value=row.qty; q.inputMode='numeric'; c3.appendChild(q);
+      var c4=document.createElement('td'); var loc=document.createElement('input'); loc.value=row.location||''; loc.placeholder='bay / shelf'; c4.appendChild(loc);
+      var c5=document.createElement('td'); var lo=document.createElement('input'); lo.type='number'; lo.className='n'; lo.value=row.low_at||0; c5.appendChild(lo);
+      var c6=document.createElement('td'); c6.style.whiteSpace='nowrap';
+      var sv=document.createElement('button'); sv.className='rowbtn save'; sv.textContent='Save'; sv.hidden=true;
+      var dl=document.createElement('button'); dl.className='rowbtn del'; dl.textContent='\u00D7'; dl.title='Remove SKU'; dl.style.marginLeft='6px';
+      [pn,q,loc,lo].forEach(function(i){ i.oninput=function(){ tr.classList.add('dirty'); sv.hidden=false; }; });
+      sv.onclick=function(){
+        sv.disabled=true;
+        sb.from('stock').update({product_name:pn.value.trim()||null,qty:parseInt(q.value,10)||0,location:loc.value.trim()||null,low_at:parseInt(lo.value,10)||0,updated_at:new Date().toISOString()}).eq('id',row.id)
+        .then(function(x){ sv.disabled=false; if(x.error){ msg('m_stock','Could not save.','bad'); return; } msg('m_stock','Saved '+row.sku,'good'); loadStock(); });
+      };
+      dl.onclick=function(){
+        if(!confirm('Remove '+row.sku+' from this customer\u2019s stock list?')) return;
+        sb.from('stock').delete().eq('id',row.id).then(function(x){ if(x.error){ msg('m_stock','Could not remove.','bad'); return; } loadStock(); });
+      };
+      c6.appendChild(sv); c6.appendChild(dl);
+      [c1,c2,c3,c4,c5,c6].forEach(function(c){ tr.appendChild(c); }); tb.appendChild(tr);
+    });
+  });
+}
+$('b_addstock').onclick=function(){
+  var sku=$('a_sku').value.trim().toUpperCase(); if(!sku){ msg('m_stock','SKU is required.','bad'); return; }
+  var sel=$('stockcust'); var email=sel.options[sel.selectedIndex].getAttribute('data-email');
+  sb.from('stock').upsert({user_id:stockCust,user_email:email,sku:sku,product_name:$('a_pn').value.trim()||null,qty:parseInt($('a_qty').value,10)||0,location:$('a_loc').value.trim()||null},{onConflict:'user_id,sku'})
+  .then(function(x){ if(x.error){ msg('m_stock','Could not add: '+x.error.message,'bad'); return; }
+    ['a_sku','a_pn','a_qty','a_loc'].forEach(function(i){ $(i).value=''; }); msg('m_stock','Added '+sku,'good'); loadStock(); });
+};
 
 $('b_out').onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
 $('b_refresh').onclick=load;
