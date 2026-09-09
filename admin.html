@@ -234,6 +234,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <button data-s="stock">Stock<span class="count" id="c_stock" hidden></span></button>
       <button data-s="services">Services<span class="count" id="c_services" hidden></span></button>
       <button data-s="access">Access<span class="count" id="c_access" hidden></span></button>
+      <button data-s="report">Reports</button>
+      <button data-s="staff">Staff</button>
     </div>
 
     <div id="sec_today">
@@ -272,6 +274,28 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
     </div>
 
     <div id="sec_needs" hidden>
+      <button class="btn second" id="b_openmatch" style="margin-bottom:12px">Match label PDFs to orders</button>
+      <div id="matchbox" hidden>
+        <div class="drop" id="mdrop" role="button" tabindex="0">
+          <div class="big">Drop today’s label PDFs here</div>
+          <div class="small">Each label is matched to a waiting order by its customer reference,<br>or by postcode and surname if there is no reference.</div>
+        </div>
+        <input type="file" id="mfile" accept="application/pdf,.pdf" multiple hidden>
+        <div class="msg" id="m_match"></div>
+        <div id="matchlist"></div>
+        <div id="matchapply" hidden>
+          <div class="reply" style="margin-top:12px">
+            <h4>Apply to all matched orders</h4>
+            <div class="g">
+              <div><label>Courier</label><input id="mm_courier" list="couriers" value="Royal Mail"></div>
+              <div><label>Service</label><input id="mm_service" value="Tracked 48"></div>
+              <div><label>How long it will take</label><input id="mm_eta" value="2–3 working days"></div>
+            </div>
+            <button class="save" id="b_applymatch">Dispatch matched orders</button>
+          </div>
+        </div>
+        <button class="btn second" id="b_closematch" style="margin-top:10px">Close</button>
+      </div>
       <div class="msg" id="m_needs"></div>
       <div id="custlist"></div>
       <div class="empty" id="needs_empty" hidden>No customers yet.</div>
@@ -289,6 +313,36 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <div id="svlist"></div>
       <div class="empty" id="sv_empty" hidden>Nothing waiting.</div>
       <button class="btn second" id="b_refresh_sv" style="margin-top:14px">Refresh</button>
+    </div>
+
+    <div id="sec_report" hidden>
+      <div class="f" style="max-width:220px;margin-bottom:10px">
+        <label style="display:block;font-size:.76rem;color:var(--muted);margin-bottom:4px">Month</label>
+        <input type="month" id="rep_month" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.95rem;color:var(--ink)">
+      </div>
+      <div class="msg" id="m_report"></div>
+      <div class="tblwrap"><table class="tbl" id="reptbl" hidden>
+        <thead><tr><th>Customer</th><th>Sent</th><th>Units out</th><th>Received</th><th>Units in</th><th>Returns</th><th>Fwd</th><th>FBA</th><th>SKUs</th><th>Held</th></tr></thead>
+        <tbody id="repbody"></tbody></table></div>
+      <div class="empty" id="rep_empty" hidden>No customers with activity.</div>
+      <button class="btn second" id="b_repcopy" style="margin-top:12px">Copy for invoicing</button>
+
+      <h2 style="margin:22px 0 8px;font-size:1rem;color:var(--navy)">Recent activity</h2>
+      <div id="actlist"></div>
+      <button class="btn second" id="b_actmore" style="margin-top:10px">Load more</button>
+    </div>
+
+    <div id="sec_staff" hidden>
+      <div class="card">
+        <h2>Staff accounts</h2>
+        <p class="lead">Anyone listed here can open this tool and see customer details. They also need a Supabase login with the same email — create that under Authentication → Users.</p>
+        <div class="msg" id="m_staff"></div>
+        <div id="stafflist"></div>
+        <div class="addline" style="grid-template-columns:1fr auto;margin-top:12px">
+          <input id="new_admin" placeholder="name@ecomflex.co.uk" autocapitalize="off" spellcheck="false">
+          <button class="rowbtn save" id="b_addadmin">Add</button>
+        </div>
+      </div>
     </div>
 
     <div id="sec_access" hidden>
@@ -481,7 +535,7 @@ var customers=[], orders=[], section='access';
 
 function setSection(sec){
   section=sec;
-  ['today','needs','inbound','stock','services','access'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
+  ['today','needs','inbound','stock','services','access','report','staff'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
     b.classList.toggle('on', b.getAttribute('data-s')===sec);
   });
@@ -490,6 +544,8 @@ function setSection(sec){
   if(sec==='inbound') loadInbound();
   if(sec==='stock') loadStockCustomers();
   if(sec==='services') loadServices();
+  if(sec==='report'){ loadReport(); loadActivity(true); }
+  if(sec==='staff') loadStaff();
 }
 Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
   b.onclick=function(){ setSection(b.getAttribute('data-s')); };
@@ -562,6 +618,7 @@ function orderCard(o){
 
   var body=document.createElement('div'); body.className='ordbody'; body.hidden=(o.status==='answered');
   body.appendChild(kvRow('Product',o.product_name+(o.sku?'  ['+o.sku+']':'')));
+  if(o.order_ref) body.appendChild(kvRow('Order ref',o.order_ref));
   if(o.marketplace) body.appendChild(kvRow('Marketplace',o.marketplace));
   body.appendChild(kvRow('Quantity',String(o.quantity)));
   body.appendChild(kvRow('Recipient',o.recipient_name));
@@ -1102,6 +1159,265 @@ function renderServices(){
     box.appendChild(li);
   });
 }
+
+
+/* =====================  LABEL PDF MATCHING  ===================== */
+var matched=[], unmatched=[];
+$('b_openmatch').onclick=function(){ $('matchbox').hidden=false; $('b_openmatch').hidden=true; };
+$('b_closematch').onclick=function(){
+  $('matchbox').hidden=true; $('b_openmatch').hidden=false;
+  $('matchlist').innerHTML=''; $('matchapply').hidden=true; msg('m_match','');
+};
+$('mdrop').onclick=function(){ $('mfile').click(); };
+$('mfile').onchange=function(){ readLabels($('mfile').files); $('mfile').value=''; };
+['dragenter','dragover'].forEach(function(e){ $('mdrop').addEventListener(e,function(ev){ ev.preventDefault(); $('mdrop').classList.add('over'); }); });
+['dragleave','drop'].forEach(function(e){ $('mdrop').addEventListener(e,function(ev){ ev.preventDefault(); $('mdrop').classList.remove('over'); }); });
+$('mdrop').addEventListener('drop',function(ev){ if(ev.dataTransfer&&ev.dataTransfer.files) readLabels(ev.dataTransfer.files); });
+
+var pdfReady=null;
+function getPdfjs(){
+  if(pdfReady) return pdfReady;
+  pdfReady=new Promise(function(res,rej){
+    var urls=['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+              'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js',
+              'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'];
+    (function next(i){
+      if(i>=urls.length) return rej(new Error('cdn'));
+      var sc=document.createElement('script'); sc.src=urls[i];
+      sc.onload=function(){
+        if(!window.pdfjsLib) return next(i+1);
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc=urls[i].replace(/pdf\.min\.js$/,'pdf.worker.min.js');
+        res(window.pdfjsLib);
+      };
+      sc.onerror=function(){ next(i+1); };
+      document.head.appendChild(sc);
+    })(0);
+  });
+  return pdfReady;
+}
+var RX_S10=/\b([A-Z]{2})\s?(\d{4})\s?(\d{4})\s?(\d)\s?([A-Z]{2})\b/;
+var RX_REF=/\b(\d{3}-\d{7}-\d{7})\b/;
+var RX_PC=/\b([A-Z]{1,2}\d{1,2}[A-Z]?)\s*(\d[A-Z]{2})\b/g;
+function labelLines(items){
+  var kept=[];
+  items.forEach(function(it){
+    if(!it.str||!it.str.trim()) return;
+    var t=it.transform;
+    if(Math.abs(t[1])>0.05||Math.abs(t[2])>0.05) return;
+    kept.push({x:t[4],y:t[5],s:it.str});
+  });
+  kept.sort(function(a,b){ return (b.y-a.y)||(a.x-b.x); });
+  var lines=[],cur=null;
+  kept.forEach(function(it){
+    if(!cur||Math.abs(cur.y-it.y)>4){ cur={y:it.y,parts:[]}; lines.push(cur); }
+    cur.parts.push(it);
+  });
+  return lines.map(function(l){
+    l.parts.sort(function(a,b){return a.x-b.x;});
+    return l.parts.map(function(p){return p.s;}).join(' ').replace(/\s+/g,' ').trim();
+  }).filter(Boolean);
+}
+function labelFacts(lines){
+  var up=lines.map(function(l){return l.toUpperCase();}), j=up.join('\n');
+  var f={};
+  var t=j.match(RX_S10); if(t) f.tracking=t[1]+t[2]+t[3]+t[4]+t[5];
+  var r=j.match(RX_REF); if(r) f.ref=r[1];
+  var pcs=[]; up.forEach(function(l){
+    if(/AYLESFORD|ME20|RETURN|KOSAR|SYNERGY|SINERGY/.test(l)) return;
+    RX_PC.lastIndex=0; var m;
+    while((m=RX_PC.exec(l))!==null){ var pc=m[1]+' '+m[2]; if(!/^ME20/.test(pc)) pcs.push(pc); }
+  });
+  if(pcs.length) f.postcode=pcs[pcs.length-1];
+  f.text=j;
+  return f;
+}
+function fmtTrack2(v){
+  var c=String(v||'').replace(/\s+/g,'').toUpperCase();
+  var m=c.match(/^([A-Z]{2})(\d{4})(\d{4})(\d)([A-Z]{2})$/);
+  return m? m[1]+' '+m[2]+' '+m[3]+' '+m[4]+m[5] : c;
+}
+function readLabels(files){
+  var pdfs=Array.prototype.slice.call(files).filter(function(f){return /\.pdf$/i.test(f.name)||f.type==='application/pdf';});
+  if(!pdfs.length){ msg('m_match','Those are not PDFs.','warn'); return; }
+  busy('m_match','Reading labels\u2026');
+  var waiting=orders.filter(function(o){return o.status==='pending';});
+  if(!waiting.length){ msg('m_match','No orders are waiting, so there is nothing to match against.','warn'); return; }
+
+  getPdfjs().then(function(lib){
+    var facts=[];
+    return pdfs.reduce(function(chain,file){
+      return chain.then(function(){
+        return file.arrayBuffer().then(function(buf){ return lib.getDocument({data:buf}).promise; })
+        .then(function(doc){
+          var pages=[]; for(var p=1;p<=doc.numPages;p++) pages.push(p);
+          return pages.reduce(function(c2,p){
+            return c2.then(function(){
+              return doc.getPage(p).then(function(pg){return pg.getTextContent();}).then(function(tc){
+                var f=labelFacts(labelLines(tc.items));
+                f.src=file.name+(doc.numPages>1?' p'+p:'');
+                if(f.tracking) facts.push(f);
+              });
+            });
+          },Promise.resolve());
+        }).catch(function(){});
+      });
+    },Promise.resolve()).then(function(){ return facts; });
+  }).then(function(facts){
+    matched=[]; unmatched=[];
+    var used={};
+    facts.forEach(function(f){
+      var hit=null;
+      if(f.ref) hit=waiting.filter(function(o){return !used[o.id] && o.order_ref && o.order_ref.replace(/\s/g,'')===f.ref;})[0];
+      if(!hit && f.postcode){
+        var cands=waiting.filter(function(o){
+          return !used[o.id] && (o.post||'')===''
+            && (o.recipient_address||'').toUpperCase().replace(/\s+/g,' ').indexOf(f.postcode)>-1;
+        });
+        if(cands.length===1) hit=cands[0];
+        else if(cands.length>1 && f.text){
+          var narrow=cands.filter(function(o){
+            var sn=(o.recipient_name||'').split(/\s+/).pop().toUpperCase();
+            return sn.length>2 && f.text.indexOf(sn)>-1;
+          });
+          if(narrow.length===1) hit=narrow[0];
+        }
+      }
+      if(hit){ used[hit.id]=1; matched.push({label:f,order:hit}); } else unmatched.push(f);
+    });
+    renderMatches();
+  }).catch(function(){ msg('m_match','Could not read the PDFs. Check the connection.','bad'); });
+}
+function renderMatches(){
+  var box=$('matchlist'); box.innerHTML='';
+  msg('m_match', matched.length+' matched'+(unmatched.length?', '+unmatched.length+' could not be matched':''),
+      unmatched.length?'warn':'good');
+  function row(title,sub,cls){
+    var d=document.createElement('div'); d.className='mini'+(cls?' '+cls:'');
+    d.innerHTML='<div class="t"><div class="p"></div><div class="s"></div></div>';
+    d.querySelector('.p').textContent=title; d.querySelector('.s').textContent=sub; return d;
+  }
+  if(matched.length){
+    var h=document.createElement('div'); h.className='grouph'; h.textContent='Matched'; box.appendChild(h);
+    matched.forEach(function(m){
+      box.appendChild(row(m.order.recipient_name+' \u2014 '+fmtTrack2(m.label.tracking),
+        (m.order.business_name||m.order.user_email)+' \u00B7 '+m.order.product_name+' \u00D7 '+m.order.quantity
+        +' \u00B7 '+(m.label.ref?'ref '+m.label.ref:'matched on postcode')));
+    });
+  }
+  if(unmatched.length){
+    var h2=document.createElement('div'); h2.className='grouph'; h2.textContent='Not matched \u2014 handle these by hand'; box.appendChild(h2);
+    unmatched.forEach(function(f){
+      box.appendChild(row(fmtTrack2(f.tracking),(f.ref?'ref '+f.ref+' \u00B7 ':'')+(f.postcode||'')+' \u00B7 '+f.src,'overdue'));
+    });
+  }
+  $('matchapply').hidden = matched.length===0;
+  $('b_applymatch').textContent='Dispatch '+matched.length+' matched order'+(matched.length===1?'':'s');
+}
+$('b_applymatch').onclick=function(){
+  if(!matched.length) return;
+  if(!confirm('Mark '+matched.length+' order'+(matched.length===1?'':'s')+' as dispatched with these tracking numbers?\n\nStock will come off automatically.')) return;
+  var courier=$('mm_courier').value.trim()||null, service=$('mm_service').value.trim()||null, eta=$('mm_eta').value.trim()||null;
+  $('b_applymatch').disabled=true; busy('m_match','Saving\u2026');
+  sb.auth.getUser().then(function(u){
+    var who=(u.data&&u.data.user&&u.data.user.email)||null;
+    return matched.reduce(function(chain,m){
+      return chain.then(function(){
+        return sb.from('orders').update({status:'answered',courier:courier,service:service,eta:eta,
+          tracking:fmtTrack2(m.label.tracking),responded_at:new Date().toISOString(),responded_by:who}).eq('id',m.order.id);
+      });
+    },Promise.resolve());
+  }).then(function(){
+    $('b_applymatch').disabled=false;
+    msg('m_match','Done. '+matched.length+' order'+(matched.length===1?'':'s')+' dispatched.','good');
+    matched=[]; unmatched=[]; $('matchlist').innerHTML=''; $('matchapply').hidden=true;
+    loadNeeds(); loadToday();
+  }).catch(function(){
+    $('b_applymatch').disabled=false; msg('m_match','Something failed part way through. Press Refresh and check.','bad');
+  });
+};
+
+/* =====================  REPORTS + ACTIVITY  ===================== */
+var repRows=[], actFrom=0;
+function loadReport(){
+  if(!$('rep_month').value){ var d=new Date(); $('rep_month').value=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2); }
+  busy('m_report','Loading\u2026');
+  return sb.rpc('month_report',{p_month:$('rep_month').value+'-01'}).then(function(r){
+    if(r.error){ msg('m_report','Could not load. Is the Phase 3 script run?','bad'); return; }
+    msg('m_report',''); repRows=r.data||[];
+    var tb=$('repbody'); tb.innerHTML='';
+    $('reptbl').hidden=!repRows.length; $('rep_empty').hidden=repRows.length>0;
+    repRows.forEach(function(x){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><strong>'+x.business+'</strong><br><span style="font-size:.76rem;color:var(--muted)">'+x.email+'</span></td>'
+        +[x.dispatched,x.units_out,x.received,x.units_in,x.returns,x.forwarded,x.fba_jobs,x.skus,x.units_held]
+          .map(function(v){return '<td>'+v+'</td>';}).join('');
+      tb.appendChild(tr);
+    });
+  });
+}
+$('rep_month').onchange=loadReport;
+$('b_repcopy').onclick=function(){
+  if(!repRows.length) return;
+  var head=['Customer','Email','Dispatched','Units out','Received','Units in','Returns','Forwarded','FBA','SKUs','Units held'].join('\t');
+  var body=repRows.map(function(x){
+    return [x.business,x.email,x.dispatched,x.units_out,x.received,x.units_in,x.returns,x.forwarded,x.fba_jobs,x.skus,x.units_held].join('\t');
+  }).join('\n');
+  EFCopy(head+'\n'+body,'Report copied \u2014 paste into a spreadsheet',$('b_repcopy'));
+};
+function loadActivity(reset){
+  if(reset){ actFrom=0; $('actlist').innerHTML=''; }
+  return sb.from('activity').select('*').order('at',{ascending:false}).range(actFrom,actFrom+19).then(function(r){
+    if(r.error) return;
+    var L=$('actlist');
+    (r.data||[]).forEach(function(a){
+      var d=document.createElement('div'); d.className='mini';
+      var det=a.detail||{};
+      var bits=Object.keys(det).map(function(k){return k+': '+det[k];}).join(' \u00B7 ');
+      d.innerHTML='<div class="t"><div class="p"></div><div class="s"></div></div>';
+      d.querySelector('.p').textContent=a.action;
+      d.querySelector('.s').textContent=when(a.at)+' \u00B7 '+(a.actor||'system')+(bits?' \u00B7 '+bits:'');
+      L.appendChild(d);
+    });
+    actFrom+=20;
+    $('b_actmore').hidden=(r.data||[]).length<20;
+  });
+}
+$('b_actmore').onclick=function(){ loadActivity(false); };
+
+/* =====================  STAFF  ===================== */
+function loadStaff(){
+  busy('m_staff','Loading\u2026');
+  return sb.rpc('list_admins').then(function(r){
+    if(r.error){ msg('m_staff','Could not load.','bad'); return; }
+    msg('m_staff','');
+    var box=$('stafflist'); box.innerHTML='';
+    (r.data||[]).forEach(function(row){
+      var em=row.email||row;
+      var d=document.createElement('div'); d.className='mini';
+      d.innerHTML='<div class="t"><div class="p"></div><div class="s">admin</div></div>';
+      d.querySelector('.p').textContent=em;
+      var rm=document.createElement('button'); rm.className='rowbtn del'; rm.textContent='Remove';
+      rm.onclick=function(){
+        if(!confirm('Remove '+em+" from the admin list?\n\nThey keep their Supabase login but lose access to this tool.")) return;
+        sb.rpc('remove_admin',{p_email:em}).then(function(x){
+          if(x.error){ msg('m_staff',x.error.message,'bad'); return; }
+          msg('m_staff','Removed '+em,'good'); loadStaff();
+        });
+      };
+      d.appendChild(rm); box.appendChild(d);
+    });
+  });
+}
+$('b_addadmin').onclick=function(){
+  var em=$('new_admin').value.trim().toLowerCase();
+  if(!em||em.indexOf('@')<0){ msg('m_staff','Enter a valid email address.','bad'); return; }
+  sb.rpc('add_admin',{p_email:em}).then(function(x){
+    if(x.error){ msg('m_staff',x.error.message,'bad'); return; }
+    $('new_admin').value='';
+    msg('m_staff','Added '+em+'. Now create their login in Supabase \u2192 Authentication \u2192 Users.','good');
+    loadStaff();
+  });
+};
 
 $('b_out').onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
 $('b_refresh').onclick=load;
