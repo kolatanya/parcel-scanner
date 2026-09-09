@@ -75,7 +75,7 @@ h1{margin:0;font-size:1.35rem;font-weight:650;letter-spacing:-.02em;color:var(--
 .edit .drop-row{margin-top:11px;width:100%;padding:9px;border-radius:6px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer;font-size:.85rem}
 
 .empty{margin:14px 0 0;padding:22px;border:1px dashed var(--edge);border-radius:8px;color:var(--muted);font-size:.85rem;text-align:center}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 4px}
 .actions button{padding:15px 10px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--ink);cursor:pointer;font-weight:500}
 .actions button:disabled{opacity:.35}
 .actions .wa{background:#E9F4EC;border-color:#B7D8C4;color:#1E6B4A}
@@ -132,15 +132,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   <div class="status" id="status"><span class="dot"></span><span id="msg">Waiting for files</span></div>
   <div class="summary" id="summary" hidden></div>
 
-  <ul class="list" id="list"></ul>
-  <div class="empty" id="empty">Results appear here, one line per label, ready to paste.</div>
-
   <div class="actions">
     <button id="copy" disabled>Copy all</button>
     <button class="wa" id="wa" disabled>Send to WhatsApp</button>
     <button id="dl" disabled>Save .txt</button>
     <button class="clear" id="clear" disabled>Clear</button>
   </div>
+
+  <ul class="list" id="list"></ul>
+  <div class="empty" id="empty">Results appear here, one line per label, ready to paste.</div>
 
   <p class="foot"><strong>Columns for Sheets</strong> is on, so each part lands in its own cell when you paste, one label per row. Turn it off if you want everything in a single cell instead.<br><br>The PDFs never leave this phone — they are read in the browser and nothing is uploaded.
   Tap any row to check or correct it. Rows with something missing are marked in amber.</p>
