@@ -804,6 +804,23 @@ function loadToday(){
     var lo=(res[3].data||[]).filter(function(r){return r.qty<=r.low_at;});
     if(lo.length){ var h3=document.createElement('div'); h3.className='grouph'; h3.textContent='Low stock'; L.appendChild(h3);
       lo.slice(0,12).forEach(function(r){ L.appendChild(mini(r.sku+(r.product_name?' \u2014 '+r.product_name:''),r.qty+' left (warn at '+r.low_at+') \u00B7 '+r.user_email,'stock','overdue')); }); }
+    sb.from('requests').select('*').eq('status','pending').order('created_at',{ascending:true}).then(function(rq){
+      var sv=(rq.data)||[];
+      if(!sv.length) return;
+      var NM={'return':'Return','forward':'Parcel to forward','fba':'FBA prep job'};
+      var h4=document.createElement('div'); h4.className='grouph'; h4.textContent='Services waiting';
+      L.insertBefore(h4, L.firstChild);
+      sv.slice(0,12).forEach(function(q){
+        var d=q.details||{}, what;
+        if(q.kind==='return') what=(d.product_name||d.sku||'')+' \u00D7 '+(d.qty||'');
+        else if(q.kind==='forward') what=(d.in_tracking||'no tracking')+' \u2192 '+(d.to_name||'');
+        else what=((d.lines||[]).length)+' SKU \u00B7 '+((d.lines||[]).reduce(function(a,b){return a+(b.qty||0);},0))+' units';
+        var el=mini(NM[q.kind]+': '+what,(q.business_name||q.user_email)+' \u00B7 '+when(q.created_at),'services');
+        L.insertBefore(el, h4.nextSibling);
+      });
+      var e0=L.querySelector('.empty'); if(e0) e0.remove();
+    });
+
     if(!od.length&&!ib.length&&!lo.length){ var e=document.createElement('div'); e.className='empty'; e.textContent='Nothing waiting. Nice.'; L.appendChild(e); }
     $('c_inbound').hidden=!(c.inbound_expected); $('c_inbound').textContent=c.inbound_expected||'';
     $('c_stock').hidden=!(c.low_stock); $('c_stock').textContent=c.low_stock||'';
@@ -1012,7 +1029,12 @@ function renderServices(){
     return q.kind===svKind && (showDone ? q.status!=='cancelled' : q.status==='pending');
   });
   $('sv_empty').hidden=list.length>0;
-  $('sv_empty').textContent = showDone? 'Nothing here.' : 'Nothing waiting.';
+  var nR=svAll.filter(function(q){return q.kind==='return';}).length,
+      nF=svAll.filter(function(q){return q.kind==='forward';}).length,
+      nB=svAll.filter(function(q){return q.kind==='fba';}).length;
+  $('sv_empty').textContent = (showDone? 'Nothing here.' : 'Nothing waiting.')
+    + '  (' + svAll.length + ' loaded \u2014 ' + nR + ' returns, ' + nF + ' forwarding, ' + nB
+    + ' FBA \u00B7 showing: ' + svKind + ')';
 
   list.forEach(function(q){
     var d=q.details||{}, o=q.outcome||{}, done=(q.status==='done');
