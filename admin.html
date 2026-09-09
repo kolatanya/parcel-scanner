@@ -190,6 +190,17 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 @media (max-width:520px){ .addline{grid-template-columns:1fr 1fr} .addline button{grid-column:1/-1} }
 @media (min-width:860px){ .tiles{grid-template-columns:repeat(5,1fr)} .secnav button{flex:1} }
 
+
+.boxline{display:grid;grid-template-columns:44px 1fr 1fr 1fr 1fr 34px;gap:5px;margin-bottom:5px;align-items:center}
+.boxline input{padding:8px;border-radius:6px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.85rem;color:var(--ink);min-width:0;text-align:right}
+.boxline .no{text-align:center;color:var(--muted);font-size:.8rem}
+.boxline .rm{width:34px;height:34px;border-radius:6px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer}
+.boxhead{display:grid;grid-template-columns:44px 1fr 1fr 1fr 1fr 34px;gap:5px;font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px;text-align:right}
+.boxhead span:first-child{text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.chip{font-size:.7rem;padding:3px 9px;border-radius:12px;background:#EFF7F9;border:1px solid #CDE4EA;color:var(--deep)}
+.chip.warn{background:#FDF6E1;border-color:#E4D3A0;color:#7A5210}
+
 </style>
 </head>
 <body>
@@ -221,6 +232,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <button data-s="needs">Orders<span class="count" id="c_needs" hidden></span></button>
       <button data-s="inbound">Inbound<span class="count" id="c_inbound" hidden></span></button>
       <button data-s="stock">Stock<span class="count" id="c_stock" hidden></span></button>
+      <button data-s="services">Services<span class="count" id="c_services" hidden></span></button>
       <button data-s="access">Access<span class="count" id="c_access" hidden></span></button>
     </div>
 
@@ -264,6 +276,19 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <div id="custlist"></div>
       <div class="empty" id="needs_empty" hidden>No customers yet.</div>
       <button class="btn second" id="b_refresh2" style="margin-top:14px">Refresh</button>
+    </div>
+
+    <div id="sec_services" hidden>
+      <div class="tabs" id="svtabs">
+        <button data-k="return" class="on">Returns<span class="count" id="c_ret" hidden></span></button>
+        <button data-k="forward">Forwarding<span class="count" id="c_fwd" hidden></span></button>
+        <button data-k="fba">FBA prep<span class="count" id="c_fba" hidden></span></button>
+      </div>
+      <label class="mode" style="margin-bottom:10px"><input type="checkbox" id="sv_done"><span>Show completed</span></label>
+      <div class="msg" id="m_sv"></div>
+      <div id="svlist"></div>
+      <div class="empty" id="sv_empty" hidden>Nothing waiting.</div>
+      <button class="btn second" id="b_refresh_sv" style="margin-top:14px">Refresh</button>
     </div>
 
     <div id="sec_access" hidden>
@@ -456,7 +481,7 @@ var customers=[], orders=[], section='access';
 
 function setSection(sec){
   section=sec;
-  ['today','needs','inbound','stock','access'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
+  ['today','needs','inbound','stock','services','access'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
     b.classList.toggle('on', b.getAttribute('data-s')===sec);
   });
@@ -464,6 +489,7 @@ function setSection(sec){
   if(sec==='today') loadToday();
   if(sec==='inbound') loadInbound();
   if(sec==='stock') loadStockCustomers();
+  if(sec==='services') loadServices();
 }
 Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
   b.onclick=function(){ setSection(b.getAttribute('data-s')); };
@@ -678,6 +704,9 @@ function loadToday(){
     t.appendChild(tile(c.inbound_expected||0,'deliveries expected','inbound','hot'));
     t.appendChild(tile(c.inbound_overdue||0,'deliveries overdue','inbound','bad'));
     t.appendChild(tile(c.low_stock||0,'SKUs low on stock','stock','bad'));
+    t.appendChild(tile(c.returns_waiting||0,'returns to process','services','hot'));
+    t.appendChild(tile(c.forward_waiting||0,'parcels to forward','services','hot'));
+    t.appendChild(tile(c.fba_waiting||0,'FBA jobs to prep','services','hot'));
     t.appendChild(tile(c.access_waiting||0,'access requests','access','hot'));
     var L=$('todaylist'); L.innerHTML='';
     var today=new Date().toISOString().slice(0,10);
@@ -698,6 +727,8 @@ function loadToday(){
     $('c_stock').hidden=!(c.low_stock); $('c_stock').textContent=c.low_stock||'';
     $('c_needs').hidden=!(c.orders_waiting); $('c_needs').textContent=c.orders_waiting||'';
     $('c_access').hidden=!(c.access_waiting); $('c_access').textContent=c.access_waiting||'';
+    var sv=(c.returns_waiting||0)+(c.forward_waiting||0)+(c.fba_waiting||0);
+    $('c_services').hidden=!sv; $('c_services').textContent=sv||'';
   });
 }
 $('b_refresh_today').onclick=loadToday;
@@ -847,6 +878,230 @@ $('b_addstock').onclick=function(){
   .then(function(x){ if(x.error){ msg('m_stock','Could not add: '+x.error.message,'bad'); return; }
     ['a_sku','a_pn','a_qty','a_loc'].forEach(function(i){ $(i).value=''; }); msg('m_stock','Added '+sku,'good'); loadStock(); });
 };
+
+
+/* =====================  SERVICES  ===================== */
+var svAll=[], svKind='return';
+var SVMETA={
+  'return' :{noun:'return',   verb:'Close return'},
+  'forward':{noun:'forwarding request', verb:'Mark forwarded'},
+  'fba'    :{noun:'FBA prep job', verb:'Mark shipped'}
+};
+function setSvKind(k){ svKind=k;
+  Array.prototype.forEach.call($('svtabs').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.getAttribute('data-k')===k); });
+  renderServices(); }
+Array.prototype.forEach.call($('svtabs').querySelectorAll('button'),function(b){ b.onclick=function(){ setSvKind(b.getAttribute('data-k')); }; });
+$('sv_done').onchange=renderServices;
+$('b_refresh_sv').onclick=function(){ loadServices(); };
+
+function loadServices(){
+  busy('m_sv','Loading\u2026');
+  return sb.from('requests').select('*').order('created_at',{ascending:false}).then(function(r){
+    if(r.error){ msg('m_sv','Could not load. Is the Phase 2 script run?','bad'); return; }
+    svAll=r.data||[]; msg('m_sv',''); renderServices(); svCounts();
+  });
+}
+function svCounts(){
+  ['return','forward','fba'].forEach(function(k){
+    var n=svAll.filter(function(q){return q.kind===k&&q.status==='pending';}).length;
+    var el=$(k==='return'?'c_ret':(k==='forward'?'c_fwd':'c_fba'));
+    el.hidden=!n; el.textContent=n||'';
+  });
+  var tot=svAll.filter(function(q){return q.status==='pending';}).length;
+  $('c_services').hidden=!tot; $('c_services').textContent=tot||'';
+}
+function chip(t,warn){ var c=document.createElement('span'); c.className='chip'+(warn?' warn':''); c.textContent=t; return c; }
+function inp(ph,val,cls){
+  var i=document.createElement('input'); i.placeholder=ph||''; if(val) i.value=val;
+  i.style.cssText='width:100%;padding:10px;border-radius:7px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.9rem;color:var(--ink)';
+  if(cls) i.className=cls; return i;
+}
+function labelled(text,el){
+  var w=document.createElement('div');
+  var l=document.createElement('label'); l.textContent=text;
+  l.style.cssText='display:block;font-size:.74rem;color:var(--muted);margin:8px 0 3px';
+  w.appendChild(l); w.appendChild(el); return w;
+}
+
+function renderServices(){
+  var box=$('svlist'); box.innerHTML='';
+  var showDone=$('sv_done').checked;
+  var list=svAll.filter(function(q){
+    return q.kind===svKind && (showDone ? q.status!=='cancelled' : q.status==='pending');
+  });
+  $('sv_empty').hidden=list.length>0;
+  $('sv_empty').textContent = showDone? 'Nothing here.' : 'Nothing waiting.';
+
+  list.forEach(function(q){
+    var d=q.details||{}, o=q.outcome||{}, done=(q.status==='done');
+    var li=document.createElement('div'); li.className='req '+(done?'approved':'pending');
+    var head=document.createElement('div'); head.className='reqhead';
+    var who=document.createElement('div'); who.className='who';
+    var nm=document.createElement('div'); nm.className='nm';
+    var bz=document.createElement('div'); bz.className='bz';
+    if(svKind==='return'){
+      nm.textContent=(d.product_name||d.sku)+' \u00D7 '+d.qty;
+      bz.textContent=(q.business_name||q.user_email)+' \u00B7 '+(d.reason||'')+(d.order_ref?' \u00B7 '+d.order_ref:'');
+    } else if(svKind==='forward'){
+      nm.textContent=(d.in_tracking||'no tracking')+' \u2192 '+d.to_name;
+      bz.textContent=(q.business_name||q.user_email)+' \u00B7 '+(d.to_country||'')+(d.in_courier?' \u00B7 in via '+d.in_courier:'');
+    } else {
+      var units=(d.lines||[]).reduce(function(a,b){return a+b.qty;},0);
+      nm.textContent=(d.lines||[]).length+' SKU \u00B7 '+units+' units';
+      bz.textContent=(q.business_name||q.user_email)+(d.shipment_id?' \u00B7 '+d.shipment_id:'')+(d.destination?' \u2192 '+d.destination:'');
+    }
+    who.appendChild(nm); who.appendChild(bz);
+    var tg=document.createElement('span'); tg.className='tag '+(done?'approved':'pending');
+    tg.textContent=done?'done':'waiting';
+    head.appendChild(who); head.appendChild(tg); li.appendChild(head);
+
+    var body=document.createElement('div'); body.className='body'; body.hidden=done;
+
+    if(svKind==='return'){
+      body.appendChild(kvRow('SKU',d.sku||'\u2014'));
+      body.appendChild(kvRow('Units',String(d.qty)));
+      if(d.order_ref) body.appendChild(kvRow('Order ref',d.order_ref));
+      body.appendChild(kvRow('Reason',d.reason||'\u2014'));
+      if(d.tracking) body.appendChild(kvRow('Tracking',(d.courier?d.courier+' ':'')+d.tracking));
+    } else if(svKind==='forward'){
+      if(d.from) body.appendChild(kvRow('From',d.from));
+      body.appendChild(kvRow('Incoming',(d.in_courier?d.in_courier+' \u00B7 ':'')+(d.in_tracking||'\u2014')));
+      if(d.boxes) body.appendChild(kvRow('Boxes',String(d.boxes)));
+      if(d.expected_on) body.appendChild(kvRow('Expected',d.expected_on.split('-').reverse().join('/')));
+      body.appendChild(kvRow('Send to',d.to_name));
+      body.appendChild(kvRow('Phone',d.to_phone));
+      body.appendChild(kvRow('Address',d.to_address));
+      body.appendChild(kvRow('Country',d.to_country));
+      if(d.service) body.appendChild(kvRow('Wants',d.service));
+    } else {
+      (d.lines||[]).forEach(function(l){ body.appendChild(kvRow(l.sku,(l.product_name?l.product_name+' \u2014 ':'')+l.qty+' units')); });
+      var pr=document.createElement('div'); pr.className='chips';
+      if(d.fnsku) pr.appendChild(chip('FNSKU labels'));
+      if(d.polybag) pr.appendChild(chip('Poly bag'));
+      if(d.bundle) pr.appendChild(chip('Bundle'));
+      if(d.fragile) pr.appendChild(chip('Fragile',true));
+      body.appendChild(pr);
+      if(d.shipment_id) body.appendChild(kvRow('Shipment ID',d.shipment_id));
+      if(d.destination) body.appendChild(kvRow('Destination',d.destination));
+    }
+    if(q.note) body.appendChild(kvRow('Customer note',q.note));
+
+    if(done){
+      var dn=document.createElement('div'); dn.className='answered-box';
+      var h=document.createElement('h4'); h.textContent='Sent to the customer'; dn.appendChild(h);
+      Object.keys(o).forEach(function(k){
+        if(k==='boxes') return;
+        dn.appendChild(kvRow(k.charAt(0).toUpperCase()+k.slice(1).replace('_',' '),String(o[k])));
+      });
+      if(o.boxes&&o.boxes.length) dn.appendChild(kvRow('Boxes',o.boxes.length+' \u00B7 '+o.boxes.reduce(function(a,b){return a+Number(b.kg||0);},0).toFixed(1)+' kg total'));
+      if(q.reply_note) dn.appendChild(kvRow('Note',q.reply_note));
+      dn.appendChild(kvRow('By',(q.responded_by||'')+' \u00B7 '+when(q.responded_at)));
+      body.appendChild(dn);
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+      return;
+    }
+
+    /* ---- respond form ---- */
+    var rep=document.createElement('div'); rep.className='reply';
+    var h2=document.createElement('h4'); h2.textContent='Respond'; rep.appendChild(h2);
+    var g=document.createElement('div'); g.className='g';
+    var F={};
+
+    if(svKind==='return'){
+      F.condition=inp('4 resellable, 1 damaged');
+      F.decision=inp('Back into stock / Disposed / Returned to client');
+      F.restock=inp('0'); F.restock.type='number'; F.restock.min='0'; F.restock.value=d.qty||0;
+      g.appendChild(labelled('Condition when it arrived',F.condition));
+      g.appendChild(labelled('Decision',F.decision));
+      g.appendChild(labelled('Units back into stock',F.restock));
+    } else if(svKind==='forward'){
+      F.courier=inp('Royal Mail / DPD \u2026'); F.courier.setAttribute('list','couriers');
+      F.service=inp('Tracked 48 / Next Day');
+      F.eta=inp('2\u20133 working days');
+      F.tracking=inp(''); F.tracking.style.fontFamily='var(--mono)';
+      g.appendChild(labelled('Courier',F.courier));
+      g.appendChild(labelled('Service',F.service));
+      g.appendChild(labelled('How long it will take',F.eta));
+      g.appendChild(labelled('Outbound tracking number',F.tracking));
+    } else {
+      F.courier=inp('UPS / Amazon Partnered \u2026'); F.courier.setAttribute('list','couriers');
+      F.tracking=inp(''); F.tracking.style.fontFamily='var(--mono)';
+      g.appendChild(labelled('Courier',F.courier));
+      g.appendChild(labelled('Tracking number',F.tracking));
+    }
+    rep.appendChild(g);
+
+    var boxRows=[];
+    if(svKind==='fba'){
+      var bl=document.createElement('label'); bl.textContent='Box dimensions and weights';
+      bl.style.cssText='display:block;font-size:.74rem;color:var(--muted);margin:12px 0 4px'; rep.appendChild(bl);
+      var bh=document.createElement('div'); bh.className='boxhead';
+      ['#','L cm','W cm','H cm','kg',''].forEach(function(t){ var sp=document.createElement('span'); sp.textContent=t; bh.appendChild(sp); });
+      rep.appendChild(bh);
+      var wrap=document.createElement('div'); rep.appendChild(wrap);
+      function renumber(){ Array.prototype.forEach.call(wrap.children,function(r,i){ r.querySelector('.no').textContent=(i+1); }); }
+      function addBox(){
+        var row=document.createElement('div'); row.className='boxline';
+        var no=document.createElement('div'); no.className='no';
+        var L=inp(''),W=inp(''),H=inp(''),K=inp('');
+        [L,W,H,K].forEach(function(i){ i.type='number'; i.min='0'; i.step='0.1'; i.inputMode='decimal'; });
+        var rm=document.createElement('button'); rm.className='rm'; rm.textContent='\u00D7';
+        rm.onclick=function(){ row.remove(); boxRows=boxRows.filter(function(x){return x.row!==row;}); renumber(); };
+        row.appendChild(no); row.appendChild(L); row.appendChild(W); row.appendChild(H); row.appendChild(K); row.appendChild(rm);
+        wrap.appendChild(row); boxRows.push({row:row,L:L,W:W,H:H,K:K}); renumber();
+      }
+      addBox();
+      var addb=document.createElement('button'); addb.type='button'; addb.textContent='+ Add box';
+      addb.style.cssText='width:100%;padding:9px;border-radius:7px;border:1px dashed var(--edge2);background:transparent;color:var(--deep);cursor:pointer;font-size:.85rem;margin-top:4px';
+      addb.onclick=addBox; rep.appendChild(addb);
+    }
+
+    var note=inp('Note for the customer (optional)');
+    rep.appendChild(labelled('Note',note));
+
+    var save=document.createElement('button'); save.className='save'; save.textContent=SVMETA[svKind].verb;
+    save.onclick=function(){
+      var outcome={}, lines=null, restock=0;
+      if(svKind==='return'){
+        outcome={condition:F.condition.value.trim()||null, decision:F.decision.value.trim()||null};
+        restock=parseInt(F.restock.value,10)||0;
+        if(restock>(d.qty||0) && !confirm('Putting back '+restock+' units but only '+d.qty+' were returned. Continue?')) return;
+      } else if(svKind==='forward'){
+        outcome={courier:F.courier.value.trim()||null, service:F.service.value.trim()||null,
+                 eta:F.eta.value.trim()||null, tracking:F.tracking.value.trim()||null};
+        if(!outcome.courier&&!outcome.tracking){ msg('m_sv','Add at least the courier or the tracking number.','bad'); return; }
+      } else {
+        var boxes=boxRows.map(function(b,i){
+          return {no:i+1,l:Number(b.L.value)||0,w:Number(b.W.value)||0,h:Number(b.H.value)||0,kg:Number(b.K.value)||0};
+        }).filter(function(b){ return b.l||b.w||b.h||b.kg; });
+        outcome={courier:F.courier.value.trim()||null, tracking:F.tracking.value.trim()||null, boxes:boxes};
+        lines=(d.lines||[]).map(function(l){ return {sku:l.sku,qty:l.qty}; });
+        if(!boxes.length && !confirm('No box measurements entered. Send anyway?')) return;
+      }
+      save.disabled=true; save.textContent='Saving\u2026';
+      var call;
+      if(svKind==='return') call=sb.rpc('close_return',{p_id:q.id,p_outcome:outcome,p_restock:restock,p_note:note.value.trim()||null});
+      else if(svKind==='fba') call=sb.rpc('close_fba',{p_id:q.id,p_outcome:outcome,p_lines:lines,p_note:note.value.trim()||null});
+      else call=sb.auth.getUser().then(function(u){
+        return sb.from('requests').update({status:'done',outcome:outcome,reply_note:note.value.trim()||null,
+          responded_at:new Date().toISOString(),responded_by:(u.data&&u.data.user&&u.data.user.email)||null}).eq('id',q.id);
+      });
+      call.then(function(r){
+        save.disabled=false; save.textContent=SVMETA[svKind].verb;
+        if(r&&r.error){ msg('m_sv','Could not save: '+r.error.message,'bad'); return; }
+        msg('m_sv','Done. The customer can see it in their panel.','good');
+        loadServices(); loadToday();
+      });
+    };
+    rep.appendChild(save);
+    body.appendChild(rep);
+    li.appendChild(body);
+    head.onclick=function(){ body.hidden=!body.hidden; };
+    box.appendChild(li);
+  });
+}
 
 $('b_out').onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
 $('b_refresh').onclick=load;

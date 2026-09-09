@@ -154,6 +154,11 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
 .avail.none{color:#8E2A2F}
 @media (max-width:480px){ .item{grid-template-columns:1fr 60px 34px} .item .pn{display:none} .ihead{grid-template-columns:1fr 60px 34px} .ihead span:nth-child(2){display:none} }
 
+.boxtbl{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:8px;background:#fff;border:1px solid #CDE4EA;border-radius:8px;overflow:hidden}
+.boxtbl th,.boxtbl td{padding:7px 9px;text-align:left;border-bottom:1px solid #EAF3F6}
+.boxtbl th{font-size:.7rem;color:var(--muted);text-transform:uppercase;background:#F4FAFB}
+.boxtbl tr:last-child td{border-bottom:0}
+.boxtbl td{font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -260,6 +265,10 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
           <div class="grp">Depo</div>
           <button class="navitem" data-p="stock">Stok</button>
           <button class="navitem" data-p="inbound">Gelen Kargo Bildirimi</button>
+          <div class="grp">Hizmetler</div>
+          <button class="navitem" data-p="ret">İade Bildirimi</button>
+          <button class="navitem" data-p="fwd">Kargo Yönlendirme</button>
+          <button class="navitem" data-p="fba">FBA Hazırlık</button>
         </nav>
       </aside>
 
@@ -337,6 +346,90 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
           <div id="inlist"></div>
           <div class="note info" id="in_empty" hidden>Henüz bildirim yok.</div>
           <button class="btn second" id="b_inreload" style="margin-top:12px">Yenile</button>
+        </section>
+
+        <!-- returns -->
+        <section id="pg_ret" hidden>
+          <h2>İade Bildirimi</h2>
+          <p class="lead">Müşterinizden depomuza dönecek bir ürünü bildirin. Ulaştığında durumunu kontrol eder, size bildirir ve sağlam olanları stoğunuza geri ekleriz.</p>
+          <div class="card" style="margin-bottom:16px">
+            <div class="grid2">
+              <div class="f full" id="w_rsku"><label>Ürün</label><select class="sel" id="r_sku"></select><div class="err">Lütfen ürünü seçin veya SKU yazın.</div></div>
+              <div class="f full" id="w_rskutxt" hidden><label>SKU</label><input id="r_skutxt" autocapitalize="characters" spellcheck="false"></div>
+              <div class="f" id="w_rqty"><label>Adet</label><input id="r_qty" type="number" min="1" value="1" inputmode="numeric"><div class="err">Adet en az 1 olmalıdır.</div></div>
+              <div class="f"><label>Sipariş numarası (isteğe bağlı)</label><input id="r_order" spellcheck="false" placeholder="203-1234567-1234567"></div>
+              <div class="f full" id="w_rreason"><label>İade sebebi</label><select class="sel" id="r_reason">
+                <option value="">Seçin…</option><option>Yanlış beden</option><option>Yanlış ürün gönderildi</option>
+                <option>Hasarlı geldi</option><option>Müşteri vazgeçti</option><option>Ürün beğenilmedi</option>
+                <option>Teslim edilemedi</option><option>Diğer</option></select><div class="err">Lütfen bir sebep seçin.</div></div>
+              <div class="f"><label>Kargo firması (isteğe bağlı)</label><input id="r_courier" list="kargolar"></div>
+              <div class="f"><label>Takip numarası (isteğe bağlı)</label><input id="r_track" spellcheck="false"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="r_note"></textarea></div>
+            </div>
+            <button class="btn primary" id="b_ret">Bildirimi Gönder</button>
+            <div class="msg" id="m_ret"></div>
+          </div>
+          <h2 style="font-size:1rem">İade bildirimlerim</h2>
+          <div class="msg" id="m_retlist"></div>
+          <div id="retlist"></div>
+          <div class="note info" id="ret_empty" hidden>Henüz iade bildirimi yok.</div>
+        </section>
+
+        <!-- forwarding -->
+        <section id="pg_fwd" hidden>
+          <h2>Kargo Yönlendirme</h2>
+          <p class="lead">Depomuza gelecek bir kargoyu, ulaştığında başka bir adrese yönlendirmemizi isteyin.</p>
+          <div class="card" style="margin-bottom:16px">
+            <div class="grid2">
+              <div class="f"><label>Gelen kargo firması</label><input id="w_courier" list="kargolar"></div>
+              <div class="f" id="w_wtrack"><label>Gelen takip numarası</label><input id="w_track" spellcheck="false"><div class="err">Lütfen takip numarasını yazın.</div></div>
+              <div class="f"><label>Gönderen / tedarikçi (isteğe bağlı)</label><input id="w_from"></div>
+              <div class="f"><label>Koli sayısı (isteğe bağlı)</label><input id="w_boxes" type="number" min="1" inputmode="numeric"></div>
+              <div class="f full"><label>Beklenen varış tarihi (isteğe bağlı)</label><input id="w_date" type="date"></div>
+              <div class="f" id="w_wname"><label>Yönlendirilecek kişi / firma</label><input id="w_name"><div class="err">Lütfen alıcıyı yazın.</div></div>
+              <div class="f" id="w_wphone"><label>Alıcı telefonu</label><input id="w_phone" type="tel"><div class="err">Lütfen geçerli bir telefon yazın.</div></div>
+              <div class="f full" id="w_waddr"><label>Yönlendirilecek adres</label><textarea id="w_addr"></textarea><div class="err">Lütfen açık adresi yazın.</div></div>
+              <div class="f" id="w_wcountry"><label>Ülke</label><input id="w_country" list="ulkeler" value="Birleşik Krallık"><div class="err">Lütfen ülkeyi yazın.</div></div>
+              <div class="f"><label>Tercih edilen servis (isteğe bağlı)</label><input id="w_service" placeholder="En ucuz / En hızlı"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="w_note"></textarea></div>
+            </div>
+            <button class="btn primary" id="b_fwd">Talebi Gönder</button>
+            <div class="msg" id="m_fwd"></div>
+          </div>
+          <h2 style="font-size:1rem">Yönlendirme taleplerim</h2>
+          <div class="msg" id="m_fwdlist"></div>
+          <div id="fwdlist"></div>
+          <div class="note info" id="fwd_empty" hidden>Henüz talep yok.</div>
+        </section>
+
+        <!-- FBA prep -->
+        <section id="pg_fba" hidden>
+          <h2>FBA Hazırlık</h2>
+          <p class="lead">Amazon deposuna gönderilecek ürünleri hazırlamamızı isteyin. Kolileri hazırladığımızda ölçü ve ağırlıklarını buradan alabilirsiniz.</p>
+          <div class="card" style="margin-bottom:16px">
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:6px">Gönderilecek ürünler</label>
+            <div class="ihead"><span>SKU</span><span>Ürün adı</span><span>Adet</span><span>x</span></div>
+            <div class="items" id="fbaitems"></div>
+            <button class="addrow" id="b_fbarow" type="button">+ Ürün satırı ekle</button>
+            <div class="err" id="fba_err" style="display:none;font-size:.76rem;color:var(--bad);margin-top:6px">En az bir ürün satırı doldurun.</div>
+            <div class="grid2" style="margin-top:12px">
+              <div class="f full"><label>Hazırlık işlemleri</label>
+                <label class="remember"><input type="checkbox" id="f_fnsku" checked> FNSKU etiketi yapıştırılsın</label>
+                <label class="remember"><input type="checkbox" id="f_poly"> Poly bag / şeffaf poşet</label>
+                <label class="remember"><input type="checkbox" id="f_bundle"> Set / bundle yapılsın</label>
+                <label class="remember"><input type="checkbox" id="f_frag"> Kırılabilir — ekstra koruma</label>
+              </div>
+              <div class="f"><label>Amazon Shipment ID (isteğe bağlı)</label><input id="f_ship" spellcheck="false" placeholder="FBA15ABCDEFG"></div>
+              <div class="f"><label>Hedef Amazon deposu (isteğe bağlı)</label><input id="f_dest" placeholder="LTN4, BHX4 …"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="f_note"></textarea></div>
+            </div>
+            <button class="btn primary" id="b_fba">Talebi Gönder</button>
+            <div class="msg" id="m_fba"></div>
+          </div>
+          <h2 style="font-size:1rem">FBA taleplerim</h2>
+          <div class="msg" id="m_fbalist"></div>
+          <div id="fbalist"></div>
+          <div class="note info" id="fba_empty" hidden>Henüz talep yok.</div>
         </section>
 
         <!-- their enquiries -->
@@ -468,13 +561,16 @@ function openPanel(user){
 
 /* ---------- pages ---------- */
 function page(p){
-  ['new','mine','stock','inbound'].forEach(function(k){ $('pg_'+k).hidden = (p!==k); });
+  ['new','mine','stock','inbound','ret','fwd','fba'].forEach(function(k){ $('pg_'+k).hidden = (p!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
     b.classList.toggle('on', b.getAttribute('data-p')===p);
   });
   if(p==='mine') loadOrders();
   if(p==='stock') loadStock();
   if(p==='inbound') loadInbounds();
+  if(p==='ret'){ fillSkuSelect(); loadReq('return'); }
+  if(p==='fwd') loadReq('forward');
+  if(p==='fba'){ if(!$('fbaitems').children.length) $('fbaitems').appendChild(itemRow()); loadReq('fba'); }
 }
 Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
   b.onclick=function(){ page(b.getAttribute('data-p')); };
@@ -770,6 +866,215 @@ function loadInbounds(){
   });
 }
 $('b_inreload').onclick=loadInbounds;
+
+/* =====================  SERVICES (returns / forwarding / FBA)  ===================== */
+function fillSkuSelect(){
+  var sel=$('r_sku'); sel.innerHTML='';
+  var o0=document.createElement('option'); o0.value=''; o0.textContent='Seçin…'; sel.appendChild(o0);
+  STOCK.forEach(function(r){
+    var o=document.createElement('option'); o.value=r.sku;
+    o.textContent=r.sku+(r.product_name?' — '+r.product_name:''); sel.appendChild(o);
+  });
+  var ox=document.createElement('option'); ox.value='__other'; ox.textContent='Listede yok — elle yazacağım'; sel.appendChild(ox);
+}
+$('r_sku').onchange=function(){ $('w_rskutxt').hidden = ($('r_sku').value!=='__other'); };
+
+function fileRequest(kind, details, note, btnId, msgId, clear){
+  var m=(ME&&ME.user_metadata)||{};
+  $(btnId).disabled=true; busy(msgId,'Gönderiliyor…');
+  return sb.from('requests').insert({
+    user_id:ME.id, user_email:ME.email, business_name:m.business_name||null,
+    kind:kind, details:details, note:note||null, status:'pending'
+  }).then(function(r){
+    $(btnId).disabled=false;
+    if(r.error){ msg(msgId,'Gönderilemedi. Lütfen tekrar deneyin.','bad'); return false; }
+    msg(msgId,'Talebiniz alındı.','good');
+    (clear||[]).forEach(function(x){ var e=$(x); if(e) e.value=''; });
+    return true;
+  });
+}
+
+/* --- returns --- */
+$('b_ret').onclick=function(){
+  var useTxt=$('r_sku').value==='__other'||!STOCK.length;
+  var sku=useTxt? $('r_skutxt').value.trim().toUpperCase() : $('r_sku').value;
+  var q=parseInt($('r_qty').value,10);
+  var ok=true;
+  if(!bad('w_rsku',!sku)) ok=false;
+  if(!bad('w_rqty',!(q>=1))) ok=false;
+  if(!bad('w_rreason',!$('r_reason').value)) ok=false;
+  if(!ok){ msg('m_ret','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var pn=''; for(var i=0;i<STOCK.length;i++) if(STOCK[i].sku===sku) pn=STOCK[i].product_name||'';
+  fileRequest('return',{
+    sku:sku, product_name:pn||null, qty:q,
+    order_ref:$('r_order').value.trim()||null, reason:$('r_reason').value,
+    courier:$('r_courier').value.trim()||null, tracking:$('r_track').value.trim()||null
+  },$('r_note').value.trim(),'b_ret','m_ret',['r_order','r_courier','r_track','r_note','r_skutxt'])
+  .then(function(ok2){ if(ok2){ $('r_qty').value='1'; $('r_sku').value=''; $('r_reason').value=''; loadReq('return'); } });
+};
+
+/* --- forwarding --- */
+var FWD=[{i:'w_track',w:'w_wtrack'},{i:'w_name',w:'w_wname'},{i:'w_phone',w:'w_wphone',type:'phone'},
+         {i:'w_addr',w:'w_waddr'},{i:'w_country',w:'w_wcountry'}];
+$('b_fwd').onclick=function(){
+  if(!checkForm('',FWD)){ msg('m_fwd','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  fileRequest('forward',{
+    in_courier:$('w_courier').value.trim()||null, in_tracking:$('w_track').value.trim(),
+    from:$('w_from').value.trim()||null, boxes:parseInt($('w_boxes').value,10)||null,
+    expected_on:$('w_date').value||null,
+    to_name:$('w_name').value.trim(), to_phone:$('w_phone').value.trim(),
+    to_address:$('w_addr').value.trim(), to_country:$('w_country').value.trim(),
+    service:$('w_service').value.trim()||null
+  },$('w_note').value.trim(),'b_fwd','m_fwd',
+   ['w_courier','w_track','w_from','w_boxes','w_date','w_name','w_phone','w_addr','w_service','w_note'])
+  .then(function(ok){ if(ok){ $('w_country').value='Birleşik Krallık'; loadReq('forward'); } });
+};
+
+/* --- FBA prep --- */
+$('b_fbarow').onclick=function(){ $('fbaitems').appendChild(itemRow()); };
+function readFbaLines(){
+  var out=[];
+  Array.prototype.forEach.call($('fbaitems').querySelectorAll('.item'),function(row){
+    var i=row.querySelectorAll('input');
+    var sku=i[0].value.trim().toUpperCase(), pn=i[1].value.trim(), q=parseInt(i[2].value,10);
+    if(sku&&q>0) out.push({sku:sku,product_name:pn||null,qty:q});
+  });
+  return out;
+}
+$('b_fba').onclick=function(){
+  var lines=readFbaLines();
+  $('fba_err').style.display=lines.length?'none':'block';
+  if(!lines.length){ msg('m_fba','En az bir ürün ekleyin.','bad'); return; }
+  var short=lines.filter(function(l){
+    for(var i=0;i<STOCK.length;i++) if(STOCK[i].sku===l.sku) return STOCK[i].qty<l.qty;
+    return false;
+  });
+  if(short.length && !confirm('Bazı ürünlerde stok yetersiz görünüyor ('+short.map(function(l){return l.sku;}).join(', ')+'). Yine de gönderilsin mi?')) return;
+  fileRequest('fba',{
+    lines:lines, fnsku:$('f_fnsku').checked, polybag:$('f_poly').checked,
+    bundle:$('f_bundle').checked, fragile:$('f_frag').checked,
+    shipment_id:$('f_ship').value.trim()||null, destination:$('f_dest').value.trim()||null
+  },$('f_note').value.trim(),'b_fba','m_fba',['f_ship','f_dest','f_note'])
+  .then(function(ok){ if(ok){ $('fbaitems').innerHTML=''; $('fbaitems').appendChild(itemRow()); loadReq('fba'); } });
+};
+
+/* --- one list renderer for all three --- */
+var KIND_UI={
+  'return':{list:'retlist',msg:'m_retlist',empty:'ret_empty'},
+  'forward':{list:'fwdlist',msg:'m_fwdlist',empty:'fwd_empty'},
+  'fba':{list:'fbalist',msg:'m_fbalist',empty:'fba_empty'}
+};
+var ST_TR={pending:'beklemede',done:'tamamlandı',cancelled:'iptal edildi'};
+function loadReq(kind){
+  if(!ME) return Promise.resolve();
+  var ui=KIND_UI[kind];
+  busy(ui.msg,'Yükleniyor…');
+  return sb.from('requests').select('*').eq('kind',kind).order('created_at',{ascending:false}).then(function(r){
+    if(r.error){ msg(ui.msg,'Yüklenemedi.','bad'); return; }
+    msg(ui.msg,'');
+    var list=r.data||[], box=$(ui.list); box.innerHTML='';
+    $(ui.empty).hidden=list.length>0;
+    list.forEach(function(q){
+      var d=q.details||{}, o=q.outcome||{};
+      var li=document.createElement('div');
+      li.className='oli '+(q.status==='done'?'answered':(q.status==='cancelled'?'':'pending'));
+      var head=document.createElement('div'); head.className='ohead';
+      var t=document.createElement('div'); t.className='t';
+      var p=document.createElement('div'); p.className='p';
+      var sline=document.createElement('div'); sline.className='s';
+      if(kind==='return'){ p.textContent=(d.product_name||d.sku)+' × '+d.qty; sline.textContent=(d.reason||'')+' · '+dt(q.created_at); }
+      else if(kind==='forward'){ p.textContent=(d.in_tracking||'takipsiz')+' → '+d.to_name; sline.textContent=(d.to_country||'')+' · '+dt(q.created_at); }
+      else { var n=(d.lines||[]).reduce(function(a,b){return a+b.qty;},0);
+             p.textContent=(d.lines||[]).length+' ürün · '+n+' adet'; sline.textContent=(d.shipment_id||'Shipment ID yok')+' · '+dt(q.created_at); }
+      t.appendChild(p); t.appendChild(sline);
+      var bg=document.createElement('span');
+      bg.className='badge '+(q.status==='done'?'answered':'pending'); bg.textContent=ST_TR[q.status]||q.status;
+      head.appendChild(t); head.appendChild(bg); li.appendChild(head);
+
+      var body=document.createElement('div'); body.className='obody'; body.hidden=(q.status!=='done');
+      if(kind==='return'){
+        body.appendChild(kv('SKU',d.sku)); body.appendChild(kv('Adet',String(d.qty)));
+        if(d.order_ref) body.appendChild(kv('Sipariş no',d.order_ref));
+        body.appendChild(kv('Sebep',d.reason||'—'));
+        if(d.tracking) body.appendChild(kv('Takip',d.tracking));
+      } else if(kind==='forward'){
+        if(d.in_courier) body.appendChild(kv('Gelen kargo',d.in_courier));
+        body.appendChild(kv('Gelen takip',d.in_tracking||'—'));
+        if(d.from) body.appendChild(kv('Gönderen',d.from));
+        body.appendChild(kv('Alıcı',d.to_name));
+        body.appendChild(kv('Telefon',d.to_phone));
+        body.appendChild(kv('Adres',d.to_address));
+        body.appendChild(kv('Ülke',d.to_country));
+        if(d.service) body.appendChild(kv('Servis tercihi',d.service));
+      } else {
+        (d.lines||[]).forEach(function(l){ body.appendChild(kv(l.sku,(l.product_name?l.product_name+' — ':'')+l.qty+' adet')); });
+        var prep=[]; if(d.fnsku) prep.push('FNSKU etiketi'); if(d.polybag) prep.push('Poly bag');
+        if(d.bundle) prep.push('Bundle'); if(d.fragile) prep.push('Kırılabilir');
+        body.appendChild(kv('Hazırlık',prep.join(', ')||'—'));
+        if(d.shipment_id) body.appendChild(kv('Shipment ID',d.shipment_id));
+        if(d.destination) body.appendChild(kv('Hedef depo',d.destination));
+      }
+      if(q.note) body.appendChild(kv('Notunuz',q.note));
+
+      if(q.status==='done'){
+        var rep=document.createElement('div'); rep.className='reply';
+        var h=document.createElement('h4'); h.textContent='ecomFLEX yanıtı'; rep.appendChild(h);
+        if(kind==='return'){
+          if(o.condition) rep.appendChild(kv('Durum',o.condition));
+          if(o.decision) rep.appendChild(kv('Karar',o.decision));
+          if(o.restocked!==undefined) rep.appendChild(kv('Stoğa eklenen',o.restocked+' adet'));
+        } else if(kind==='forward'){
+          if(o.courier) rep.appendChild(kv('Kargo firması',o.courier));
+          if(o.service) rep.appendChild(kv('Servis',o.service));
+          if(o.eta) rep.appendChild(kv('Tahmini süre',o.eta));
+        } else {
+          if(o.courier) rep.appendChild(kv('Kargo firması',o.courier));
+          if(o.boxes&&o.boxes.length){
+            var tb=document.createElement('table'); tb.className='boxtbl';
+            tb.innerHTML='<thead><tr><th>Koli</th><th>U×G×Y (cm)</th><th>Ağırlık (kg)</th></tr></thead>';
+            var bd=document.createElement('tbody');
+            o.boxes.forEach(function(b){
+              var tr=document.createElement('tr');
+              tr.innerHTML='<td>'+b.no+'</td><td>'+b.l+' × '+b.w+' × '+b.h+'</td><td>'+b.kg+'</td>';
+              bd.appendChild(tr);
+            });
+            tb.appendChild(bd); rep.appendChild(tb);
+            var cp=document.createElement('button'); cp.className='btn second'; cp.style.marginTop='8px';
+            cp.textContent='Koli ölçülerini kopyala';
+            cp.onclick=function(){
+              var txt=o.boxes.map(function(b){return [b.no,b.l,b.w,b.h,b.kg].join('\t');}).join('\n');
+              EFCopy(txt,'Koli ölçüleri kopyalandı',cp);
+            };
+            rep.appendChild(cp);
+          }
+        }
+        if(o.tracking){
+          var lab=document.createElement('div'); lab.className='k'; lab.textContent='Takip numarası';
+          lab.style.width='auto'; lab.style.paddingTop='10px'; rep.appendChild(lab);
+          var w=document.createElement('div'); w.className='trk';
+          var c=document.createElement('code'); c.textContent=o.tracking;
+          var cb=document.createElement('button'); cb.textContent='Kopyala';
+          cb.onclick=function(){ EFCopy(o.tracking,'Takip numarası kopyalandı',cb); };
+          w.appendChild(c); w.appendChild(cb); rep.appendChild(w);
+        }
+        if(q.reply_note) rep.appendChild(kv('Not',q.reply_note));
+        body.appendChild(rep);
+      } else if(q.status==='pending'){
+        var cancel=document.createElement('button'); cancel.className='btn second'; cancel.style.marginTop='10px';
+        cancel.textContent='Talebi iptal et';
+        cancel.onclick=function(){
+          if(!confirm('Bu talebi iptal etmek istiyor musunuz?')) return;
+          sb.rpc('cancel_request',{p_id:q.id}).then(function(){ loadReq(kind); });
+        };
+        body.appendChild(cancel);
+      }
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+    });
+  });
+}
+
 
 
 /* ---------- actions ---------- */
