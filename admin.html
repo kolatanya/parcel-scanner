@@ -226,6 +226,34 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 /* the sign-in screen stays a readable column */
 #v_login{max-width:460px;margin-left:auto;margin-right:auto}
 
+
+/* ---------- FBA box builder ---------- */
+.bxcard{border:1px solid var(--edge2);border-radius:10px;margin-bottom:10px;background:#FFFDF8;overflow:hidden}
+.bxhead{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#F4EFE4;border-bottom:1px solid var(--edge2)}
+.bxhead .n{font-weight:700;color:var(--navy);font-size:1.05rem;min-width:58px}
+.bxhead .rm{margin-left:auto;width:30px;height:30px;border-radius:6px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer}
+.bxin{padding:11px 12px}
+.itrow{display:grid;grid-template-columns:1fr 78px 30px;gap:6px;margin-bottom:5px}
+.ithead{display:grid;grid-template-columns:1fr 78px 30px;gap:6px;font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.ithead span:last-child{visibility:hidden}
+.itrow input{width:100%;padding:8px;border-radius:6px;border:1px solid var(--edge2);background:#fff;font-family:var(--mono);font-size:.85rem;color:var(--ink)}
+.itrow .x{width:30px;height:34px;border-radius:6px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer;font-size:.9rem}
+.additem{width:100%;padding:7px;border-radius:6px;border:1px dashed var(--edge2);background:transparent;color:var(--deep);cursor:pointer;font-size:.8rem;margin-bottom:10px}
+.dimrow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.dimrow input{width:100%;padding:8px;border-radius:6px;border:1px solid var(--edge2);background:#fff;font-family:inherit;font-size:.85rem;color:var(--ink);text-align:right}
+.dimhead{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;text-align:right}
+.addbox{width:100%;padding:11px;border-radius:8px;border:1px dashed var(--deep);background:#EFF7F9;color:var(--deep);cursor:pointer;font-weight:600;font-size:.9rem}
+.refpill{font-family:var(--mono);font-size:.76rem;background:#EFF7F9;border:1px solid #CDE4EA;color:var(--deep);border-radius:20px;padding:2px 9px;display:inline-block}
+.lblrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px dashed #EFE9DC;font-size:.87rem}
+.lblrow:last-child{border-bottom:0}
+.lblrow .no{font-weight:700;color:var(--navy);min-width:52px}
+.lblrow a{color:var(--deep);word-break:break-all}
+.lblrow .miss{color:#8E2A2F}
+.stagebar{display:flex;gap:5px;margin:10px 0 12px}
+.stagebar div{flex:1;text-align:center;font-size:.68rem;padding:6px 3px;border-radius:6px;background:#F0EADD;color:var(--muted)}
+.stagebar div.on{background:var(--deep);color:#fff;font-weight:600}
+.stagebar div.did{background:#DCEEF3;color:var(--deep)}
+
 </style>
 </head>
 <body>
@@ -392,6 +420,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
   <p class="foot">Approving a request lets that customer set a password and enter the panel.
   Use the email button to tell them it's been approved.</p>
 </div>
+<datalist id="fbacodes"></datalist>
 <datalist id="couriers"><option value="Royal Mail"><option value="DPD"><option value="Evri"><option value="UPS"><option value="DHL"><option value="FedEx"><option value="Parcelforce"><option value="Yodel"></datalist>
 
 <script src="shared.js"></script>
@@ -979,6 +1008,13 @@ $('b_addstock').onclick=function(){
 };
 
 
+function openFile(path){
+  sb.storage.from('labels').createSignedUrl(path,3600).then(function(r){
+    if(r.error||!r.data){ alert('Could not open that file.'); return; }
+    window.open(r.data.signedUrl,'_blank');
+  });
+}
+
 /* =====================  SERVICES  ===================== */
 var svAll=[], svKind='return';
 var SVMETA={
@@ -1002,11 +1038,15 @@ function loadServices(){
 }
 function svCounts(){
   ['return','forward','fba'].forEach(function(k){
-    var n=svAll.filter(function(q){return q.kind===k&&q.status==='pending';}).length;
+    var n=svAll.filter(function(q){
+      return q.kind===k && (k==='fba' ? (q.status==='pending'||q.status==='labelled') : q.status==='pending');
+    }).length;
     var el=$(k==='return'?'c_ret':(k==='forward'?'c_fwd':'c_fba'));
     el.hidden=!n; el.textContent=n||'';
   });
-  var tot=svAll.filter(function(q){return q.status==='pending';}).length;
+  var tot=svAll.filter(function(q){
+    return q.kind==='fba' ? (q.status==='pending'||q.status==='labelled') : q.status==='pending';
+  }).length;
   $('c_services').hidden=!tot; $('c_services').textContent=tot||'';
 }
 function chip(t,warn){ var c=document.createElement('span'); c.className='chip'+(warn?' warn':''); c.textContent=t; return c; }
@@ -1026,7 +1066,9 @@ function renderServices(){
   var box=$('svlist'); box.innerHTML='';
   var showDone=$('sv_done').checked;
   var list=svAll.filter(function(q){
-    return q.kind===svKind && (showDone ? q.status!=='cancelled' : q.status==='pending');
+    if(q.kind!==svKind) return false;
+    if(showDone) return q.status!=='cancelled';
+    return svKind==='fba' ? ['pending','boxed','labelled'].indexOf(q.status)>-1 : q.status==='pending';
   });
   $('sv_empty').hidden=list.length>0;
   var nR=svAll.filter(function(q){return q.kind==='return';}).length,
@@ -1050,13 +1092,14 @@ function renderServices(){
       nm.textContent=(d.in_tracking||'no tracking')+' \u2192 '+d.to_name;
       bz.textContent=(q.business_name||q.user_email)+' \u00B7 '+(d.to_country||'')+(d.in_courier?' \u00B7 in via '+d.in_courier:'');
     } else {
-      var units=(d.lines||[]).reduce(function(a,b){return a+b.qty;},0);
-      nm.textContent=(d.lines||[]).length+' SKU \u00B7 '+units+' units';
-      bz.textContent=(q.business_name||q.user_email)+(d.shipment_id?' \u00B7 '+d.shipment_id:'')+(d.destination?' \u2192 '+d.destination:'');
+      var units=(d.lines||[]).reduce(function(a,b){return a+(b.qty||0);},0);
+      nm.textContent=(q.ref||'no ref')+' \u00B7 '+(d.lines||[]).length+' items \u00B7 '+units+' units';
+      bz.textContent=(q.business_name||q.user_email)+' \u00B7 '+when(q.created_at);
     }
     who.appendChild(nm); who.appendChild(bz);
-    var tg=document.createElement('span'); tg.className='tag '+(done?'approved':'pending');
-    tg.textContent=done?'done':'waiting';
+    var FBAST={pending:'build boxes',boxed:'with customer',labelled:'stick labels',done:'done'};
+    var tg=document.createElement('span'); tg.className='tag '+(done?'approved':(q.status==='boxed'?'approved':'pending'));
+    tg.textContent= svKind==='fba' ? (FBAST[q.status]||q.status) : (done?'done':'waiting');
     head.appendChild(who); head.appendChild(tg); li.appendChild(head);
 
     var body=document.createElement('div'); body.className='body'; body.hidden=done;
@@ -1078,15 +1121,34 @@ function renderServices(){
       body.appendChild(kvRow('Country',d.to_country));
       if(d.service) body.appendChild(kvRow('Wants',d.service));
     } else {
-      (d.lines||[]).forEach(function(l){ body.appendChild(kvRow(l.sku,(l.product_name?l.product_name+' \u2014 ':'')+l.qty+' units')); });
-      var pr=document.createElement('div'); pr.className='chips';
-      if(d.fnsku) pr.appendChild(chip('FNSKU labels'));
-      if(d.polybag) pr.appendChild(chip('Poly bag'));
-      if(d.bundle) pr.appendChild(chip('Bundle'));
-      if(d.fragile) pr.appendChild(chip('Fragile',true));
-      body.appendChild(pr);
-      if(d.shipment_id) body.appendChild(kvRow('Shipment ID',d.shipment_id));
-      if(d.destination) body.appendChild(kvRow('Destination',d.destination));
+      if(q.ref){
+        var rp=document.createElement('div'); rp.style.margin='2px 0 8px';
+        var pill=document.createElement('span'); pill.className='refpill'; pill.textContent=q.ref;
+        rp.appendChild(pill); body.appendChild(rp);
+      }
+      var stages=['pending','boxed','labelled','done'];
+      var sb2=document.createElement('div'); sb2.className='stagebar';
+      ['Build boxes','With customer','Stick labels','Closed'].forEach(function(t,i){
+        var el=document.createElement('div');
+        var at=stages.indexOf(q.status);
+        el.className = i<at?'did':(i===at?'on':'');
+        el.textContent=t; sb2.appendChild(el);
+      });
+      body.appendChild(sb2);
+      (d.lines||[]).forEach(function(l){
+        var t2=l.qty+' units';
+        if(l.new_fnsku) t2+='  \u2192 new FNSKU '+l.new_fnsku;
+        body.appendChild(kvRow(l.fnsku||l.sku||'\u2014',t2));
+        if(l.new_fnsku_file){
+          var r3=document.createElement('div'); r3.className='kv';
+          r3.innerHTML='<div class="k">Label file</div><div class="v"></div>';
+          var a2=document.createElement('a'); a2.textContent=l.new_fnsku_file.name; a2.href='#'; a2.style.color='var(--deep)';
+          a2.onclick=function(e){ e.preventDefault(); openFile(l.new_fnsku_file.path); };
+          r3.querySelector('.v').appendChild(a2); body.appendChild(r3);
+        }
+      });
+      if(d.lines&&d.lines[0]&&d.lines[0].ship) body.appendChild(kvRow('Shipment ID',d.lines[0].ship));
+      if(d.lines&&d.lines[0]&&d.lines[0].dest) body.appendChild(kvRow('Destination',d.lines[0].dest));
     }
     if(q.note) body.appendChild(kvRow('Customer note',q.note));
 
