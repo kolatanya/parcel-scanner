@@ -1169,6 +1169,155 @@ function renderServices(){
       return;
     }
 
+    /* ---- FBA has its own stages instead of the generic form ---- */
+    if(svKind==='fba'){
+      var rep2=document.createElement('div'); rep2.className='reply';
+
+      if(q.status==='pending'){
+        var h5=document.createElement('h4'); h5.textContent='Build the boxes'; rep2.appendChild(h5);
+        var askedFor=document.createElement('div');
+        askedFor.style.cssText='font-size:.78rem;color:var(--muted);margin:-4px 0 10px';
+        askedFor.textContent='Customer sent: '+(d.lines||[]).map(function(l){return l.qty+' \u00D7 '+l.fnsku;}).join(', ');
+        rep2.appendChild(askedFor);
+        var boxWrap=document.createElement('div'); rep2.appendChild(boxWrap);
+        var boxes=[];
+        function renumber2(){ boxes.forEach(function(b,i){ b.no.textContent='Box '+(i+1); }); }
+        function addItem(list,holder,seed){
+          var r4=document.createElement('div'); r4.className='itrow';
+          var c=document.createElement('input'); c.placeholder='FNSKU / ASIN'; c.setAttribute('list','fbacodes');
+          if(seed) c.value=seed;
+          var n2=document.createElement('input'); n2.type='number'; n2.min='1'; n2.placeholder='Qty'; n2.inputMode='numeric';
+          var x=document.createElement('button'); x.type='button'; x.className='x'; x.textContent='\u00D7';
+          var rec={code:c,qty:n2};
+          x.onclick=function(){ r4.remove(); var i=list.indexOf(rec); if(i>-1) list.splice(i,1); };
+          list.push(rec);
+          r4.appendChild(c); r4.appendChild(n2); r4.appendChild(x);
+          holder.appendChild(r4);
+        }
+        function addBox2(){
+          var card=document.createElement('div'); card.className='bxcard';
+          var hd=document.createElement('div'); hd.className='bxhead';
+          var no=document.createElement('div'); no.className='n';
+          var rm=document.createElement('button'); rm.type='button'; rm.className='rm'; rm.textContent='\u00D7';
+          hd.appendChild(no); hd.appendChild(rm); card.appendChild(hd);
+          var inr=document.createElement('div'); inr.className='bxin';
+          var ih=document.createElement('div'); ih.className='ithead';
+          ['FNSKU / ASIN','Qty',''].forEach(function(t){ var sp=document.createElement('span'); sp.textContent=t; ih.appendChild(sp); });
+          inr.appendChild(ih);
+          var itemsHolder=document.createElement('div'); inr.appendChild(itemsHolder);
+          var items=[];
+          var ai=document.createElement('button'); ai.type='button'; ai.className='additem';
+          ai.textContent='+ Add another product to this box';
+          ai.onclick=function(){ addItem(items,itemsHolder); };
+          inr.appendChild(ai);
+          var dh=document.createElement('div'); dh.className='dimhead';
+          ['L cm','W cm','H cm','kg'].forEach(function(t){ var sp=document.createElement('span'); sp.textContent=t; dh.appendChild(sp); });
+          inr.appendChild(dh);
+          var dr=document.createElement('div'); dr.className='dimrow';
+          var L=document.createElement('input'),W=document.createElement('input'),H=document.createElement('input'),K=document.createElement('input');
+          [L,W,H,K].forEach(function(i2){ i2.type='number'; i2.min='0'; i2.step='0.1'; i2.inputMode='decimal'; dr.appendChild(i2); });
+          inr.appendChild(dr); card.appendChild(inr);
+          var rec2={no:no,items:items,L:L,W:W,H:H,K:K};
+          rm.onclick=function(){ card.remove(); var i=boxes.indexOf(rec2); if(i>-1) boxes.splice(i,1); renumber2(); };
+          boxes.push(rec2); boxWrap.appendChild(card); renumber2();
+          addItem(items,itemsHolder,(d.lines&&d.lines[0])?d.lines[0].fnsku:'');
+        }
+        var ab=document.createElement('button'); ab.type='button'; ab.className='addbox';
+        ab.textContent='+ Add another box'; ab.onclick=addBox2;
+        rep2.appendChild(ab);
+        addBox2();
+
+        var note2=inp('Note for the customer (optional)');
+        rep2.appendChild(labelled('Note',note2));
+        var sv2=document.createElement('button'); sv2.className='save'; sv2.textContent='Send box details to customer';
+        sv2.onclick=function(){
+          var payload=boxes.map(function(b,i){
+            return {no:i+1,
+              items:b.items.map(function(it){ return {code:(it.code.value||'').trim().toUpperCase(),qty:parseInt(it.qty.value,10)||0}; })
+                           .filter(function(it){ return it.code && it.qty>0; }),
+              l:Number(b.L.value)||0,w:Number(b.W.value)||0,h:Number(b.H.value)||0,kg:Number(b.K.value)||0};
+          }).filter(function(b){ return b.items.length; });
+          if(!payload.length){ msg('m_sv','Put at least one product in a box.','bad'); return; }
+          var packed={},asked={};
+          payload.forEach(function(b){ b.items.forEach(function(it){ packed[it.code]=(packed[it.code]||0)+it.qty; }); });
+          (d.lines||[]).forEach(function(l){ asked[l.fnsku]=(asked[l.fnsku]||0)+l.qty; });
+          var off=Object.keys(asked).filter(function(k){ return (packed[k]||0)!==asked[k]; });
+          if(off.length && !confirm('These do not match what the customer sent:\n\n'
+              +off.map(function(k){return k+': sent '+asked[k]+', packed '+(packed[k]||0);}).join('\n')
+              +'\n\nSend anyway?')) return;
+          var noDims=payload.filter(function(b){ return !(b.l&&b.w&&b.h&&b.kg); }).length;
+          if(noDims && !confirm(noDims+' box'+(noDims>1?'es are':' is')+' missing size or weight. Send anyway?')) return;
+          sv2.disabled=true; sv2.textContent='Saving\u2026';
+          sb.rpc('set_fba_boxes',{p_id:q.id,p_boxes:payload,p_note:note2.value.trim()||null}).then(function(r5){
+            sv2.disabled=false; sv2.textContent='Send box details to customer';
+            if(r5.error){ msg('m_sv','Could not save: '+r5.error.message,'bad'); return; }
+            msg('m_sv','Sent. The customer can now upload a label for each box.','good');
+            loadServices(); loadToday();
+          });
+        };
+        rep2.appendChild(sv2);
+      }
+
+      else if(q.status==='boxed'){
+        var h6=document.createElement('h4'); h6.textContent='Waiting for the customer to upload box labels'; rep2.appendChild(h6);
+        var lbls=(d.box_labels)||[];
+        ((o.boxes)||[]).forEach(function(b){
+          var got=lbls.filter(function(x){return x.no===b.no;})[0];
+          var r6=document.createElement('div'); r6.className='lblrow';
+          var n3=document.createElement('div'); n3.className='no'; n3.textContent='Box '+b.no;
+          var v=document.createElement('div'); v.style.flex='1';
+          if(got){ var a3=document.createElement('a'); a3.textContent=got.name; a3.href='#';
+            a3.onclick=function(e){ e.preventDefault(); openFile(got.path); }; v.appendChild(a3); }
+          else { v.className='miss'; v.textContent='no label yet'; }
+          r6.appendChild(n3); r6.appendChild(v); rep2.appendChild(r6);
+        });
+      }
+
+      else if(q.status==='labelled'){
+        var h7=document.createElement('h4'); h7.textContent='Print these, stick them on, then close'; rep2.appendChild(h7);
+        var lb2=(d.box_labels)||[];
+        ((o.boxes)||[]).forEach(function(b){
+          var got2=lb2.filter(function(x){return x.no===b.no;})[0];
+          var r7=document.createElement('div'); r7.className='lblrow';
+          var n4=document.createElement('div'); n4.className='no'; n4.textContent='Box '+b.no;
+          var v2=document.createElement('div'); v2.style.flex='1';
+          if(got2){ var a4=document.createElement('a'); a4.textContent='open '+got2.name; a4.href='#';
+            a4.onclick=function(e){ e.preventDefault(); openFile(got2.path); }; v2.appendChild(a4); }
+          else { v2.className='miss'; v2.textContent='no label'; }
+          r7.appendChild(n4); r7.appendChild(v2); rep2.appendChild(r7);
+        });
+        var g2=document.createElement('div'); g2.className='g';
+        var Fc=inp('UPS / Amazon Partnered \u2026'); Fc.setAttribute('list','couriers');
+        var Ft=inp(''); Ft.style.fontFamily='var(--mono)';
+        g2.appendChild(labelled('Courier (optional)',Fc));
+        g2.appendChild(labelled('Tracking number (optional)',Ft));
+        rep2.appendChild(g2);
+        var note3=inp('Note for the customer (optional)');
+        rep2.appendChild(labelled('Note',note3));
+        var cl=document.createElement('button'); cl.className='save';
+        cl.textContent='Labels stuck on \u2014 close '+(q.ref||'job');
+        cl.onclick=function(){
+          if(!confirm('Close '+(q.ref||'this job')+'?\n\nUnits come off stock where the code matches a SKU you hold.')) return;
+          cl.disabled=true; cl.textContent='Closing\u2026';
+          sb.rpc('close_fba_job',{p_id:q.id,p_courier:Fc.value.trim()||null,p_tracking:Ft.value.trim()||null,p_note:note3.value.trim()||null})
+          .then(function(r8){
+            cl.disabled=false; cl.textContent='Labels stuck on \u2014 close';
+            if(r8.error){ msg('m_sv','Could not close: '+r8.error.message,'bad'); return; }
+            var took=(r8.data)||[];
+            msg('m_sv','Closed'+(took.length?' \u00B7 stock adjusted for '+took.length+' item'+(took.length>1?'s':''):' \u00B7 nothing matched your stock list'),'good');
+            loadServices(); loadToday();
+          });
+        };
+        rep2.appendChild(cl);
+      }
+
+      body.appendChild(rep2);
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+      return;
+    }
+
     /* ---- respond form ---- */
     var rep=document.createElement('div'); rep.className='reply';
     var h2=document.createElement('h4'); h2.textContent='Respond'; rep.appendChild(h2);
