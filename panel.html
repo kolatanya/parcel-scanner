@@ -1467,7 +1467,17 @@ $('b_create').onclick=function(){
   }).catch(function(e){
     $('b_create').disabled=false;
     if(e&&e.message==='not-approved'){ show('v_pending'); return; }
-    msg('m_approved','Hesap oluşturulamadı. Lütfen tekrar deneyin.','bad');
+    var m=(e&&e.message)||'';
+    if(/already|registered|exists/i.test(m)||/invalid login/i.test(m)){
+      msg('m_approved','Bu e-posta adresiyle zaten bir hesap var. Girdiğiniz şifre eşleşmedi. '
+        +'Mevcut şifrenizle giriş yapın; şifrenizi hatırlamıyorsanız info@ecomflex.co.uk adresine yazın.','bad');
+      $('l_email').value=email;
+      return;
+    }
+    if(/password/i.test(m)){ msg('m_approved','Şifre kabul edilmedi: en az 8 karakter olmalıdır.','bad'); return; }
+    if(/rate|too many/i.test(m)){ msg('m_approved','Çok fazla deneme yapıldı. Birkaç dakika sonra tekrar deneyin.','bad'); return; }
+    if(/fetch|network/i.test(m)){ msg('m_approved','Bağlantı kurulamadı. İnternetinizi kontrol edin.','bad'); return; }
+    msg('m_approved','Hesap oluşturulamadı. '+m,'bad');
   });
 };
 
@@ -1480,7 +1490,13 @@ $('b_dologin').onclick=function(){
   $('b_dologin').disabled=true; busy('m_login','Giriş yapılıyor…');
   sb.auth.signInWithPassword({email:email,password:$('l_pw').value}).then(function(r){
     $('b_dologin').disabled=false;
-    if(r.error){ msg('m_login','E-posta veya şifre hatalı.','bad'); return; }
+    if(r.error){
+      var lm=(r.error.message)||'';
+      if(/confirm/i.test(lm)) msg('m_login','E-posta adresiniz doğrulanmamış. info@ecomflex.co.uk adresine yazın.','bad');
+      else if(/rate|too many/i.test(lm)) msg('m_login','Çok fazla deneme. Birkaç dakika sonra tekrar deneyin.','bad');
+      else msg('m_login','E-posta veya şifre hatalı.','bad');
+      return;
+    }
     if($('l_remember').checked) remember(email); else forget();
     msg('m_login','');
     return openPanel(r.data.user);
