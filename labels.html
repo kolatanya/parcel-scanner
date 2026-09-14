@@ -106,6 +106,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   .edit > label{grid-column:1/-1}
 }
 
+
+.namebox{margin-top:12px;background:#FDF9EC;border:1px solid #E4D3A0;border-radius:11px;padding:16px}
+.namebox h3{margin:0 0 3px;font-size:1.02rem;color:#7A5210}
+.namebox .sub{margin:0 0 10px;font-size:.8rem;color:#8A7433}
+.nb_sku{font-family:var(--mono);font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:10px;word-break:break-all}
+.namebox input{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#fff;color:var(--ink);font-family:inherit;font-size:1rem}
+.nb_btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.nb_btns button{padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#fff;color:var(--navy);cursor:pointer;font-size:.9rem}
+.nb_btns .go{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:650}
+.btn-plain{width:100%;margin-top:12px;padding:12px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--muted);cursor:pointer;font-size:.86rem}
+.row .txt .pname{color:#5E5E78}
+.tbl .del{border:0;background:transparent;color:#98A2AA;font-size:1.05rem;cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -120,6 +133,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
     <div class="right">
       <span class="ver">v1</span>
       <label class="mode"><input type="checkbox" id="tabs" checked><span>Columns for Sheets</span></label>
+      <label class="mode"><input type="checkbox" id="perSku" checked><span>A row per SKU</span></label>
     </div>
   </div>
 
@@ -131,6 +145,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
 
   <div class="bar" id="barwrap" hidden><div id="bar"></div></div>
+
+  <div class="namebox" id="namebox" hidden>
+    <h3>New SKU found</h3>
+    <p class="sub" id="nb_left"></p>
+    <div class="nb_sku" id="nb_sku"></div>
+    <input id="nb_name" placeholder="What is this product called?" autocomplete="off">
+    <div class="nb_btns">
+      <button id="nb_skip">Skip</button>
+      <button class="go" id="nb_save">Save name</button>
+    </div>
+  </div>
   <div class="status" id="status"><span class="dot"></span><span id="msg">Waiting for files</span></div>
   <div class="summary" id="summary" hidden></div>
 
@@ -144,7 +169,20 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   <ul class="list" id="list"></ul>
   <div class="empty" id="empty">Results appear here, one line per label, ready to paste.</div>
 
-  <p class="foot"><strong>Columns for Sheets</strong> is on, so each part lands in its own cell when you paste, one label per row. Turn it off if you want everything in a single cell instead.<br><br>The PDFs never leave this phone — they are read in the browser and nothing is uploaded.
+  <button class="btn-plain" id="b_names">Saved product names</button>
+  <div class="card" id="namelist" hidden>
+    <h3 style="margin:0 0 8px;font-size:1rem;color:var(--navy)">Saved product names</h3>
+    <div class="tblwrap"><table class="tbl" id="nametbl">
+      <thead><tr><th>SKU</th><th>Product</th><th></th></tr></thead><tbody id="namebody"></tbody></table></div>
+    <div class="empty" id="name_empty" hidden>No names saved yet.</div>
+    <div class="nb_btns" style="margin-top:10px">
+      <button id="b_nameexport">Copy all</button>
+      <button id="b_nameimport">Paste in</button>
+    </div>
+    <p class="foot" style="margin-top:8px">Names are kept on this device. Use Copy all / Paste in to move them to another phone or computer.</p>
+  </div>
+
+  <p class="foot"><strong>Columns for Sheets</strong> puts each part in its own cell when you paste. <strong>A row per SKU</strong> gives a label with two products two rows, sharing the same tracking number — turn it off to keep one row per label instead.<br><br>The PDFs never leave this phone — they are read in the browser and nothing is uploaded.
   Tap any row to check or correct it. Rows with something missing are marked in amber.</p>
 </div>
 
@@ -264,27 +302,32 @@ function readPage(lines){
   }
 
   /* 1 + 2 - quantity and SKU.
-     They are printed together at the bottom as "1x CODE". Anchoring on the
-     quantity rather than on the shape of the code means it works for every
-     client: 1x SX7664-100-L3-W63-UK and 1x 004-LGG-G both read the same way. */
-  for(var j=up.length-1;j>=0;j--){
+     A label can carry several product lines, e.g.
+        1x 001-BR-G
+        1x 001-VNL-G
+     so every "Nx CODE" line is collected, not just the first one found. */
+  f.items=[];
+  var seenSku={};
+  for(var j=0;j<up.length;j++){
     var L=up[j];
     if(!L||OURS.test(L)||CHROME.test(L)||RX.ref.test(L)) continue;
-    var mqs=L.match(/(?:^|[^0-9A-Z])(\d{1,3})\s*[X\u00D7]\s*[^0-9A-Z]{0,2}([0-9A-Z][0-9A-Z\-\/\.]{2,})/);
-    if(mqs && looksLikeSku(mqs[2])){
-      f.qty=String(parseInt(mqs[1],10));
-      f.sku=mqs[2].replace(/[.,;:]+$/,'');
-      break;
+    var rx=/(?:^|[^0-9A-Z])(\d{1,3})\s*[X\u00D7]\s*[^0-9A-Z]{0,2}([0-9A-Z][0-9A-Z\-\/\.]{2,})/g, m2;
+    while((m2=rx.exec(L))!==null){
+      var code=m2[2].replace(/[.,;:]+$/,'');
+      if(!looksLikeSku(code)) continue;
+      if(seenSku[code]){ seenSku[code].qty+=parseInt(m2[1],10)||0; continue; }
+      var rec={sku:code, qty:parseInt(m2[1],10)||1};
+      seenSku[code]=rec; f.items.push(rec);
     }
   }
-  /* no quantity printed: fall back to the shape of the code, quantity 1 */
-  if(!f.sku){
+  /* no quantity printed anywhere: fall back to the shape of the code */
+  if(!f.items.length){
     for(var j2=up.length-1;j2>=0;j2--){
       var L2=up[j2];
       if(!L2||OURS.test(L2)||CHROME.test(L2)) continue;
       var ms=L2.match(RX.skuFull)||L2.match(RX.skuPart);
       if(!ms||RX.ref.test(ms[1])) continue;
-      f.sku=ms[1]; f.qty='1'; break;
+      f.items.push({sku:ms[1],qty:1}); break;
     }
   }
 
@@ -344,6 +387,82 @@ function getPdfjs(){
   return pdfReady;
 }
 
+
+/* ---------- saved product names, kept on this device ---------- */
+var PRODUCTS={};
+function loadNames(){
+  try{ PRODUCTS=JSON.parse(localStorage.getItem('labels:products')||'{}')||{}; }catch(e){ PRODUCTS={}; }
+}
+function saveNames(){ try{ localStorage.setItem('labels:products',JSON.stringify(PRODUCTS)); }catch(e){} }
+function nameOf(sku){ return PRODUCTS[String(sku).toUpperCase()]||''; }
+loadNames();
+
+/* Ask about each unfamiliar SKU, one at a time, then carry on. */
+var askQueue=[], askDone=null;
+function askForNames(skus,then){
+  askQueue=skus.slice(); askDone=then||function(){};
+  nextAsk();
+}
+function nextAsk(){
+  if(!askQueue.length){ $('namebox').hidden=true; var f=askDone; askDone=null; if(f) f(); return; }
+  var sku=askQueue[0];
+  $('namebox').hidden=false;
+  $('nb_sku').textContent=sku;
+  $('nb_name').value='';
+  $('nb_left').textContent = askQueue.length>1 ? (askQueue.length-1)+' more after this one' : 'Last one';
+  try{ $('namebox').scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
+  setTimeout(function(){ $('nb_name').focus(); },80);
+}
+$('nb_save').onclick=function(){
+  var v=$('nb_name').value.trim();
+  if(!v){ $('nb_name').focus(); return; }
+  PRODUCTS[askQueue[0].toUpperCase()]=v; saveNames();
+  askQueue.shift(); render(); nextAsk();
+};
+$('nb_skip').onclick=function(){ askQueue.shift(); nextAsk(); };
+$('nb_name').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); $('nb_save').click(); } });
+
+/* ---------- managing the saved names ---------- */
+$('b_names').onclick=function(){
+  var box=$('namelist'); box.hidden=!box.hidden;
+  if(!box.hidden) drawNames();
+};
+function drawNames(){
+  var keys=Object.keys(PRODUCTS).sort();
+  var tb=$('namebody'); tb.innerHTML='';
+  $('nametbl').hidden=!keys.length; $('name_empty').hidden=keys.length>0;
+  keys.forEach(function(k){
+    var tr=document.createElement('tr');
+    var a=document.createElement('td'); a.className='sku'; a.textContent=k;
+    var b=document.createElement('td');
+    var i=document.createElement('input'); i.value=PRODUCTS[k];
+    i.onchange=function(){ PRODUCTS[k]=i.value.trim(); if(!PRODUCTS[k]) delete PRODUCTS[k]; saveNames(); render(); };
+    b.appendChild(i);
+    var c=document.createElement('td');
+    var x=document.createElement('button'); x.className='del'; x.textContent='\u00D7'; x.title='Forget this SKU';
+    x.onclick=function(){ delete PRODUCTS[k]; saveNames(); drawNames(); render(); };
+    c.appendChild(x);
+    tr.appendChild(a); tr.appendChild(b); tr.appendChild(c); tb.appendChild(tr);
+  });
+}
+$('b_nameexport').onclick=function(){
+  var t=Object.keys(PRODUCTS).sort().map(function(k){ return k+'\t'+PRODUCTS[k]; }).join('\n');
+  if(!t){ say('Nothing saved yet','warn'); return; }
+  EFCopy(t,Object.keys(PRODUCTS).length+' product names copied',$('b_nameexport'));
+};
+$('b_nameimport').onclick=function(){
+  var t=prompt('Paste SKU and product name, one per line, separated by a tab:');
+  if(!t) return;
+  var n=0;
+  t.split(/\r?\n/).forEach(function(line){
+    var p=line.split('\t'); if(p.length<2) p=line.split(/\s{2,}/);
+    var k=(p[0]||'').trim().toUpperCase(), v=(p[1]||'').trim();
+    if(k&&v){ PRODUCTS[k]=v; n++; }
+  });
+  saveNames(); drawNames(); render();
+  say(n+' product name'+(n===1?'':'s')+' added','good');
+};
+
 /* ---------- handle files ---------- */
 function say(t,k){ msg.textContent=t; status.className='status'+(k?' '+k:''); }
 function handle(files){
@@ -384,6 +503,12 @@ function handle(files){
     },Promise.resolve()).then(function(){
       barwrap.hidden=true;
       render();
+      var unknown={},list2=[];
+      rows.forEach(function(r){ (r.items||[]).forEach(function(it){
+        var k=String(it.sku).toUpperCase();
+        if(!nameOf(k)&&!unknown[k]){ unknown[k]=1; list2.push(k); }
+      }); });
+      if(list2.length) askForNames(list2);
       if(!added && blank) say('No text found in those PDFs — they look like scans rather than real labels.','bad');
       else if(blank) say('Read '+added+' label'+(added===1?'':'s')+'. '+blank+' page'+(blank===1?'':'s')+' had no text.','warn');
       else say('Read '+added+' label'+(added===1?'':'s'),'good');
@@ -406,10 +531,28 @@ file.onchange=function(){ handle(file.files); file.value=''; };
 drop.addEventListener('drop',function(e){ if(e.dataTransfer&&e.dataTransfer.files) handle(e.dataTransfer.files); });
 
 /* ---------- output ---------- */
-function gapsOf(f){ return KEYS.filter(function(k){ return !f[k]; }); }
-function lineOf(f){
-  return [f.date,f.sku,f.qty,f.name,f.post,f.ref,fmtTrack(f.track)].join(tabs.checked?'\t':'  ');
+function gapsOf(f){
+  var miss=['name','post','ref','track'].filter(function(k){ return !f[k]; });
+  if(!f.items||!f.items.length) miss.unshift('sku');
+  return miss;
 }
+/* One label can hold several products, so it can produce several rows.
+   Columns: date, SKU, qty, product, customer, postcode, reference, tracking. */
+function rowsOf(f){
+  var sep = tabs.checked ? '\t' : '  ';
+  var items = (f.items&&f.items.length) ? f.items : [{sku:'',qty:''}];
+  if($('perSku').checked){
+    return items.map(function(it){
+      return [f.date,it.sku,it.qty,nameOf(it.sku),f.name,f.post,f.ref,fmtTrack(f.track)].join(sep);
+    });
+  }
+  return [[f.date,
+    items.map(function(i){return i.sku;}).join(', '),
+    items.map(function(i){return i.qty;}).join(', '),
+    items.map(function(i){return nameOf(i.sku)||'?';}).join(', '),
+    f.name,f.post,f.ref,fmtTrack(f.track)].join(sep)];
+}
+function lineOf(f){ return rowsOf(f).join('\n'); }
 function render(){
   listEl.innerHTML='';
   rows.forEach(function(f,i){
@@ -420,6 +563,8 @@ function render(){
     var head=document.createElement('div'); head.className='rowhead';
     var s=document.createElement('div'); s.className='stripe'; head.appendChild(s);
     var t=document.createElement('div'); t.className='txt'; t.textContent=lineOf(f); head.appendChild(t);
+    if((f.items||[]).length>1){ var mk=document.createElement('div'); mk.className='flag';
+      mk.textContent=f.items.length+' SKUs'; head.appendChild(mk); }
     if(miss.length){
       var fl=document.createElement('div'); fl.className='flag';
       fl.textContent='missing '+miss.length; head.appendChild(fl);
@@ -428,16 +573,43 @@ function render(){
     li.appendChild(head);
 
     var ed=document.createElement('div'); ed.className='edit'; ed.hidden=true;
-    KEYS.forEach(function(k){
-      var w=document.createElement('div'); w.className='f';
-      var lab=document.createElement('label'); lab.textContent=LABELS[k]+(f.src?'':''); w.appendChild(lab);
-      var inp=document.createElement('input');
-      inp.value = k==='track'? fmtTrack(f[k]) : (f[k]||'');
-      if(!f[k]) inp.className='miss';
-      inp.oninput=function(){ f[k]=inp.value.trim(); inp.className=f[k]?'':'miss'; t.textContent=lineOf(f);
-        li.className='row'+(gapsOf(f).length?' warn':''); save(); };
-      w.appendChild(inp); ed.appendChild(w);
+
+    function redraw(){ t.textContent=lineOf(f); li.className='row'+(gapsOf(f).length?' warn':''); save(); }
+
+    (f.items||[]).forEach(function(it,ix){
+      var w1=document.createElement('div'); w1.className='f';
+      var l1=document.createElement('label'); l1.textContent='SKU '+(ix+1); w1.appendChild(l1);
+      var i1=document.createElement('input'); i1.value=it.sku||''; if(!it.sku) i1.className='miss';
+      i1.oninput=function(){ it.sku=i1.value.trim().toUpperCase(); i1.className=it.sku?'':'miss'; redraw(); };
+      w1.appendChild(i1); ed.appendChild(w1);
+
+      var w2=document.createElement('div'); w2.className='f';
+      var l2=document.createElement('label'); l2.textContent='Quantity'; w2.appendChild(l2);
+      var i2=document.createElement('input'); i2.value=it.qty||''; i2.inputMode='numeric';
+      i2.oninput=function(){ it.qty=i2.value.trim(); redraw(); };
+      w2.appendChild(i2); ed.appendChild(w2);
+
+      var w3=document.createElement('div'); w3.className='f';
+      var l3=document.createElement('label'); l3.textContent='Product name'; w3.appendChild(l3);
+      var i3=document.createElement('input'); i3.value=nameOf(it.sku); i3.placeholder='not saved yet';
+      i3.onchange=function(){
+        var v=i3.value.trim();
+        if(it.sku){ if(v) PRODUCTS[it.sku.toUpperCase()]=v; else delete PRODUCTS[it.sku.toUpperCase()];
+                    saveNames(); redraw(); }
+      };
+      w3.appendChild(i3); ed.appendChild(w3);
     });
+
+    ['name','post','ref','track'].forEach(function(k){
+      var w=document.createElement('div'); w.className='f';
+      var lab=document.createElement('label'); lab.textContent=LABELS[k]; w.appendChild(lab);
+      var inp2=document.createElement('input');
+      inp2.value = k==='track'? fmtTrack(f[k]) : (f[k]||'');
+      if(!f[k]) inp2.className='miss';
+      inp2.oninput=function(){ f[k]=inp2.value.trim(); inp2.className=f[k]?'':'miss'; redraw(); };
+      w.appendChild(inp2); ed.appendChild(w);
+    });
+
     var src=document.createElement('label'); src.style.marginTop='10px'; src.style.display='block';
     src.textContent='from '+(f.src||'file'); ed.appendChild(src);
     var rm=document.createElement('button'); rm.className='drop-row'; rm.textContent='Remove this label';
@@ -466,7 +638,7 @@ function save(){ try{
   if(window.storage) window.storage.set('labels:rows',JSON.stringify(rows));
   else localStorage.setItem('labels:rows',JSON.stringify(rows));
 }catch(e){} }
-function allText(){ return rows.map(lineOf).join('\n'); }
+function allText(){ var out=[]; rows.forEach(function(f){ out=out.concat(rowsOf(f)); }); return out.join('\n'); }
 tabs.onchange=function(){
   try{ localStorage.setItem('labels:tabs', tabs.checked?'1':'0'); }catch(e){}
   render();
