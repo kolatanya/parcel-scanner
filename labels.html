@@ -537,20 +537,20 @@ function gapsOf(f){
   return miss;
 }
 /* One label can hold several products, so it can produce several rows.
-   Columns: date, SKU, qty, product, customer, postcode, reference, tracking. */
+   Columns: date, SKU, qty, customer, postcode, reference, tracking, product. */
 function rowsOf(f){
   var sep = tabs.checked ? '\t' : '  ';
   var items = (f.items&&f.items.length) ? f.items : [{sku:'',qty:''}];
   if($('perSku').checked){
     return items.map(function(it){
-      return [f.date,it.sku,it.qty,nameOf(it.sku),f.name,f.post,f.ref,fmtTrack(f.track)].join(sep);
+      return [f.date,it.sku,it.qty,f.name,f.post,f.ref,fmtTrack(f.track),nameOf(it.sku)].join(sep);
     });
   }
   return [[f.date,
     items.map(function(i){return i.sku;}).join(', '),
     items.map(function(i){return i.qty;}).join(', '),
-    items.map(function(i){return nameOf(i.sku)||'?';}).join(', '),
-    f.name,f.post,f.ref,fmtTrack(f.track)].join(sep)];
+    f.name,f.post,f.ref,fmtTrack(f.track),
+    items.map(function(i){return nameOf(i.sku)||'?';}).join(', ')].join(sep)];
 }
 function lineOf(f){ return rowsOf(f).join('\n'); }
 function render(){
