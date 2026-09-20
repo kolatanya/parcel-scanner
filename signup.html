@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4EEE2">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Yeni Müşteri Kaydı — ecomFLEX</title>
+<style>
+:root{
+  --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
+  --ink:#33334E; --navy:#48486C; --muted:#7C7C93;
+  --red:#EA3D49; --blue:#45B0C8; --deep:#2E8FA8;
+  --ok:#2E8FA8; --warn:#B0761A; --bad:#D62F3C;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans)}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+.wrap{max-width:660px;margin:0 auto;padding:26px 16px 50px}
+button{font-family:inherit;font-size:1rem}
+[hidden]{display:none!important}
+
+header{padding-bottom:18px;border-bottom:2px solid var(--edge2);margin-bottom:20px}
+header img{height:38px;width:auto;display:block}
+.intro{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:18px;margin-bottom:18px}
+.intro p{margin:0 0 9px;font-size:.92rem}
+.intro p:last-child{margin-bottom:0}
+.intro b{color:var(--red)}
+.hmrc{display:inline-block;background:#FDF6E1;border:1px solid #E4D3A0;color:#7A5210;
+  border-radius:7px;padding:5px 10px;font-size:.85rem;font-weight:600;margin-top:4px}
+
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:18px;margin-bottom:14px}
+h2{margin:0 0 4px;font-size:1.05rem;font-weight:650;color:var(--navy)}
+.sub{margin:0 0 14px;font-size:.84rem;color:var(--muted)}
+.f{margin-bottom:13px}
+.f label.top{display:block;font-size:.82rem;color:var(--ink);margin-bottom:5px;font-weight:600}
+.f .req{color:var(--red)}
+.f input[type=text],.f input[type=email],.f input[type=tel],.f textarea{
+  width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;
+  color:var(--ink);font-family:inherit;font-size:1rem}
+.f textarea{min-height:92px;resize:vertical}
+.f .err{font-size:.78rem;color:var(--bad);margin-top:4px;display:none}
+.f.bad input,.f.bad textarea{border-color:var(--bad);background:#FDF1F0}
+.f.bad .err{display:block}
+.opts{display:grid;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:9px;font-size:.92rem;padding:8px 10px;border-radius:8px;
+  border:1px solid var(--edge);background:#FFFDF8;cursor:pointer}
+.opt input{width:18px;height:18px;margin-top:1px;accent-color:var(--red);flex:none}
+.opt.on{border-color:var(--deep);background:#EFF7F9}
+.other{margin-top:7px}
+.other input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.95rem;color:var(--ink)}
+
+.btn{display:block;width:100%;padding:17px;border-radius:10px;border:0;background:var(--red);
+  color:#fff;font-size:1.05rem;font-weight:650;cursor:pointer}
+.btn:disabled{opacity:.5}
+.btn.second{background:var(--panel);color:var(--navy);border:1px solid var(--edge2);font-weight:500;font-size:.95rem}
+.msg{margin-top:12px;min-height:22px;font-size:.88rem;color:var(--muted)}
+.msg.bad{color:var(--bad)} .msg.good{color:var(--ok)}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--edge2);border-top-color:var(--red);
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* the code they get at the end */
+.codebox{text-align:center;padding:26px 18px}
+.codebox .big{font-family:var(--mono);font-size:2.2rem;font-weight:700;letter-spacing:.18em;
+  color:var(--navy);background:#fff;border:2px dashed var(--deep);border-radius:12px;padding:18px 10px;margin:14px 0}
+.codebox .warn{background:#FDF6E1;border:1px solid #E4D3A0;color:#7A5210;border-radius:9px;
+  padding:13px;font-size:.88rem;text-align:left;margin-bottom:14px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);background:var(--navy);
+  color:#fff;padding:11px 18px;border-radius:24px;font-size:.88rem;font-weight:600;opacity:0;
+  pointer-events:none;transition:opacity .18s,transform .18s;z-index:99}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{margin-top:20px;font-size:.78rem;color:#8E8EA3;text-align:center}
+.foot a{color:#8E8EA3}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+@media (min-width:760px){ .wrap{max-width:760px} .opts.two{grid-template-columns:1fr 1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header><img src="logo.png" alt="ecomFLEX"></header>
+
+  <div id="form">
+    <div class="intro">
+      <p><b>ecomFLEX</b>'e gösterdiğiniz ilgi için çok teşekkür ederiz.</p>
+      <p>Size daha iyi hizmet verebilmemiz için lütfen aşağıdaki bilgileri doldurabilir misiniz?</p>
+      <p>İyi günler dileriz.</p>
+      <span class="hmrc">ecomFLEX, HMRC onaylı bir fulfilment merkezidir.</span>
+    </div>
+
+    <div class="card">
+      <h2>İletişim bilgileriniz</h2>
+      <p class="sub">Panel hesabınız bu bilgilerle oluşturulur.</p>
+      <div class="f" id="w_email"><label class="top">E-posta <span class="req">*</span></label>
+        <input id="i_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false">
+        <div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
+      <div class="f" id="w_name"><label class="top">Adınız Soyadınız <span class="req">*</span></label>
+        <input id="i_name" type="text" autocomplete="name"><div class="err">Lütfen ad ve soyadınızı yazın.</div></div>
+      <div class="f" id="w_company"><label class="top">Şirket Adınız <span class="req">*</span></label>
+        <input id="i_company" type="text" autocomplete="organization"><div class="err">Lütfen şirket adınızı yazın.</div></div>
+      <div class="f" id="w_addr"><label class="top">Şirket Adresiniz <span class="req">*</span></label>
+        <textarea id="i_addr" autocomplete="street-address"></textarea><div class="err">Lütfen şirket adresinizi yazın.</div></div>
+      <div class="f" id="w_phone"><label class="top">Telefon Numaranız <span class="req">*</span></label>
+        <input id="i_phone" type="tel" autocomplete="tel"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Çalışma Yönteminiz <span class="req">*</span></h2>
+      <p class="sub">Birden fazla seçebilirsiniz.</p>
+      <div class="opts two" id="g_work"></div>
+      <div class="other"><input id="o_work" placeholder="Diğer (yazabilirsiniz)"></div>
+      <div class="f" id="w_work"><div class="err">Lütfen en az bir seçenek işaretleyin.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>İlgilendiğiniz Hizmetlerimiz <span class="req">*</span></h2>
+      <p class="sub">Birden fazla seçebilirsiniz.</p>
+      <div class="opts" id="g_serv"></div>
+      <div class="other"><input id="o_serv" placeholder="Diğer (yazabilirsiniz)"></div>
+      <div class="f" id="w_serv"><div class="err">Lütfen en az bir seçenek işaretleyin.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Talebiniz İle İlgili Detaylı Bilgi <span class="req">*</span></h2>
+      <div class="f" id="w_details">
+        <textarea id="i_details" placeholder="Aylık kaç koli, hangi pazaryerleri, özel isteğiniz…"></textarea>
+        <div class="err">Lütfen kısaca yazın.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>ecomFLEX'i Nereden Duydunuz? <span class="req">*</span></h2>
+      <div class="opts two" id="g_heard"></div>
+      <div class="other"><input id="o_heard" placeholder="Diğer (yazabilirsiniz)"></div>
+      <div class="f" id="w_heard"><div class="err">Lütfen en az bir seçenek işaretleyin.</div></div>
+    </div>
+
+    <button class="btn" id="b_send">Kaydı Tamamla</button>
+    <div class="msg" id="m"></div>
+    <p class="foot">Hesabınız anında oluşturulur. Size özel bir giriş kodu verilir.</p>
+  </div>
+
+  <!-- success -->
+  <div class="card codebox" id="done" hidden>
+    <h2 style="font-size:1.2rem">Kaydınız tamamlandı</h2>
+    <p class="sub">Panele girmek için kullanacağınız kod:</p>
+    <div class="big" id="thecode">--------</div>
+    <div class="warn">
+      <b>Bu kodu saklayın.</b> Panele girmek için tek ihtiyacınız olan şey budur.
+      Kimseyle paylaşmayın — kodu bilen herkes hesabınıza girebilir.
+      Kodunuzu kaybederseniz <a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a> adresinden bize yazın.
+    </div>
+    <button class="btn" id="b_copy">Kodu Kopyala</button>
+    <button class="btn second" id="b_go" style="margin-top:9px">Panele Git</button>
+    <p class="sub" style="margin-top:14px;text-align:left">
+      Sıradaki adım: panele girip hesabınıza ilk yüklemenizi yapın.
+      İlk yükleme yapılana kadar talep oluşturamazsınız.</p>
+  </div>
+
+  <p class="foot">ecomFLEX · <a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a></p>
+</div>
+
+<script src="ecomflex-config.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i);};
+
+var WORK=['Üretici','Toptancı','Private Label','Retail - Online Arbitraj','FBA','FBM','Dropshipping'];
+var SERV=['Fulfilment, depolama','Pazaryerleri hesap açılışı, ürün listelenmesi','Pazaryeri hesap yönetimi',
+          'Pazar, rekabet ve maliyet analizi','Şirket kuruluşu, banka hesabı açılması',
+          'İade - Şirket adresi hizmeti','FBA Hazırlık'];
+var HEARD=['Arama motoru','Web sitesi','Instagram','LinkedIn','WhatsApp grupları','Arkadaş tavsiyesi'];
+
+function fill(id,items){
+  var box=$(id);
+  items.forEach(function(t){
+    var l=document.createElement('label'); l.className='opt';
+    var c=document.createElement('input'); c.type='checkbox'; c.value=t;
+    var s=document.createElement('span'); s.textContent=t;
+    c.onchange=function(){ l.classList.toggle('on',c.checked); };
+    l.appendChild(c); l.appendChild(s); box.appendChild(l);
+  });
+}
+fill('g_work',WORK); fill('g_serv',SERV); fill('g_heard',HEARD);
+function picked(id,otherId){
+  var out=[];
+  Array.prototype.forEach.call($(id).querySelectorAll('input:checked'),function(c){ out.push(c.value); });
+  var o=$(otherId).value.trim(); if(o) out.push(o);
+  return out;
+}
+
+function msg(t,k){ $('m').innerHTML=t; $('m').className='msg'+(k?' '+k:''); }
+function bad(w,on){ $(w).classList.toggle('bad',!!on); return !on; }
+var EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+var sb=null;
+function loadScript(urls){
+  return new Promise(function(res,rej){
+    (function next(i){
+      if(i>=urls.length) return rej(new Error('cdn'));
+      var s=document.createElement('script'); s.src=urls[i];
+      s.onload=function(){res();}; s.onerror=function(){next(i+1);};
+      document.head.appendChild(s);
+    })(0);
+  });
+}
+function connect(){
+  var cfg=window.ECOMFLEX||{};
+  if(!cfg.SUPABASE_URL||/PASTE_/.test(cfg.SUPABASE_URL)) return Promise.reject(new Error('config'));
+  return loadScript(['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+                     'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'])
+  .then(function(){
+    sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,
+      {auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}});
+  });
+}
+
+function toast(t){
+  var el=document.createElement('div'); el.className='toast'; el.textContent=t;
+  document.body.appendChild(el); void el.offsetWidth; el.classList.add('on');
+  setTimeout(function(){ el.classList.remove('on'); setTimeout(function(){el.remove();},300); },1700);
+}
+
+$('b_send').onclick=function(){
+  var ok=true;
+  ok = bad('w_email', !EMAIL.test($('i_email').value.trim())) && ok;
+  ok = bad('w_name', $('i_name').value.trim().length<3) && ok;
+  ok = bad('w_company', $('i_company').value.trim().length<2) && ok;
+  ok = bad('w_addr', $('i_addr').value.trim().length<5) && ok;
+  ok = bad('w_phone', $('i_phone').value.replace(/\D/g,'').length<7) && ok;
+  var work=picked('g_work','o_work'), serv=picked('g_serv','o_serv'), heard=picked('g_heard','o_heard');
+  ok = bad('w_work', !work.length) && ok;
+  ok = bad('w_serv', !serv.length) && ok;
+  ok = bad('w_details', $('i_details').value.trim().length<3) && ok;
+  ok = bad('w_heard', !heard.length) && ok;
+  if(!ok){ msg('Lütfen işaretli alanları doldurun.','bad');
+    var f=document.querySelector('.f.bad'); if(f) f.scrollIntoView({behavior:'smooth',block:'center'});
+    return; }
+
+  var email=$('i_email').value.trim();
+  $('b_send').disabled=true; msg('<span class="spin"></span>Hesabınız oluşturuluyor…');
+
+  var code=null;
+  sb.rpc('gen_code').then(function(r){
+    if(r.error) throw r.error;
+    code=r.data;
+    return sb.auth.signUp({email:email,password:code,options:{data:{
+      full_name:$('i_name').value.trim(), business_name:$('i_company').value.trim()
+    }}});
+  }).then(function(r){
+    if(r.error){
+      if(/already|registered/i.test(r.error.message||'')) throw new Error('DUP');
+      throw r.error;
+    }
+    if(!(r.data&&r.data.session)) return sb.auth.signInWithPassword({email:email,password:code});
+    return r;
+  }).then(function(){
+    return sb.rpc('register_client',{p_code:code,p_data:{
+      full_name:$('i_name').value.trim(), company:$('i_company').value.trim(),
+      company_address:$('i_addr').value.trim(), phone:$('i_phone').value.trim(),
+      work_methods:work, services:serv, details:$('i_details').value.trim(), heard_from:heard
+    }});
+  }).then(function(r){
+    if(r.error) throw r.error;
+    $('form').hidden=true; $('done').hidden=false;
+    $('thecode').textContent=code;
+    window.scrollTo(0,0);
+  }).catch(function(e){
+    $('b_send').disabled=false;
+    if(e&&e.message==='DUP'){
+      msg('Bu e-posta ile zaten bir kayıt var. Panele giriş yapın veya kodunuz için '
+        +'<a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a> adresine yazın.','bad');
+      return;
+    }
+    msg('Kayıt tamamlanamadı. Lütfen tekrar deneyin. '+((e&&e.message)||''),'bad');
+  });
+};
+
+$('b_copy').onclick=function(){
+  var t=$('thecode').textContent;
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(t).then(function(){ toast('Kod kopyalandı'); },function(){ toast('Kopyalanamadı'); });
+  else toast('Kodu elle not alın: '+t);
+};
+$('b_go').onclick=function(){ location.href='panel.html'; };
+
+connect().catch(function(){
+  msg('Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.','bad');
+  $('b_send').disabled=true;
+});
+})();
+</script>
+</body>
+</html>

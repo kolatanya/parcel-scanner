@@ -214,6 +214,25 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
 .badge.boxed{background:#EFF7F9;color:#1F5F70;border:1px solid #CDE4EA}
 .badge.labelled{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
 
+
+.balcard{background:linear-gradient(135deg,#2E8FA8,#48486C);border-radius:14px;padding:22px;color:#fff}
+.balcard .bal{font-size:2.4rem;font-weight:700;letter-spacing:-.02em;line-height:1}
+.balcard .ballbl{font-size:.82rem;opacity:.85;margin-top:5px}
+.bank{background:#FFFDF8;border:1px solid var(--edge2);border-radius:9px;padding:13px;font-family:var(--mono);
+  font-size:.86rem;white-space:pre-wrap;word-break:break-word;margin:0 0 10px;color:var(--ink)}
+.locked{background:#FDF6E1;border:1px solid #E4D3A0;border-radius:11px;padding:15px;margin-bottom:16px}
+.locked h4{margin:0 0 5px;font-size:.95rem;color:#7A5210}
+.locked p{margin:0 0 10px;font-size:.86rem;color:#7A5210;line-height:1.5}
+.locked button{width:100%;padding:12px;border-radius:8px;border:0;background:var(--red);color:#fff;font-weight:650;cursor:pointer}
+.wh{background:#EFF7F9;border:1px solid #CDE4EA;border-radius:10px;padding:13px;margin-bottom:14px}
+.wh h4{margin:0 0 5px;font-size:.82rem;color:#1F5F70;text-transform:uppercase;letter-spacing:.05em}
+.wh pre{margin:0;font-family:var(--mono);font-size:.85rem;white-space:pre-wrap;color:var(--ink)}
+.wh button{margin-top:9px;padding:9px 13px;border-radius:7px;border:1px solid #CDE4EA;background:#fff;color:var(--deep);cursor:pointer;font-size:.82rem;font-weight:600}
+.tbl .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.tbl .amt.neg{color:#8E2A2F} .tbl .amt.pos{color:#1E6B4A}
+.me .mycode{font-family:var(--mono);font-size:.78rem;color:var(--deep);background:#EFF7F9;border:1px solid #CDE4EA;
+  border-radius:20px;padding:2px 9px;display:inline-block;margin-top:7px}
+
 </style>
 </head>
 <body>
@@ -232,10 +251,10 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
   <!-- choose -->
   <div class="card" id="v_choice" hidden>
     <h2>Panele hoş geldiniz</h2>
-    <p class="lead">Hesabınız varsa giriş yapın. Yoksa kayıt talebi oluşturun.</p>
+    <p class="lead">Hesabınız varsa giriş kodunuzla girin. Yoksa kayıt formunu doldurun.</p>
     <div class="choice">
-      <button class="btn primary" id="b_signup">Kayıt Ol</button>
-      <button class="btn second" id="b_login">Giriş Yap</button>
+      <button class="btn primary" id="b_login">Giriş Yap</button>
+      <button class="btn second" id="b_signup">Yeni Müşteri Kaydı</button>
     </div>
   </div>
 
@@ -295,11 +314,19 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
   <!-- login -->
   <div class="card" id="v_login" hidden>
     <h2>Giriş yap</h2>
-    <p class="lead">Panel hesabınızla giriş yapın.</p>
+    <p class="lead">Kaydınız sırasında size verilen 8 haneli kodu yazın.</p>
+    <div class="f" id="w_code"><label>Giriş kodunuz</label>
+      <input id="l_code" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8"
+             placeholder="ABCD2345" style="font-family:var(--mono);font-size:1.4rem;letter-spacing:.2em;text-align:center">
+      <div class="err">Lütfen 8 haneli kodunuzu yazın.</div></div>
+    <button class="btn primary" id="b_codelogin">Kod ile Giriş Yap</button>
+    <button class="linkbtn" id="b_showpw">Kod yerine e-posta ve şifre ile gir</button>
+    <div id="pwbox" hidden style="margin-top:12px;border-top:1px solid var(--edge);padding-top:12px">
     <div class="f" id="w_lemail"><label>E-posta adresi</label><input id="l_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"><div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
     <div class="f" id="w_lpw"><label>Şifre</label><input id="l_pw" type="password" autocomplete="current-password"><div class="err">Lütfen şifrenizi yazın.</div></div>
     <label class="remember"><input type="checkbox" id="l_remember" checked> Bu cihazı 30 gün hatırla</label>
-    <button class="btn primary" id="b_dologin">Giriş Yap</button>
+    <button class="btn second" id="b_dologin">E-posta ile Giriş Yap</button>
+    </div>
     <button class="linkbtn" id="b_back2">Geri</button>
     <div class="msg" id="m_login"></div>
   </div>
@@ -325,12 +352,47 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
           <button class="navitem" data-p="ret">İade Bildirimi</button>
           <button class="navitem" data-p="fwd">Kargo Yönlendirme</button>
           <button class="navitem" data-p="fba">FBA Hazırlık</button>
+          <div class="grp">Hesap</div>
+          <button class="navitem" data-p="wallet">Bakiye</button>
           <div class="grp">Rapor</div>
           <button class="navitem" data-p="report">Aylık Özet</button>
         </nav>
       </aside>
 
       <main>
+        <div class="locked" id="lockbar" hidden>
+          <h4>Hesabınız henüz aktif değil</h4>
+          <p>Talep oluşturabilmek için önce hesabınıza bakiye yüklemeniz gerekiyor.
+             Yüklemeniz ulaştığında tüm özellikler açılır.</p>
+          <button id="b_tolock">Bakiye Yükle</button>
+        </div>
+        <div class="wh" id="whbox" hidden>
+          <h4>Depo adresiniz</h4>
+          <pre id="whtext"></pre>
+          <button id="b_whcopy">Adresi kopyala</button>
+        </div>
+
+        <section id="pg_wallet" hidden>
+          <h2>Bakiye</h2>
+          <p class="lead">Hesabınızdaki bakiye ve hareketleriniz.</p>
+          <div class="balcard"><div class="bal" id="bal_amount">£0.00</div>
+            <div class="ballbl">Kullanılabilir bakiye</div></div>
+          <div class="card" style="margin-top:14px">
+            <h2 style="font-size:1rem">Bakiye yükleme</h2>
+            <p class="lead">Aşağıdaki hesaba havale/EFT yapın. Ödemeniz ulaştığında bakiyeniz güncellenir.</p>
+            <pre class="bank" id="bankbox">—</pre>
+            <button class="btn second" id="b_bankcopy">Hesap bilgilerini kopyala</button>
+            <p class="hint" style="margin-top:10px">Açıklama kısmına şirket adınızı yazın, böylece ödemenizi hızlıca eşleştirebiliriz.</p>
+          </div>
+          <h2 style="font-size:1rem;margin-top:18px">Hesap hareketleri</h2>
+          <div class="msg" id="m_wallet"></div>
+          <div class="tblwrap"><table class="tbl" id="waltbl" hidden>
+            <thead><tr><th>Tarih</th><th>Açıklama</th><th style="text-align:right">Tutar</th></tr></thead>
+            <tbody id="walbody"></tbody></table></div>
+          <div class="note info" id="wal_empty" hidden>Henüz hareket yok.</div>
+          <button class="btn second" id="b_walreload" style="margin-top:12px">Yenile</button>
+        </section>
+
         <!-- new enquiry -->
         <section id="pg_new">
           <h2>Geçici 1 — Yeni sipariş talebi</h2>
@@ -635,6 +697,7 @@ function openPanel(user){
     $('p_sub').textContent=(m.business_name?m.business_name+'\n':'')+user.email;
     show('v_panel');
     sb.rpc('link_my_account').then(function(){},function(){});
+    refreshAccount();
     page('new');
     loadOrders(); loadStock();
   }).catch(function(){ show('v_panel'); });
@@ -642,7 +705,7 @@ function openPanel(user){
 
 /* ---------- pages ---------- */
 function page(p){
-  ['new','mine','stock','inbound','ret','fwd','fba','bulk','report'].forEach(function(k){ $('pg_'+k).hidden = (p!==k); });
+  ['new','mine','stock','inbound','ret','fwd','fba','bulk','report','wallet'].forEach(function(k){ $('pg_'+k).hidden = (p!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
     b.classList.toggle('on', b.getAttribute('data-p')===p);
   });
@@ -653,6 +716,7 @@ function page(p){
   if(p==='fwd') loadReq('forward');
   if(p==='fba'){ if(!$('fbarows').children.length) $('fbarows').appendChild(fbaRow()); loadReq('fba'); }
   if(p==='report') loadReport();
+  if(p==='wallet'){ refreshAccount(); loadWallet(); }
 }
 Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
   b.onclick=function(){ page(b.getAttribute('data-p')); };
@@ -1391,7 +1455,7 @@ function loadReq(kind){
 
 
 /* ---------- actions ---------- */
-$('b_signup').onclick=function(){ show('v_signup'); };
+$('b_signup').onclick=function(){ location.href='signup.html'; };
 $('b_login').onclick=function(){ show('v_login'); };
 $('b_back1').onclick=function(){ show('v_choice'); };
 $('b_back2').onclick=function(){ show('v_choice'); };
@@ -1513,6 +1577,92 @@ document.addEventListener('keydown',function(e){
   if(!$('v_signup').hidden) $('b_send').click();
   else if(!$('v_login').hidden) $('b_dologin').click();
   else if(!$('v_approved').hidden) $('b_create').click();
+});
+
+/* =====================  ACCOUNT, BALANCE, LOCK  ===================== */
+var ACC={unlocked:false,balance:0,unit:null,bank:'',welcome:'',code:null};
+function money(p){ var n=(Number(p)||0)/100; return (n<0?'-':'')+'\u00A3'+Math.abs(n).toFixed(2); }
+function refreshAccount(){
+  if(!sb) return Promise.resolve();
+  return sb.rpc('my_account').then(function(r){
+    if(r.error) return;
+    var a=r.data||{};
+    ACC.unlocked=!!a.unlocked; ACC.balance=a.balance||0; ACC.unit=a.unit||null;
+    ACC.bank=a.bank||''; ACC.code=a.code||null;
+    $('lockbar').hidden=ACC.unlocked;
+    $('bal_amount').textContent=money(ACC.balance);
+    $('bankbox').textContent=ACC.bank||'—';
+    if(ACC.code && !document.querySelector('.me .mycode')){
+      var c=document.createElement('div'); c.className='mycode'; c.textContent='Kod: '+ACC.code;
+      var me=document.querySelector('.me'); if(me) me.insertBefore(c,$('b_logout'));
+    }
+    if(ACC.unit){
+      $('whtext').textContent=(a.company||'')+'\nAylesford Storage Unit '+ACC.unit
+        +'\nThe Coachworks, Old Mill Lane\nAylesford\nME20 7DT';
+      $('whbox').hidden=false;
+    } else $('whbox').hidden=true;
+  },function(){});
+}
+/* Nothing that creates work is allowed until the first top-up has landed. */
+function needsFunds(){
+  if(ACC.unlocked) return false;
+  alert('Talep oluşturabilmek için önce hesabınıza bakiye yüklemeniz gerekiyor.');
+  page('wallet');
+  return true;
+}
+$('b_tolock').onclick=function(){ page('wallet'); };
+$('b_whcopy').onclick=function(){ EFCopy($('whtext').textContent,'Depo adresi kopyalandı',$('b_whcopy')); };
+$('b_bankcopy').onclick=function(){ EFCopy($('bankbox').textContent,'Hesap bilgileri kopyalandı',$('b_bankcopy')); };
+
+var KIND_TR={topup:'Bakiye yükleme',charge:'Hizmet bedeli',refund:'İade',adjustment:'Düzeltme'};
+function loadWallet(){
+  if(!ME||!sb) return Promise.resolve();
+  busy('m_wallet','Yükleniyor…');
+  return sb.from('wallet_entries').select('*').order('at',{ascending:false}).then(function(r){
+    if(r.error){ msg('m_wallet','Yüklenemedi.','bad'); return; }
+    msg('m_wallet','');
+    var list=r.data||[], tb=$('walbody'); tb.innerHTML='';
+    $('waltbl').hidden=!list.length; $('wal_empty').hidden=list.length>0;
+    list.forEach(function(w){
+      var tr=document.createElement('tr');
+      var a=document.createElement('td'); a.textContent=dt(w.at);
+      var b=document.createElement('td'); b.textContent=(KIND_TR[w.kind]||w.kind)+(w.note?' — '+w.note:'');
+      var c=document.createElement('td'); c.className='amt '+(w.pence<0?'neg':'pos'); c.textContent=money(w.pence);
+      tr.appendChild(a); tr.appendChild(b); tr.appendChild(c); tb.appendChild(tr);
+    });
+  });
+}
+$('b_walreload').onclick=loadWallet;
+
+/* ---- sign in with the access code alone ---- */
+$('b_showpw').onclick=function(){ $('pwbox').hidden=!$('pwbox').hidden; };
+$('b_codelogin').onclick=function(){
+  var code=$('l_code').value.trim().toUpperCase().replace(/\s/g,'');
+  if(code.length<6){ bad('w_code',true); msg('m_login','Lütfen kodunuzu yazın.','bad'); return; }
+  bad('w_code',false);
+  $('b_codelogin').disabled=true; busy('m_login','Giriş yapılıyor…');
+  sb.rpc('email_for_code',{p_code:code}).then(function(r){
+    if(r.error||!r.data) throw new Error('BADCODE');
+    return sb.auth.signInWithPassword({email:r.data,password:code});
+  }).then(function(r){
+    $('b_codelogin').disabled=false;
+    if(r.error) throw new Error('BADCODE');
+    if($('l_remember').checked) remember(r.data.user.email); else forget();
+    msg('m_login','');
+    return openPanel(r.data.user);
+  }).catch(function(e){
+    $('b_codelogin').disabled=false;
+    msg('m_login', (e&&e.message==='BADCODE')
+      ? 'Bu kod tanınmadı. Kodunuzu kontrol edin veya info@ecomflex.co.uk adresine yazın.'
+      : 'Giriş yapılamadı. Lütfen tekrar deneyin.','bad');
+  });
+};
+$('l_code').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); $('b_codelogin').click(); } });
+
+;['b_order','b_bulksend','b_inbound','b_ret','b_fwd','b_fba'].forEach(function(id){
+  var el=$(id); if(!el||!el.onclick) return;
+  var orig=el.onclick;
+  el.onclick=function(ev){ if(needsFunds()) return; return orig.call(this,ev); };
 });
 
 connect().then(route).catch(function(){

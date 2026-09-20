@@ -254,6 +254,20 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 .stagebar div.on{background:var(--deep);color:#fff;font-weight:600}
 .stagebar div.did{background:#DCEEF3;color:var(--deep)}
 
+
+.tbl .tick{font-size:1.1rem;cursor:pointer;background:none;border:0;padding:2px 6px}
+.tbl .tick.yes{color:#1E6B4A} .tbl .tick.no{color:#C0392B}
+.tbl .unit{width:82px;text-align:center;font-family:var(--mono)}
+.tbl .codecell{font-family:var(--mono);font-size:.82rem;color:var(--deep);cursor:pointer}
+.tbl tr.done td{background:#F3FAF5}
+.tbl .money{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.tbl .money.zero{color:#C0392B}
+.rowacts{display:flex;gap:5px;flex-wrap:wrap}
+.rowacts button{padding:6px 9px;border-radius:6px;border:1px solid var(--edge2);background:#fff;color:var(--navy);cursor:pointer;font-size:.76rem;white-space:nowrap}
+.rowacts .pay{background:#E9F4EC;border-color:#B7D8C4;color:#1E6B4A;font-weight:600}
+.pricewrap{display:flex;align-items:center;gap:6px}
+.pricewrap span{color:var(--muted);font-size:.95rem}
+
 </style>
 </head>
 <body>
@@ -286,6 +300,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <button data-s="inbound">Inbound<span class="count" id="c_inbound" hidden></span></button>
       <button data-s="stock">Stock<span class="count" id="c_stock" hidden></span></button>
       <button data-s="services">Services<span class="count" id="c_services" hidden></span></button>
+      <button data-s="clients">Customers<span class="count" id="c_clients" hidden></span></button>
       <button data-s="access">Access<span class="count" id="c_access" hidden></span></button>
       <button data-s="report">Reports</button>
       <button data-s="staff">Staff</button>
@@ -343,6 +358,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
               <div><label>Courier</label><input id="mm_courier" list="couriers" value="Royal Mail"></div>
               <div><label>Service</label><input id="mm_service" value="Tracked 48"></div>
               <div><label>How long it will take</label><input id="mm_eta" value="2–3 working days"></div>
+              <div><label>Charge each (£)</label><input id="mm_price" inputmode="decimal" placeholder="4.30"></div>
             </div>
             <button class="save" id="b_applymatch">Dispatch matched orders</button>
           </div>
@@ -366,6 +382,38 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <div id="svlist"></div>
       <div class="empty" id="sv_empty" hidden>Nothing waiting.</div>
       <button class="btn second" id="b_refresh_sv" style="margin-top:14px">Refresh</button>
+    </div>
+
+    <div id="sec_clients" hidden>
+      <div class="tabs" id="cltabs">
+        <button data-c="new" class="on">Onboarding<span class="count" id="c_newcl" hidden></span></button>
+        <button data-c="live">Active customers</button>
+        <button data-c="setup">Bank details</button>
+      </div>
+      <div class="msg" id="m_cl"></div>
+
+      <div id="cl_board">
+        <div class="tblwrap"><table class="tbl" id="cltbl">
+          <thead><tr><th>#</th><th>Customer</th><th>Code</th><th>Unit</th><th>Form sent</th><th>Paid</th><th>Balance</th><th></th></tr></thead>
+          <tbody id="clbody"></tbody></table></div>
+        <div class="empty" id="cl_empty" hidden>No customers yet.</div>
+      </div>
+
+      <div id="cl_setup" hidden>
+        <div class="card">
+          <h2>Bank details shown to customers</h2>
+          <p class="lead">This appears on their Bakiye page with a copy button. Plain text, any layout you like.</p>
+          <textarea id="bankedit" style="width:100%;min-height:150px;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:var(--mono);font-size:.9rem;color:var(--ink)"></textarea>
+          <button class="btn second" id="b_banksave" style="margin-top:10px">Save bank details</button>
+          <h2 style="margin-top:20px">Welcome message template</h2>
+          <p class="lead">{UNIT} and {COMPANY} are replaced with that customer's details.</p>
+          <textarea id="welcedit" style="width:100%;min-height:190px;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:var(--mono);font-size:.88rem;color:var(--ink)"></textarea>
+          <button class="btn second" id="b_welcsave" style="margin-top:10px">Save template</button>
+          <div class="msg" id="m_setup"></div>
+        </div>
+      </div>
+
+      <button class="btn second" id="b_clreload" style="margin-top:14px">Refresh</button>
     </div>
 
     <div id="sec_report" hidden>
@@ -589,7 +637,7 @@ var customers=[], orders=[], section='access';
 
 function setSection(sec){
   section=sec;
-  ['today','needs','inbound','stock','services','access','report','staff'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
+  ['today','needs','inbound','stock','services','clients','access','report','staff'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
     b.classList.toggle('on', b.getAttribute('data-s')===sec);
   });
@@ -598,6 +646,7 @@ function setSection(sec){
   if(sec==='inbound') loadInbound();
   if(sec==='stock') loadStockCustomers();
   if(sec==='services') loadServices();
+  if(sec==='clients') loadClients();
   if(sec==='report'){ loadReport(); loadActivity(true); }
   if(sec==='staff') loadStaff();
 }
@@ -632,27 +681,33 @@ function kvRow(k,v){
 }
 
 function saveReply(o,fields,btn,rerender){
-  var patch={
-    courier:fields.courier.value.trim()||null,
-    service:fields.service.value.trim()||null,
-    eta:fields.eta.value.trim()||null,
-    tracking:fields.tracking.value.trim()||null,
-    status:'answered',
-    responded_at:new Date().toISOString()
-  };
-  if(!patch.courier&&!patch.tracking){
+  var courier=fields.courier.value.trim()||null;
+  var tracking=fields.tracking.value.trim()||null;
+  if(!courier&&!tracking){
     msg('m_needs','Add at least the courier or the tracking number.','bad'); return;
   }
-  btn.disabled=true; btn.textContent='Saving…';
-  sb.auth.getUser().then(function(u){
-    patch.responded_by=(u.data&&u.data.user&&u.data.user.email)||null;
-    return sb.from('orders').update(patch).eq('id',o.id);
-  }).then(function(r){
+  var raw=(fields.price?fields.price.value:'').trim().replace(/[^0-9.]/g,'');
+  var pence=raw? Math.round(parseFloat(raw)*100) : 0;
+  if(!isFinite(pence)||pence<0){ msg('m_needs','That price does not look right.','bad'); return; }
+  if(pence===0 && !confirm('No charge entered. Dispatch this order free of charge?')) return;
+
+  btn.disabled=true; btn.textContent='Saving\u2026';
+  sb.rpc('dispatch_order',{p_id:o.id,p_pence:pence,p_courier:courier,
+    p_service:fields.service.value.trim()||null,p_eta:fields.eta.value.trim()||null,p_tracking:tracking})
+  .then(function(r){
     btn.disabled=false; btn.textContent='Send response';
-    if(r.error){ msg('m_needs','Could not save. Try again.','bad'); return; }
-    Object.keys(patch).forEach(function(k){ o[k]=patch[k]; });
-    msg('m_needs','Response sent. The customer sees it in their panel.','good');
-    rerender(); counts();
+    if(r.error){
+      if(/INSUFFICIENT_FUNDS/.test(r.error.message||'')){
+        msg('m_needs','Not enough balance for this charge. Record a top-up first \u2014 Customers \u2192 Record top-up.','bad');
+      } else msg('m_needs','Could not save: '+r.error.message,'bad');
+      return;
+    }
+    o.status='answered'; o.courier=courier; o.tracking=tracking;
+    o.service=fields.service.value.trim()||null; o.eta=fields.eta.value.trim()||null;
+    o.charged_pence=pence; o.responded_at=new Date().toISOString();
+    var d=(r.data)||{};
+    msg('m_needs','Dispatched'+(pence? ' \u00B7 charged '+gbp(pence)+' \u00B7 balance now '+gbp(d.balance):''),'good');
+    rerender(); counts(); loadToday();
   });
 }
 
@@ -673,6 +728,7 @@ function orderCard(o){
   var body=document.createElement('div'); body.className='ordbody'; body.hidden=(o.status==='answered');
   body.appendChild(kvRow('Product',o.product_name+(o.sku?'  ['+o.sku+']':'')));
   if(o.order_ref) body.appendChild(kvRow('Order ref',o.order_ref));
+  if(o.charged_pence!==null&&o.charged_pence!==undefined) body.appendChild(kvRow('Charged',gbp(o.charged_pence)));
   if(o.marketplace) body.appendChild(kvRow('Marketplace',o.marketplace));
   body.appendChild(kvRow('Quantity',String(o.quantity)));
   body.appendChild(kvRow('Recipient',o.recipient_name));
@@ -1336,6 +1392,8 @@ function renderServices(){
       F.service=inp('Tracked 48 / Next Day');
       F.eta=inp('2\u20133 working days');
       F.tracking=inp(''); F.tracking.style.fontFamily='var(--mono)';
+      F.price=inp('4.30'); F.price.inputMode='decimal';
+      g.appendChild(labelled('Charge the customer (£)',F.price));
       g.appendChild(labelled('Courier',F.courier));
       g.appendChild(labelled('Service',F.service));
       g.appendChild(labelled('How long it will take',F.eta));
@@ -1343,6 +1401,8 @@ function renderServices(){
     } else {
       F.courier=inp('UPS / Amazon Partnered \u2026'); F.courier.setAttribute('list','couriers');
       F.tracking=inp(''); F.tracking.style.fontFamily='var(--mono)';
+      F.price=inp('4.30'); F.price.inputMode='decimal';
+      g.appendChild(labelled('Charge the customer (£)',F.price));
       g.appendChild(labelled('Courier',F.courier));
       g.appendChild(labelled('Tracking number',F.tracking));
     }
@@ -1573,24 +1633,33 @@ function renderMatches(){
 }
 $('b_applymatch').onclick=function(){
   if(!matched.length) return;
-  if(!confirm('Mark '+matched.length+' order'+(matched.length===1?'':'s')+' as dispatched with these tracking numbers?\n\nStock will come off automatically.')) return;
-  var courier=$('mm_courier').value.trim()||null, service=$('mm_service').value.trim()||null, eta=$('mm_eta').value.trim()||null;
+  var raw=($('mm_price').value||'').trim().replace(/[^0-9.]/g,'');
+  var pence=raw? Math.round(parseFloat(raw)*100) : 0;
+  if(!isFinite(pence)||pence<0){ msg('m_match','That price does not look right.','bad'); return; }
+  if(!confirm('Dispatch '+matched.length+' order'+(matched.length===1?'':'s')
+      +(pence? ' and charge '+gbp(pence)+' each?' : ' with no charge?')
+      +'\n\nStock comes off automatically.')) return;
+
+  var courier=$('mm_courier').value.trim()||null, service=$('mm_service').value.trim()||null,
+      eta=$('mm_eta').value.trim()||null;
   $('b_applymatch').disabled=true; busy('m_match','Saving\u2026');
-  sb.auth.getUser().then(function(u){
-    var who=(u.data&&u.data.user&&u.data.user.email)||null;
-    return matched.reduce(function(chain,m){
-      return chain.then(function(){
-        return sb.from('orders').update({status:'answered',courier:courier,service:service,eta:eta,
-          tracking:fmtTrack2(m.label.tracking),responded_at:new Date().toISOString(),responded_by:who}).eq('id',m.order.id);
+  var done=0, failed=[];
+  matched.reduce(function(chain,m){
+    return chain.then(function(){
+      return sb.rpc('dispatch_order',{p_id:m.order.id,p_pence:pence,p_courier:courier,
+        p_service:service,p_eta:eta,p_tracking:fmtTrack2(m.label.tracking)})
+      .then(function(r){
+        if(r.error) failed.push((m.order.business_name||m.order.user_email)
+          +(/INSUFFICIENT_FUNDS/.test(r.error.message||'')?' (no balance)':''));
+        else done++;
       });
-    },Promise.resolve());
-  }).then(function(){
+    });
+  },Promise.resolve()).then(function(){
     $('b_applymatch').disabled=false;
-    msg('m_match','Done. '+matched.length+' order'+(matched.length===1?'':'s')+' dispatched.','good');
+    if(failed.length) msg('m_match',done+' dispatched. '+failed.length+' failed: '+failed.join(', '),'warn');
+    else msg('m_match','Done. '+done+' order'+(done===1?'':'s')+' dispatched.','good');
     matched=[]; unmatched=[]; $('matchlist').innerHTML=''; $('matchapply').hidden=true;
     loadNeeds(); loadToday();
-  }).catch(function(){
-    $('b_applymatch').disabled=false; msg('m_match','Something failed part way through. Press Refresh and check.','bad');
   });
 };
 
@@ -1676,6 +1745,157 @@ $('b_addadmin').onclick=function(){
     loadStaff();
   });
 };
+
+
+/* =====================  CUSTOMERS  ===================== */
+var CLIENTS=[], clTab='new';
+function gbp(p){ var n=(Number(p)||0)/100; return (n<0?'-':'')+'\u00A3'+Math.abs(n).toFixed(2); }
+function askMoney(title,dflt){
+  var v=prompt(title+'\n\nAmount in pounds, e.g. 250 or 250.50');
+  if(v===null) return null;
+  v=String(v).replace(/[^0-9.\-]/g,'');
+  if(!v) return null;
+  var p=Math.round(parseFloat(v)*100);
+  if(!isFinite(p)||p===0) return null;
+  return p;
+}
+Array.prototype.forEach.call(document.querySelectorAll('#cltabs button'),function(b){
+  b.onclick=function(){
+    clTab=b.getAttribute('data-c');
+    Array.prototype.forEach.call(document.querySelectorAll('#cltabs button'),function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    $('cl_board').hidden=(clTab==='setup');
+    $('cl_setup').hidden=(clTab!=='setup');
+    if(clTab==='setup') loadSetup(); else renderClients();
+  };
+});
+$('b_clreload').onclick=function(){ loadClients(); };
+
+function loadClients(){
+  busy('m_cl','Loading\u2026');
+  return sb.rpc('onboarding').then(function(r){
+    if(r.error){ msg('m_cl','Could not load. Is the Phase 6 script run?','bad'); return; }
+    CLIENTS=r.data||[]; msg('m_cl',''); renderClients();
+    var waiting=CLIENTS.filter(function(c){return !c.complete;}).length;
+    $('c_clients').hidden=!waiting; $('c_clients').textContent=waiting||'';
+    $('c_newcl').hidden=!waiting; $('c_newcl').textContent=waiting||'';
+  });
+}
+function renderClients(){
+  if(clTab==='setup') return;
+  var list=CLIENTS.filter(function(c){ return clTab==='new' ? !c.complete : c.complete; });
+  var tb=$('clbody'); tb.innerHTML='';
+  $('cl_empty').hidden=list.length>0;
+  $('cl_empty').textContent = clTab==='new' ? 'Nobody waiting to be set up.' : 'No active customers yet.';
+
+  list.forEach(function(c,i){
+    var tr=document.createElement('tr'); if(c.complete) tr.className='done';
+
+    var n=document.createElement('td'); n.textContent=i+1;
+
+    var who=document.createElement('td');
+    who.innerHTML='<strong></strong><br><span style="font-size:.76rem;color:var(--muted)"></span>';
+    who.querySelector('strong').textContent=c.company||c.full_name;
+    who.querySelector('span').textContent=c.full_name+' \u00B7 '+c.email+(c.phone?' \u00B7 '+c.phone:'');
+
+    var cd=document.createElement('td'); cd.className='codecell'; cd.textContent=c.code||'\u2014';
+    cd.title='Tap to copy'; cd.onclick=function(){ if(c.code) EFCopy(c.code,'Access code copied',cd); };
+
+    var un=document.createElement('td');
+    var ui=document.createElement('input'); ui.className='unit'; ui.value=c.unit_number||''; ui.placeholder='260';
+    ui.onchange=function(){
+      sb.rpc('set_client_field',{p_user:c.user_id,p_field:'unit_number',p_value:ui.value}).then(function(x){
+        if(x.error){ msg('m_cl','Could not save the unit number.','bad'); return; }
+        msg('m_cl','Unit saved','good'); loadClients();
+      });
+    };
+    un.appendChild(ui);
+
+    var fs=document.createElement('td');
+    var fb=document.createElement('button'); fb.className='tick '+(c.form_sent?'yes':'no');
+    fb.textContent=c.form_sent?'\u2713':'\u2717'; fb.title='Has the link been sent?';
+    fb.onclick=function(){
+      sb.rpc('set_client_field',{p_user:c.user_id,p_field:'form_sent',p_value:c.form_sent?'false':'true'})
+      .then(function(){ loadClients(); });
+    };
+    fs.appendChild(fb);
+
+    var pd=document.createElement('td');
+    var pb=document.createElement('span'); pb.className='tick '+(c.paid?'yes':'no');
+    pb.textContent=c.paid?'\u2713':'\u2717';
+    pb.title=c.paid?'First top-up recorded':'No top-up recorded yet \u2014 record one to tick this';
+    pd.appendChild(pb);
+
+    var bal=document.createElement('td'); bal.className='money'+(c.balance_pence<=0?' zero':'');
+    bal.textContent=gbp(c.balance_pence);
+
+    var act=document.createElement('td');
+    var wrap=document.createElement('div'); wrap.className='rowacts';
+    var pay=document.createElement('button'); pay.className='pay'; pay.textContent='Record top-up';
+    pay.onclick=function(){
+      var p=askMoney('Top-up for '+(c.company||c.full_name));
+      if(!p) return;
+      var note=prompt('Reference (optional) \u2014 e.g. Wise 12 Sep')||null;
+      sb.rpc('record_topup',{p_user:c.user_id,p_pence:p,p_note:note}).then(function(x){
+        if(x.error){ msg('m_cl',x.error.message,'bad'); return; }
+        msg('m_cl','Top-up recorded \u00B7 new balance '+gbp(x.data),'good');
+        loadClients(); loadToday();
+      });
+    };
+    var adj=document.createElement('button'); adj.textContent='Adjust';
+    adj.onclick=function(){
+      var p=askMoney('Adjustment for '+(c.company||c.full_name)+'\nUse a minus sign to take money off');
+      if(!p) return;
+      var why=prompt('Reason (required)');
+      if(!why) return;
+      sb.rpc('adjust_balance',{p_user:c.user_id,p_pence:p,p_note:why}).then(function(x){
+        if(x.error){ msg('m_cl',x.error.message,'bad'); return; }
+        msg('m_cl','Adjusted \u00B7 new balance '+gbp(x.data),'good'); loadClients();
+      });
+    };
+    var wel=document.createElement('button'); wel.textContent='Welcome message';
+    wel.onclick=function(){
+      sb.rpc('welcome_for',{p_user:c.user_id}).then(function(x){
+        if(x.error||!x.data){ msg('m_cl','Could not build the message.','bad'); return; }
+        EFCopy(x.data,'Welcome message copied',wel);
+      });
+    };
+    var rg=document.createElement('button'); rg.textContent='New code';
+    rg.onclick=function(){
+      if(!confirm('Issue a new access code for '+(c.company||c.full_name)+'?\n\nTheir old code stops working straight away.')) return;
+      sb.rpc('regenerate_code',{p_user:c.user_id}).then(function(x){
+        if(x.error){ msg('m_cl',x.error.message,'bad'); return; }
+        msg('m_cl','New code: '+x.data,'good'); loadClients();
+      });
+    };
+    [pay,adj,wel,rg].forEach(function(b){ wrap.appendChild(b); });
+    act.appendChild(wrap);
+
+    [n,who,cd,un,fs,pd,bal,act].forEach(function(td){ tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+}
+
+function loadSetup(){
+  busy('m_setup','Loading\u2026');
+  return sb.from('app_settings').select('*').then(function(r){
+    if(r.error){ msg('m_setup','Could not load.','bad'); return; }
+    msg('m_setup','');
+    (r.data||[]).forEach(function(row){
+      if(row.key==='bank_details') $('bankedit').value=row.value||'';
+      if(row.key==='welcome_template') $('welcedit').value=row.value||'';
+    });
+  });
+}
+function saveSetting(key,val,btn){
+  btn.disabled=true;
+  sb.from('app_settings').upsert({key:key,value:val},{onConflict:'key'}).then(function(x){
+    btn.disabled=false;
+    msg('m_setup', x.error? ('Could not save: '+x.error.message) : 'Saved', x.error?'bad':'good');
+  });
+}
+$('b_banksave').onclick=function(){ saveSetting('bank_details',$('bankedit').value,$('b_banksave')); };
+$('b_welcsave').onclick=function(){ saveSetting('welcome_template',$('welcedit').value,$('b_welcsave')); };
 
 $('b_out').onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
 $('b_refresh').onclick=load;
