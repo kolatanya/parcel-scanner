@@ -279,7 +279,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <h1>Panel requests</h1>
       <p class="sub" id="sub">Customers asking for panel access</p>
     </div>
-    <span class="ver">v1</span>
+    <span class="ver">v2</span>
   </div>
 
   <!-- sign in -->
@@ -664,7 +664,7 @@ function counts(){
 function loadNeeds(){
   busy('m_needs','Loading…');
   return Promise.all([
-    sb.from('signup_requests').select('*').eq('status','approved').order('created_at',{ascending:false}),
+    sb.rpc('customer_directory'),
     sb.from('orders').select('*').order('created_at',{ascending:false})
   ]).then(function(res){
     if(res[0].error||res[1].error){ msg('m_needs','Could not load. Try Refresh.','bad'); return; }
@@ -1006,7 +1006,7 @@ $('b_refresh_in').onclick=loadInbound;
 /* =====================  STOCK  ===================== */
 var stockCust=null;
 function loadStockCustomers(){
-  return sb.from('signup_requests').select('full_name,business_name,email,user_id').eq('status','approved').order('business_name').then(function(r){
+  return sb.rpc('customer_directory').then(function(r){
     if(r.error){ msg('m_stock','Could not load customers.','bad'); return; }
     var sel=$('stockcust'); var keep=sel.value; sel.innerHTML='<option value="">Choose a customer\u2026</option>';
     (r.data||[]).forEach(function(c){
