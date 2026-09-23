@@ -279,7 +279,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <h1>Panel requests</h1>
       <p class="sub" id="sub">Customers asking for panel access</p>
     </div>
-    <span class="ver">v2</span>
+    <span class="ver">v3</span>
   </div>
 
   <!-- sign in -->
@@ -388,6 +388,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <div class="tabs" id="cltabs">
         <button data-c="new" class="on">Onboarding<span class="count" id="c_newcl" hidden></span></button>
         <button data-c="live">Active customers</button>
+        <button data-c="pay">Payments<span class="count" id="c_paycl" hidden></span></button>
         <button data-c="setup">Bank details</button>
       </div>
       <div class="msg" id="m_cl"></div>
@@ -397,6 +398,14 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
           <thead><tr><th>#</th><th>Customer</th><th>Code</th><th>Unit</th><th>Form sent</th><th>Paid</th><th>Balance</th><th></th></tr></thead>
           <tbody id="clbody"></tbody></table></div>
         <div class="empty" id="cl_empty" hidden>No customers yet.</div>
+      </div>
+
+      <div id="cl_pay" hidden>
+        <p class="lead">Bank transfers customers say they have sent. Check the money has actually landed in the bank before confirming. Confirming adds it to their balance.</p>
+        <div class="tblwrap"><table class="tbl" id="paytbl">
+          <thead><tr><th>Filed</th><th>Customer</th><th>Declared</th><th>Sent on</th><th>Reference</th><th>Balance now</th><th></th></tr></thead>
+          <tbody id="paybody"></tbody></table></div>
+        <div class="empty" id="pay_empty" hidden>No payments waiting to be confirmed.</div>
       </div>
 
       <div id="cl_setup" hidden>
@@ -646,7 +655,7 @@ function setSection(sec){
   if(sec==='inbound') loadInbound();
   if(sec==='stock') loadStockCustomers();
   if(sec==='services') loadServices();
-  if(sec==='clients') loadClients();
+  if(sec==='clients'){ loadClients(); loadPayments(); }
   if(sec==='report'){ loadReport(); loadActivity(true); }
   if(sec==='staff') loadStaff();
 }
@@ -845,7 +854,11 @@ var inbounds=[], inItems=[], stockAll=[];
 function tile(n,label,go,cls){
   var b=document.createElement('button'); b.className='tile '+(n?cls:'zero');
   b.innerHTML='<div class="n">'+n+'</div><div class="l">'+label+'</div>';
-  b.onclick=function(){ setSection(go); if(go==='inbound') setInTab('expected'); };
+  b.onclick=function(){
+    var g=go.split(':'); setSection(g[0]);
+    if(g[0]==='inbound') setInTab('expected');
+    if(g[1]) setClTab(g[1]);
+  };
   return b;
 }
 function mini(p,sline,go,cls){
@@ -874,6 +887,7 @@ function loadToday(){
     t.appendChild(tile(c.returns_waiting||0,'returns to process','services','hot'));
     t.appendChild(tile(c.forward_waiting||0,'parcels to forward','services','hot'));
     t.appendChild(tile(c.fba_waiting||0,'FBA jobs to prep','services','hot'));
+    t.appendChild(tile(c.payments_waiting||0,'bank transfers to confirm','clients:pay','hot'));
     t.appendChild(tile(c.access_waiting||0,'access requests','access','hot'));
     var L=$('todaylist'); L.innerHTML='';
     var today=new Date().toISOString().slice(0,10);
@@ -1759,17 +1773,20 @@ function askMoney(title,dflt){
   if(!isFinite(p)||p===0) return null;
   return p;
 }
+function setClTab(c){
+  clTab=c;
+  Array.prototype.forEach.call(document.querySelectorAll('#cltabs button'),function(x){
+    x.classList.toggle('on', x.getAttribute('data-c')===c);
+  });
+  $('cl_board').hidden=(c==='setup'||c==='pay');
+  $('cl_setup').hidden=(c!=='setup');
+  $('cl_pay').hidden=(c!=='pay');
+  if(c==='setup') loadSetup(); else if(c==='pay') loadPayments(); else renderClients();
+}
 Array.prototype.forEach.call(document.querySelectorAll('#cltabs button'),function(b){
-  b.onclick=function(){
-    clTab=b.getAttribute('data-c');
-    Array.prototype.forEach.call(document.querySelectorAll('#cltabs button'),function(x){x.classList.remove('on');});
-    b.classList.add('on');
-    $('cl_board').hidden=(clTab==='setup');
-    $('cl_setup').hidden=(clTab!=='setup');
-    if(clTab==='setup') loadSetup(); else renderClients();
-  };
+  b.onclick=function(){ setClTab(b.getAttribute('data-c')); };
 });
-$('b_clreload').onclick=function(){ loadClients(); };
+$('b_clreload').onclick=function(){ loadClients(); if(clTab==='pay') loadPayments(); };
 
 function loadClients(){
   busy('m_cl','Loading\u2026');
@@ -1777,12 +1794,74 @@ function loadClients(){
     if(r.error){ msg('m_cl','Could not load. Is the Phase 6 script run?','bad'); return; }
     CLIENTS=r.data||[]; msg('m_cl',''); renderClients();
     var waiting=CLIENTS.filter(function(c){return !c.complete;}).length;
-    $('c_clients').hidden=!waiting; $('c_clients').textContent=waiting||'';
     $('c_newcl').hidden=!waiting; $('c_newcl').textContent=waiting||'';
+    CL_WAITING=waiting; clBadge();
+  });
+}
+/* the Customers badge counts people to set up plus bank transfers to confirm */
+var CL_WAITING=0, PAY_WAITING=0;
+function clBadge(){
+  var n=CL_WAITING+PAY_WAITING;
+  $('c_clients').hidden=!n; $('c_clients').textContent=n||'';
+  $('c_paycl').hidden=!PAY_WAITING; $('c_paycl').textContent=PAY_WAITING||'';
+}
+
+/* ---------- bank transfers customers have declared ---------- */
+function loadPayments(){
+  if(clTab==='pay') busy('m_cl','Loading…');
+  return sb.rpc('pending_declarations').then(function(r){
+    if(r.error){ if(clTab==='pay') msg('m_cl','Could not load payments. Is the Phase 8 script run?','bad'); return; }
+    var list=r.data||[];
+    PAY_WAITING=list.length; clBadge();
+    if(clTab!=='pay') return;
+    msg('m_cl','');
+    var tb=$('paybody'); tb.innerHTML='';
+    $('paytbl').hidden=!list.length; $('pay_empty').hidden=list.length>0;
+    list.forEach(function(d){
+      var tr=document.createElement('tr');
+      var a=document.createElement('td'); a.textContent=when(d.created_at);
+      var b=document.createElement('td');
+      b.innerHTML='<strong></strong><br><span style="font-size:.76rem;color:var(--muted)"></span>';
+      b.querySelector('strong').textContent=d.company; b.querySelector('span').textContent=d.email;
+      var c=document.createElement('td'); c.className='money'; c.textContent=gbp(d.amount_pence);
+      var e=document.createElement('td'); e.textContent=d.sent_on?d.sent_on.split('-').reverse().join('/'):'—';
+      var f=document.createElement('td'); f.textContent=d.reference||'—';
+      var g=document.createElement('td'); g.className='money'+(d.balance_pence<=0?' zero':''); g.textContent=gbp(d.balance_pence);
+      var act=document.createElement('td');
+      var wrap=document.createElement('div'); wrap.className='rowacts';
+      var ok=document.createElement('button'); ok.className='pay'; ok.textContent='Money received';
+      ok.onclick=function(){
+        var v=prompt('Amount that actually arrived in the bank for '+d.company+', in pounds.\n\nThey declared '+gbp(d.amount_pence)+'. Change it if a different amount landed.',
+          ((Number(d.amount_pence)||0)/100).toFixed(2));
+        if(v===null) return;
+        v=String(v).replace(/[^0-9.]/g,'');
+        var pence=Math.round(parseFloat(v)*100);
+        if(!isFinite(pence)||pence<=0){ msg('m_cl','That amount was not understood.','bad'); return; }
+        if(!confirm('Add '+gbp(pence)+' to '+d.company+"'s balance?")) return;
+        ok.disabled=true;
+        sb.rpc('confirm_declaration',{p_id:d.id,p_pence:pence,p_note:null}).then(function(x){
+          if(x.error){ ok.disabled=false; msg('m_cl',x.error.message,'bad'); return; }
+          msg('m_cl','Confirmed · '+d.company+' balance is now '+gbp(x.data),'good');
+          loadPayments(); loadClients(); loadToday();
+        });
+      };
+      var no=document.createElement('button'); no.textContent='Not received';
+      no.onclick=function(){
+        var why=prompt('Why is this being rejected? The customer sees this reason.');
+        if(!why) return;
+        sb.rpc('reject_declaration',{p_id:d.id,p_note:why}).then(function(x){
+          if(x.error){ msg('m_cl',x.error.message,'bad'); return; }
+          msg('m_cl','Rejected.','good'); loadPayments(); loadToday();
+        });
+      };
+      wrap.appendChild(ok); wrap.appendChild(no); act.appendChild(wrap);
+      [a,b,c,e,f,g,act].forEach(function(td){ tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
   });
 }
 function renderClients(){
-  if(clTab==='setup') return;
+  if(clTab==='setup'||clTab==='pay') return;
   var list=CLIENTS.filter(function(c){ return clTab==='new' ? !c.complete : c.complete; });
   var tb=$('clbody'); tb.innerHTML='';
   $('cl_empty').hidden=list.length>0;
@@ -1868,7 +1947,18 @@ function renderClients(){
         msg('m_cl','New code: '+x.data,'good'); loadClients();
       });
     };
-    [pay,adj,wel,rg].forEach(function(b){ wrap.appendChild(b); });
+    /* TEST ONLY — adds £50 of pretend money so the flow can be tried. Remove before going live. */
+    var tst=document.createElement('button'); tst.textContent='TEST: +£50';
+    tst.style.cssText='border-color:#E4D3A0;background:#FDF6E1;color:#7A5210';
+    tst.onclick=function(){
+      if(!confirm('Add £50 of TEST money to '+(c.company||c.full_name)+'?\n\nNo real payment. For testing only.')) return;
+      sb.rpc('record_topup',{p_user:c.user_id,p_pence:5000,p_note:'TEST — gerçek ödeme değil'}).then(function(x){
+        if(x.error){ msg('m_cl',x.error.message,'bad'); return; }
+        msg('m_cl','TEST £50 added · new balance '+gbp(x.data),'good');
+        loadClients(); loadToday();
+      });
+    };
+    [pay,adj,wel,rg,tst].forEach(function(b){ wrap.appendChild(b); });
     act.appendChild(wrap);
 
     [n,who,cd,un,fs,pd,bal,act].forEach(function(td){ tr.appendChild(td); });

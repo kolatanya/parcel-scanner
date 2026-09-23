@@ -233,6 +233,55 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
 .me .mycode{font-family:var(--mono);font-size:.78rem;color:var(--deep);background:#EFF7F9;border:1px solid #CDE4EA;
   border-radius:20px;padding:2px 9px;display:inline-block;margin-top:7px}
 
+/* ---------- balance page ---------- */
+.eyebrow{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.wtop{display:flex;flex-direction:column;gap:14px}
+.wtop h2{margin:2px 0 4px}
+.wtopr{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FAF6ED;border:1px solid var(--edge);border-radius:12px;padding:10px 12px}
+.balpill{display:inline-block;margin-top:3px;font-family:var(--mono);font-weight:700;font-size:1.05rem;color:#1E6B4A;
+  background:#E9F4EC;border:1px solid #B7D8C4;border-radius:20px;padding:3px 12px;font-variant-numeric:tabular-nums}
+.balpill.neg{color:#8E2A2F;background:#FDEFEE;border-color:#F2C4C0}
+.btn.sm{display:inline-block;width:auto;padding:9px 15px;font-size:.84rem;border-radius:20px}
+.wstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.ws{background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:11px 13px;min-width:0}
+.ws .l{font-size:.72rem;color:var(--muted)}
+.ws .v{font-family:var(--mono);font-weight:700;font-size:1.12rem;color:var(--navy);margin-top:3px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ws.balw{grid-column:1/-1}
+.wsec{margin-top:12px}
+.wsh{display:flex;gap:12px;align-items:flex-start;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--edge)}
+.wsh .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--cream);border:1px solid var(--edge);
+  display:grid;place-items:center;font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+.wsh h3{margin:3px 0 2px;font-size:1rem;color:var(--navy)}
+.wsh p{margin:0;font-size:.8rem;color:var(--muted)}
+.wgrid{display:grid;grid-template-columns:1fr;gap:10px}
+.wbox{background:#FAF6ED;border:1px solid var(--edge);border-radius:10px;padding:11px 13px}
+.wbox .l{font-size:.72rem;color:var(--muted);margin-bottom:3px}
+.wbox .v{font-weight:650;color:var(--ink);overflow-wrap:anywhere}
+#stripebox{margin-top:12px}
+#stripebox:empty{display:none}
+.wsub{margin:18px 0 4px;font-size:.92rem;color:var(--navy)}
+#decllist{margin-top:10px}
+.decl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:10px 0;border-bottom:1px dashed #EFE9DC;font-size:.86rem}
+.decl:last-child{border-bottom:0}
+.decl .a{flex:none;font-family:var(--mono);font-weight:700;color:var(--navy);min-width:80px;font-variant-numeric:tabular-nums}
+.decl .d{order:5;flex:1 1 100%;min-width:0;color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.decl .st{flex:none;margin-left:auto;font-size:.72rem;border-radius:20px;padding:2px 9px;white-space:nowrap}
+.st.pending{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
+.st.confirmed{background:#E9F4EC;color:#1E6B4A;border:1px solid #B7D8C4}
+.st.rejected{background:#FDEFEE;color:#8E2A2F;border:1px solid #F2C4C0}
+.st.cancelled{background:#F2F0EC;color:var(--muted);border:1px solid var(--edge)}
+.decl button{flex:none;font-size:.74rem;padding:4px 9px;border-radius:6px;border:1px solid var(--edge2);background:#fff;color:var(--muted);cursor:pointer}
+@media (min-width:640px){
+  .wtop{flex-direction:row;justify-content:space-between;align-items:center}
+  .wstats{grid-template-columns:repeat(3,1fr)}
+  .ws.balw{grid-column:auto}
+  .wgrid{grid-template-columns:1fr 1fr}
+}
+@media (min-width:1100px){
+  .wstats{grid-template-columns:repeat(5,1fr)}
+  .wcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+}
+
 </style>
 </head>
 <body>
@@ -373,23 +422,71 @@ select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge
         </div>
 
         <section id="pg_wallet" hidden>
-          <h2>Bakiye</h2>
-          <p class="lead">Hesabınızdaki bakiye ve hareketleriniz.</p>
-          <div class="balcard"><div class="bal" id="bal_amount">£0.00</div>
-            <div class="ballbl">Kullanılabilir bakiye</div></div>
-          <div class="card" style="margin-top:14px">
-            <h2 style="font-size:1rem">Bakiye yükleme</h2>
-            <p class="lead">Aşağıdaki hesaba havale/EFT yapın. Ödemeniz ulaştığında bakiyeniz güncellenir.</p>
-            <pre class="bank" id="bankbox">—</pre>
-            <button class="btn second" id="b_bankcopy">Hesap bilgilerini kopyala</button>
-            <p class="hint" style="margin-top:10px">Açıklama kısmına şirket adınızı yazın, böylece ödemenizi hızlıca eşleştirebiliriz.</p>
+          <div class="card wtop">
+            <div>
+              <div class="eyebrow">Muhasebe</div>
+              <h2>Bakiyeniz</h2>
+              <p class="lead" style="margin:0">Tüm yükleme ve harcama kayıtlarınız.</p>
+            </div>
+            <div class="wtopr">
+              <div><div class="eyebrow">Güncel bakiye</div><span class="balpill" id="bal_amount">£0.00</span></div>
+              <button class="btn second sm" id="b_walxls">Excel indir</button>
+            </div>
           </div>
+
+          <div class="wstats">
+            <div class="ws"><div class="l">Bugünkü harcama</div><div class="v" id="ws_today">—</div></div>
+            <div class="ws"><div class="l">Bu ayki harcama</div><div class="v" id="ws_month">—</div></div>
+            <div class="ws"><div class="l">Toplam yüklenen</div><div class="v" id="ws_in">—</div></div>
+            <div class="ws"><div class="l">Toplam harcanan</div><div class="v" id="ws_out">—</div></div>
+            <div class="ws balw"><div class="l">Güncel bakiye</div><div class="v" id="ws_bal">—</div></div>
+          </div>
+
+          <div class="card wsec">
+            <div class="wsh"><span class="num">01</span><div><h3>Hesap özeti</h3><p>Güncel bakiye ve hesap bilgileri.</p></div></div>
+            <div class="wgrid">
+              <div class="wbox"><div class="l">Şirket adı</div><div class="v" id="ws_company">—</div></div>
+              <div class="wbox"><div class="l">Hesap para birimi</div><div class="v">GBP (£)</div></div>
+            </div>
+          </div>
+
+          <div class="wcols">
+            <div class="card wsec" id="cardsec" hidden>
+              <div class="wsh"><span class="num">02</span><div><h3>Kartla bakiye yükle</h3><p>Ödemeler Stripe ile güvenle alınır. Kart bilgileriniz bize ulaşmaz.</p></div></div>
+              <div class="f" id="w_camt"><label>Yüklenecek tutar (£)</label>
+                <input id="c_amt" type="text" inputmode="decimal" value="50.00" autocomplete="off">
+                <div class="err">Tutar £50 ile £5.000 arasında olmalıdır.</div></div>
+              <p class="hint">En az yükleme tutarı £50. Ödediğiniz tutarın tamamı bakiyenize eklenir.</p>
+              <button class="btn primary" id="b_cardgo" style="margin-top:12px">Ödemeye geç</button>
+              <div id="stripebox"></div>
+              <button class="btn second" id="b_cardstop" style="margin-top:10px" hidden>Vazgeç</button>
+              <div class="msg" id="m_card"></div>
+            </div>
+
+            <div class="card wsec">
+              <div class="wsh"><span class="num" id="bank_num">03</span><div><h3>Havale ile bakiye yükle</h3><p>Aşağıdaki hesaba havale yapın, sonra ödemenizi bildirin.</p></div></div>
+              <pre class="bank" id="bankbox">—</pre>
+              <button class="btn second" id="b_bankcopy">Hesap bilgilerini kopyala</button>
+              <p class="hint" style="margin-top:10px">Açıklama kısmına şirket adınızı yazın, böylece ödemenizi hızlıca eşleştirebiliriz.</p>
+              <h4 class="wsub">Ödeme bildirimi</h4>
+              <p class="hint" style="margin-top:0">Havaleyi yaptıktan sonra buradan bildirin. Ödeme hesabımıza ulaştığında onaylarız ve bakiyeniz güncellenir.</p>
+              <div class="f" id="w_damt"><label>Gönderilen tutar (£)</label>
+                <input id="d_amt" type="text" inputmode="decimal" autocomplete="off"><div class="err">Lütfen gönderdiğiniz tutarı yazın.</div></div>
+              <div class="f"><label>Gönderim tarihi</label><input id="d_date" type="date"></div>
+              <div class="f"><label>Açıklama / referans (isteğe bağlı)</label><input id="d_ref" maxlength="120" autocomplete="off"></div>
+              <button class="btn blue" id="b_declare" style="margin-top:12px">Ödemeyi bildir</button>
+              <div class="msg" id="m_declare"></div>
+              <div id="decllist"></div>
+            </div>
+          </div>
+
           <h2 style="font-size:1rem;margin-top:18px">Hesap hareketleri</h2>
           <div class="msg" id="m_wallet"></div>
           <div class="tblwrap"><table class="tbl" id="waltbl" hidden>
             <thead><tr><th>Tarih</th><th>Açıklama</th><th style="text-align:right">Tutar</th></tr></thead>
             <tbody id="walbody"></tbody></table></div>
           <div class="note info" id="wal_empty" hidden>Henüz hareket yok.</div>
+          <p class="hint" id="wal_more" hidden>Son 200 hareket gösteriliyor. Tamamı için “Excel indir” düğmesini kullanın.</p>
           <button class="btn second" id="b_walreload" style="margin-top:12px">Yenile</button>
         </section>
 
@@ -1591,6 +1688,7 @@ function refreshAccount(){
     ACC.bank=a.bank||''; ACC.code=a.code||null;
     $('lockbar').hidden=ACC.unlocked;
     $('bal_amount').textContent=money(ACC.balance);
+    $('bal_amount').classList.toggle('neg',ACC.balance<0);
     $('bankbox').textContent=ACC.bank||'—';
     if(ACC.code && !document.querySelector('.me .mycode')){
       var c=document.createElement('div'); c.className='mycode'; c.textContent='Kod: '+ACC.code;
@@ -1615,14 +1713,38 @@ $('b_whcopy').onclick=function(){ EFCopy($('whtext').textContent,'Depo adresi ko
 $('b_bankcopy').onclick=function(){ EFCopy($('bankbox').textContent,'Hesap bilgileri kopyalandı',$('b_bankcopy')); };
 
 var KIND_TR={topup:'Bakiye yükleme',charge:'Hizmet bedeli',refund:'İade',adjustment:'Düzeltme'};
+var WAL_SHOWN=200;
+/* "50", "50.5", "50,50", "£1,250.00" -> pence; NaN if not a number */
+function penceOf(v){
+  v=String(v||'').replace(/[\s£]/g,'');
+  if(v.indexOf(',')>-1 && v.indexOf('.')===-1) v=v.replace(',','.'); else v=v.replace(/,/g,'');
+  if(!/^[0-9]+(\.[0-9]{0,2})?$/.test(v)) return NaN;
+  return Math.round(parseFloat(v)*100);
+}
+function loadSummary(){
+  return sb.rpc('my_wallet_summary').then(function(r){
+    if(r.error||!r.data) return;
+    var s=r.data;
+    $('ws_today').textContent=money(s.today_spend);
+    $('ws_month').textContent=money(s.month_spend);
+    $('ws_in').textContent=money(s.lifetime_topups);
+    $('ws_out').textContent=money(s.lifetime_spend);
+    $('ws_bal').textContent=money(s.balance);
+    $('bal_amount').textContent=money(s.balance);
+    $('bal_amount').classList.toggle('neg',s.balance<0);
+    $('ws_company').textContent=s.company||(ME&&ME.user_metadata&&ME.user_metadata.business_name)||'—';
+  },function(){});
+}
 function loadWallet(){
   if(!ME||!sb) return Promise.resolve();
+  loadSummary(); loadDecl();
   busy('m_wallet','Yükleniyor…');
-  return sb.from('wallet_entries').select('*').order('at',{ascending:false}).then(function(r){
+  return sb.from('wallet_entries').select('*').order('at',{ascending:false}).limit(WAL_SHOWN).then(function(r){
     if(r.error){ msg('m_wallet','Yüklenemedi.','bad'); return; }
     msg('m_wallet','');
     var list=r.data||[], tb=$('walbody'); tb.innerHTML='';
     $('waltbl').hidden=!list.length; $('wal_empty').hidden=list.length>0;
+    $('wal_more').hidden=list.length<WAL_SHOWN;
     list.forEach(function(w){
       var tr=document.createElement('tr');
       var a=document.createElement('td'); a.textContent=dt(w.at);
@@ -1633,6 +1755,137 @@ function loadWallet(){
   });
 }
 $('b_walreload').onclick=loadWallet;
+
+/* ---- Excel download: the whole statement with a running balance ---- */
+$('b_walxls').onclick=function(){
+  var btn=$('b_walxls'); btn.disabled=true; busy('m_wallet','Excel hazırlanıyor…');
+  var all=[];
+  function fetchFrom(from){
+    return sb.from('wallet_entries').select('at,kind,note,pence').order('at',{ascending:true}).range(from,from+999).then(function(r){
+      if(r.error) throw r.error;
+      all=all.concat(r.data||[]);
+      if((r.data||[]).length===1000) return fetchFrom(from+1000);
+    });
+  }
+  Promise.all([fetchFrom(0), window.XLSX?null:loadScript([
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'])]).then(function(){
+    var run=0, rows=[['Tarih','İşlem','Açıklama','Tutar (£)','Bakiye (£)']];
+    all.forEach(function(w){
+      run+=Number(w.pence)||0;
+      rows.push([dt(w.at), KIND_TR[w.kind]||w.kind, w.note||'', (Number(w.pence)||0)/100, run/100]);
+    });
+    var ws=XLSX.utils.aoa_to_sheet(rows);
+    for(var i=2;i<=rows.length;i++){ ['D','E'].forEach(function(c){ if(ws[c+i]) ws[c+i].z='#,##0.00'; }); }
+    ws['!cols']=[{wch:17},{wch:16},{wch:42},{wch:12},{wch:12}];
+    var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Hesap hareketleri');
+    XLSX.writeFile(wb,'ecomflex-hesap-hareketleri-'+new Date().toISOString().slice(0,10)+'.xlsx');
+    msg('m_wallet','');
+  }).catch(function(){
+    msg('m_wallet','Excel dosyası hazırlanamadı. Lütfen tekrar deneyin.','bad');
+  }).then(function(){ btn.disabled=false; });
+};
+
+/* ---- bank transfer: payment declarations ---- */
+var DST={pending:'Kontrol ediliyor',confirmed:'Onaylandı',rejected:'Reddedildi',cancelled:'İptal edildi'};
+function loadDecl(){
+  return sb.from('payment_declarations').select('*').order('created_at',{ascending:false}).limit(10).then(function(r){
+    var box=$('decllist'); box.innerHTML='';
+    if(r.error) return;
+    (r.data||[]).forEach(function(d){
+      var row=document.createElement('div'); row.className='decl';
+      var a=document.createElement('div'); a.className='a'; a.textContent=money(d.amount_pence);
+      var t=document.createElement('div'); t.className='d';
+      t.textContent=(d.sent_on?d.sent_on.split('-').reverse().join('/'):dt(d.created_at).slice(0,10))
+        +(d.reference?' · '+d.reference:'')
+        +(d.status==='rejected'&&d.decision_note?' · '+d.decision_note:'');
+      var st=document.createElement('span'); st.className='st '+d.status; st.textContent=DST[d.status]||d.status;
+      row.appendChild(a); row.appendChild(t); row.appendChild(st);
+      if(d.status==='pending'){
+        var x=document.createElement('button'); x.textContent='İptal';
+        x.onclick=function(){
+          if(!confirm('Bu ödeme bildirimini iptal etmek istiyor musunuz?')) return;
+          sb.rpc('cancel_declaration',{p_id:d.id}).then(function(){ loadDecl(); });
+        };
+        row.appendChild(x);
+      }
+      box.appendChild(row);
+    });
+  },function(){});
+}
+$('b_declare').onclick=function(){
+  var p=penceOf($('d_amt').value);
+  if(!(p>=100)){ bad('w_damt',true); return; }
+  bad('w_damt',false);
+  $('b_declare').disabled=true; busy('m_declare','Gönderiliyor…');
+  sb.rpc('declare_payment',{p_pence:p,p_sent_on:$('d_date').value||null,p_reference:$('d_ref').value.trim()||null}).then(function(r){
+    $('b_declare').disabled=false;
+    if(r.error){
+      msg('m_declare',/TOO_MANY_PENDING/.test(r.error.message||'')
+        ? 'Kontrol edilmeyi bekleyen çok sayıda bildiriminiz var. Lütfen onaylanmalarını bekleyin.'
+        : 'Gönderilemedi. Lütfen tekrar deneyin.','bad');
+      return;
+    }
+    msg('m_declare','Bildiriminiz alındı. Ödeme hesabımıza ulaştığında bakiyeniz güncellenecek.','good');
+    $('d_amt').value=''; $('d_ref').value='';
+    loadDecl();
+  },function(){ $('b_declare').disabled=false; msg('m_declare','Gönderilemedi. Lütfen tekrar deneyin.','bad'); });
+};
+$('d_date').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+
+/* ---- card top-up (Stripe). Shown only once a Stripe key is set in ecomflex-config.js ---- */
+var STRIPE_PK=(window.ECOMFLEX&&window.ECOMFLEX.STRIPE_PUBLISHABLE_KEY)||'';
+var STRIPE=null, CHECKOUT=null, CARD_BEFORE=0;
+if(STRIPE_PK) $('cardsec').hidden=false; else $('bank_num').textContent='02';
+function cardReset(){
+  if(CHECKOUT){ try{ CHECKOUT.destroy(); }catch(e){} CHECKOUT=null; }
+  $('stripebox').innerHTML='';
+  $('b_cardgo').hidden=false; $('b_cardgo').disabled=false;
+  $('b_cardstop').hidden=true; $('c_amt').disabled=false;
+}
+$('b_cardgo').onclick=function(){
+  var p=penceOf($('c_amt').value);
+  if(!(p>=5000 && p<=500000)){ bad('w_camt',true); return; }
+  bad('w_camt',false);
+  $('b_cardgo').disabled=true; busy('m_card','Ödeme sayfası hazırlanıyor…');
+  CARD_BEFORE=ACC.balance;
+  var secret='';
+  sb.functions.invoke('create-topup',{body:{pence:p}}).then(function(r){
+    if(r.error||!r.data||!r.data.clientSecret) throw new Error('START');
+    secret=r.data.clientSecret;
+    return window.Stripe?null:loadScript(['https://js.stripe.com/v3/']);
+  }).then(function(){
+    if(!STRIPE) STRIPE=window.Stripe(STRIPE_PK);
+    var make=STRIPE.createEmbeddedCheckoutPage||STRIPE.initEmbeddedCheckout;
+    return make.call(STRIPE,{
+      fetchClientSecret:function(){ return Promise.resolve(secret); },
+      onComplete:function(){ cardPaid(p); }
+    });
+  }).then(function(co){
+    CHECKOUT=co; co.mount('#stripebox'); msg('m_card','');
+    $('b_cardgo').hidden=true; $('b_cardstop').hidden=false; $('c_amt').disabled=true;
+  }).catch(function(){
+    cardReset(); msg('m_card','Ödeme başlatılamadı. Lütfen biraz sonra tekrar deneyin.','bad');
+  });
+};
+$('b_cardstop').onclick=function(){ cardReset(); msg('m_card',''); };
+/* Stripe has taken the payment; the webhook credits the balance, usually within seconds. */
+function cardPaid(p){
+  cardReset(); busy('m_card','Ödemeniz alındı. Bakiyeniz güncelleniyor…');
+  var tries=0;
+  (function poll(){
+    tries++;
+    refreshAccount().then(function(){
+      var landed=ACC.balance>=CARD_BEFORE+p;
+      if(landed||tries>=15){
+        msg('m_card', landed ? 'Teşekkürler! '+money(p)+' bakiyenize eklendi.'
+          : 'Ödemeniz alındı. Bakiyeniz birkaç dakika içinde güncellenecek.','good');
+        loadWallet();
+      } else setTimeout(poll,2000);
+    });
+  })();
+}
 
 /* ---- sign in with the access code alone ---- */
 $('b_showpw').onclick=function(){ $('pwbox').hidden=!$('pwbox').hidden; };
