@@ -1341,24 +1341,16 @@ $('b_fba').onclick=function(){
     return l;
   });
 
-  sb.rpc('submit_fba',{p_lines:payload,p_note:$('f_note').value.trim()||null}).then(function(r){
+  /* label files go up first and travel with the job. (Customers cannot edit a job
+     afterwards, so attaching them later silently failed.) */
+  var folder='fba-'+Date.now();
+  Promise.all(files.map(function(f,i){
+    return f? uploadLabel(f,folder,'fnsku-'+(i+1)).then(function(meta){ payload[i].new_fnsku_file=meta; }) : null;
+  })).then(function(){
+    return sb.rpc('submit_fba',{p_lines:payload,p_note:$('f_note').value.trim()||null});
+  }).then(function(r){
     if(r.error) throw r.error;
-    var ref=r.data;
-    /* find the row we just made so the label files can be attached to it */
-    return sb.from('requests').select('id').eq('ref',ref).single().then(function(g){
-      if(g.error||!g.data) return ref;
-      var id=g.data.id;
-      var jobs=[];
-      files.forEach(function(f,i){
-        if(f) jobs.push(uploadLabel(f,id,'fnsku-'+(i+1)).then(function(meta){
-          payload[i].new_fnsku_file=meta; return meta;
-        }));
-      });
-      if(!jobs.length) return ref;
-      return Promise.all(jobs).then(function(){
-        return sb.from('requests').update({details:{lines:payload}}).eq('id',id).then(function(){ return ref; });
-      });
-    });
+    return r.data;
   }).then(function(ref){
     $('b_fba').disabled=false;
     msg('m_fba','Talebiniz alındı. Talep numaranız: '+ref,'good');

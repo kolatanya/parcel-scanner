@@ -186,6 +186,33 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 .short{color:#8E2A2F;font-weight:600}
 .custsel{width:100%;padding:12px;border-radius:9px;border:1px solid var(--edge2);background:var(--panel);color:var(--ink);font-family:inherit;font-size:.95rem;margin-bottom:12px}
 .addline{display:grid;grid-template-columns:1fr 1fr 80px 1fr auto;gap:6px;margin-top:10px;align-items:center}
+/* ---------- support + content (phase 9) ---------- */
+.tk{background:#fff;border:1px solid var(--edge);border-radius:10px;margin-bottom:9px;overflow:hidden}
+.tk.wait{border-left:4px solid var(--warn)}
+.tkh{display:flex;gap:10px;align-items:center;padding:12px 14px;cursor:pointer}
+.tkh .t{flex:1;min-width:0}
+.tkh .t b{display:block;color:var(--navy);font-size:.92rem;overflow-wrap:anywhere}
+.tkh .t span{font-size:.76rem;color:var(--muted)}
+.tkb{padding:0 14px 14px}
+.tkmsg{padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:.88rem;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.tkmsg.cust{background:#FAFAFB;border:1px solid var(--edge);margin-right:36px}
+.tkmsg.staff{background:#EFF7F9;border:1px solid #CDE4EA;margin-left:36px}
+.tkmsg .who{font-size:.72rem;color:var(--muted);margin-bottom:3px;font-weight:600}
+.ta{width:100%;min-height:90px;padding:10px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.9rem;color:var(--ink);resize:vertical}
+.inl{width:100%;padding:10px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.9rem;color:var(--ink)}
+.acts2{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.st{display:inline-block;font-size:.7rem;font-weight:600;border-radius:20px;padding:2px 9px;white-space:nowrap;border:1px solid}
+.st.wait{background:#FDF6E1;color:#7A5210;border-color:#E4D3A0}
+.st.done{background:#EFF7F9;color:#1F5F70;border-color:#CDE4EA}
+.st.off{background:#F2F0EC;color:var(--muted);border-color:var(--edge)}
+.frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.frm .full{grid-column:1/-1}
+.frm label{display:block;font-size:.74rem;color:var(--muted);margin-bottom:4px}
+.item{background:#fff;border:1px solid var(--edge);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.item b{color:var(--navy)}
+.item .body{font-size:.86rem;color:var(--ink);white-space:pre-wrap;margin-top:4px;overflow-wrap:anywhere}
+.item .meta{font-size:.74rem;color:var(--muted);margin-top:4px}
+@media (max-width:640px){ .frm{grid-template-columns:1fr} }
 .addline input{padding:9px;border-radius:6px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.86rem;color:var(--ink);min-width:0}
 .secnav{flex-wrap:wrap}
 .secnav button{flex:1 1 30%;padding:10px 6px;font-size:.84rem}
@@ -279,7 +306,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <h1>Panel requests</h1>
       <p class="sub" id="sub">Customers asking for panel access</p>
     </div>
-    <span class="ver">v3</span>
+    <span class="ver">v4</span>
   </div>
 
   <!-- sign in -->
@@ -300,8 +327,10 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <button data-s="inbound">Inbound<span class="count" id="c_inbound" hidden></span></button>
       <button data-s="stock">Stock<span class="count" id="c_stock" hidden></span></button>
       <button data-s="services">Services<span class="count" id="c_services" hidden></span></button>
+      <button data-s="support">Support<span class="count" id="c_support" hidden></span></button>
       <button data-s="clients">Customers<span class="count" id="c_clients" hidden></span></button>
       <button data-s="access">Access<span class="count" id="c_access" hidden></span></button>
+      <button data-s="content">Content</button>
       <button data-s="report">Reports</button>
       <button data-s="staff">Staff</button>
     </div>
@@ -328,7 +357,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <select class="custsel" id="stockcust"><option value="">Choose a customer…</option></select>
       <div class="msg" id="m_stock"></div>
       <div class="tblwrap"><table class="tbl" id="stocktbl" hidden>
-        <thead><tr><th>SKU</th><th>Product</th><th>Qty</th><th>Location</th><th>Warn at</th><th></th></tr></thead>
+        <thead><tr><th>SKU</th><th>Product</th><th>Qty</th><th>Damaged</th><th>Location</th><th>Warn at</th><th>ASIN</th><th>Barcode</th><th>Active</th><th></th></tr></thead>
         <tbody id="stockbody"></tbody></table></div>
       <div class="empty" id="stock_empty" hidden>No stock for this customer yet.</div>
       <div class="addline" id="addline" hidden>
@@ -389,6 +418,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <button data-c="new" class="on">Onboarding<span class="count" id="c_newcl" hidden></span></button>
         <button data-c="live">Active customers</button>
         <button data-c="pay">Payments<span class="count" id="c_paycl" hidden></span></button>
+        <button data-c="inv">Invoices</button>
         <button data-c="setup">Bank details</button>
       </div>
       <div class="msg" id="m_cl"></div>
@@ -408,6 +438,23 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <div class="empty" id="pay_empty" hidden>No payments waiting to be confirmed.</div>
       </div>
 
+      <div id="cl_inv" hidden>
+        <div class="card" style="margin-bottom:12px">
+          <h2>Upload an invoice</h2>
+          <p class="lead">The customer sees it on their Faturalar page and can open or download it.</p>
+          <div class="frm">
+            <div class="full"><label>Customer</label><select class="custsel" id="inv_cust" style="margin:0"><option value="">Choose a customer…</option></select></div>
+            <div><label>Title</label><input class="inl" id="inv_title" placeholder="Invoice INV-1416"></div>
+            <div><label>Period (optional)</label><input class="inl" id="inv_period" placeholder="September 2026"></div>
+            <div><label>Amount £ (optional)</label><input class="inl" id="inv_amount" inputmode="decimal" placeholder="273.30"></div>
+            <div><label>PDF file</label><input class="inl" id="inv_file" type="file" accept="application/pdf,image/*"></div>
+          </div>
+          <button class="rowbtn save" id="b_invup">Upload invoice</button>
+        </div>
+        <div id="invlist"></div>
+        <div class="empty" id="inv_empty" hidden>No invoices uploaded yet.</div>
+      </div>
+
       <div id="cl_setup" hidden>
         <div class="card">
           <h2>Bank details shown to customers</h2>
@@ -423,6 +470,63 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       </div>
 
       <button class="btn second" id="b_clreload" style="margin-top:14px">Refresh</button>
+    </div>
+
+    <div id="sec_support" hidden>
+      <div class="tabs" id="tktabs">
+        <button data-t="open" class="on">Waiting for us<span class="count" id="c_tkopen" hidden></span></button>
+        <button data-t="answered">Answered</button>
+        <button data-t="closed">Closed</button>
+      </div>
+      <div class="msg" id="m_tk"></div>
+      <div id="tklist"></div>
+      <div class="empty" id="tk_empty" hidden>Nothing here.</div>
+      <button class="btn second" id="b_tkreload" style="margin-top:14px">Refresh</button>
+    </div>
+
+    <div id="sec_content" hidden>
+      <div class="tabs" id="cttabs">
+        <button data-t="ann" class="on">Announcements</button>
+        <button data-t="price">Price list</button>
+        <button data-t="docs">Documents</button>
+      </div>
+      <div class="msg" id="m_ct"></div>
+      <div id="ct_ann">
+        <div class="card" style="margin-bottom:12px">
+          <h2>New announcement</h2>
+          <p class="lead">Shown to every customer on their dashboard, with a “new” badge until they read it. Write it in Turkish.</p>
+          <div class="frm">
+            <div class="full"><label>Title</label><input class="inl" id="an_title" maxlength="140"></div>
+            <div class="full"><label>Message</label><textarea class="ta" id="an_body"></textarea></div>
+          </div>
+          <button class="rowbtn save" id="b_anpost">Post announcement</button>
+        </div>
+        <div id="annlist"></div>
+      </div>
+      <div id="ct_price" hidden>
+        <p class="lead">The price list customers see on their Fiyat Listesi page. Prices in pounds. Untick “show” to hide a line without deleting it.</p>
+        <div class="tblwrap"><table class="tbl">
+          <thead><tr><th>Category</th><th>Service</th><th>Unit</th><th>Price £</th><th>Order</th><th>Show</th><th></th></tr></thead>
+          <tbody id="pricebody"></tbody></table></div>
+        <div class="empty" id="price_empty" hidden>No prices yet. Add the first line below.</div>
+        <div class="addline" style="grid-template-columns:1fr 1.6fr .7fr .6fr auto">
+          <input id="np_cat" placeholder="Category"><input id="np_name" placeholder="Service name"><input id="np_unit" placeholder="Unit (adet, koli…)">
+          <input id="np_price" placeholder="£" inputmode="decimal"><button class="rowbtn save" id="b_npadd">Add</button>
+        </div>
+      </div>
+      <div id="ct_docs" hidden>
+        <div class="card" style="margin-bottom:12px">
+          <h2>Share a document</h2>
+          <p class="lead">Every customer can open it on their Belgeler page: agreements, payment methods, guides.</p>
+          <div class="frm">
+            <div><label>Title</label><input class="inl" id="dc_title" placeholder="Ödeme yöntemleri"></div>
+            <div><label>Short description (optional)</label><input class="inl" id="dc_desc"></div>
+            <div class="full"><label>File (PDF)</label><input class="inl" id="dc_file" type="file" accept="application/pdf,image/*"></div>
+          </div>
+          <button class="rowbtn save" id="b_dcup">Upload document</button>
+        </div>
+        <div id="doclist"></div>
+      </div>
     </div>
 
     <div id="sec_report" hidden>
@@ -488,8 +592,10 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 var $=function(i){return document.getElementById(i);};
 var sb=null, rows=[], filter='pending';
 
-function msg(el,t,k){ var e=$(el); e.innerHTML=t; e.className='msg'+(k?' '+k:''); }
-function busy(el,t){ msg(el,'<span class="spin"></span>'+t); }
+/* messages are plain text: they often contain customer-typed SKUs, company names and emails */
+function msg(el,t,k){ var e=$(el); e.textContent=(t===null||t===undefined)?'':String(t); e.className='msg'+(k?' '+k:''); }
+function busy(el,t){ var e=$(el); e.className='msg'; e.textContent='';
+  var sp=document.createElement('span'); sp.className='spin'; e.appendChild(sp); e.appendChild(document.createTextNode(t||'')); }
 
 function loadScript(urls){
   return new Promise(function(res,rej){
@@ -600,7 +706,9 @@ function render(){
       body.appendChild(a2);
       if(r.decided_by){
         var d=document.createElement('div'); d.className='kv';
-        d.innerHTML='<div class="k">Approved by</div><div class="v">'+r.decided_by+'</div>';
+        var dk=document.createElement('div'); dk.className='k'; dk.textContent='Approved by';
+        var dv=document.createElement('div'); dv.className='v'; dv.textContent=r.decided_by;
+        d.appendChild(dk); d.appendChild(dv);
         body.appendChild(d);
       }
     }
@@ -646,7 +754,7 @@ var customers=[], orders=[], section='access';
 
 function setSection(sec){
   section=sec;
-  ['today','needs','inbound','stock','services','clients','access','report','staff'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
+  ['today','needs','inbound','stock','services','support','clients','content','access','report','staff'].forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
     b.classList.toggle('on', b.getAttribute('data-s')===sec);
   });
@@ -658,6 +766,8 @@ function setSection(sec){
   if(sec==='clients'){ loadClients(); loadPayments(); }
   if(sec==='report'){ loadReport(); loadActivity(true); }
   if(sec==='staff') loadStaff();
+  if(sec==='support') loadTickets();
+  if(sec==='content') setCtTab(ctTab);
 }
 Array.prototype.forEach.call(document.querySelectorAll('.secnav button'),function(b){
   b.onclick=function(){ setSection(b.getAttribute('data-s')); };
@@ -888,6 +998,8 @@ function loadToday(){
     t.appendChild(tile(c.forward_waiting||0,'parcels to forward','services','hot'));
     t.appendChild(tile(c.fba_waiting||0,'FBA jobs to prep','services','hot'));
     t.appendChild(tile(c.payments_waiting||0,'bank transfers to confirm','clients:pay','hot'));
+    t.appendChild(tile(c.tickets_waiting||0,'support tickets waiting','support','hot'));
+    $('c_support').hidden=!c.tickets_waiting; $('c_support').textContent=c.tickets_waiting||'';
     t.appendChild(tile(c.access_waiting||0,'access requests','access','hot'));
     var L=$('todaylist'); L.innerHTML='';
     var today=new Date().toISOString().slice(0,10);
@@ -1051,13 +1163,25 @@ function loadStock(){
       var c3=document.createElement('td'); var q=document.createElement('input'); q.type='number'; q.className='n'; q.value=row.qty; q.inputMode='numeric'; c3.appendChild(q);
       var c4=document.createElement('td'); var loc=document.createElement('input'); loc.value=row.location||''; loc.placeholder='bay / shelf'; c4.appendChild(loc);
       var c5=document.createElement('td'); var lo=document.createElement('input'); lo.type='number'; lo.className='n'; lo.value=row.low_at||0; c5.appendChild(lo);
+      var cd=document.createElement('td'); var dmg=document.createElement('input'); dmg.type='number'; dmg.min='0'; dmg.className='n'; dmg.value=row.damaged_qty||0; dmg.title='Damaged units, kept apart from sellable stock'; cd.appendChild(dmg);
+      var ca=document.createElement('td'); var asin=document.createElement('input'); asin.value=row.asin||''; asin.placeholder='B0…'; asin.style.minWidth='110px'; ca.appendChild(asin);
+      var cb=document.createElement('td'); var bar=document.createElement('input'); bar.value=row.barcode||''; bar.placeholder='EAN'; bar.style.minWidth='110px'; cb.appendChild(bar);
+      var cx=document.createElement('td'); var act=document.createElement('input'); act.type='checkbox'; act.checked=row.active!==false; act.style.width='auto'; act.style.minWidth='0'; act.title='Passive products are hidden from the customer’s order forms'; cx.appendChild(act);
       var c6=document.createElement('td'); c6.style.whiteSpace='nowrap';
       var sv=document.createElement('button'); sv.className='rowbtn save'; sv.textContent='Save'; sv.hidden=true;
       var dl=document.createElement('button'); dl.className='rowbtn del'; dl.textContent='\u00D7'; dl.title='Remove SKU'; dl.style.marginLeft='6px';
-      [pn,q,loc,lo].forEach(function(i){ i.oninput=function(){ tr.classList.add('dirty'); sv.hidden=false; }; });
+      [pn,q,loc,lo,dmg,asin,bar,act].forEach(function(i){ i.oninput=i.onchange=function(){ tr.classList.add('dirty'); sv.hidden=false; }; });
       sv.onclick=function(){
         sv.disabled=true;
-        sb.from('stock').update({product_name:pn.value.trim()||null,qty:parseInt(q.value,10)||0,location:loc.value.trim()||null,low_at:parseInt(lo.value,10)||0,updated_at:new Date().toISOString()}).eq('id',row.id)
+        var now={product_name:pn.value.trim()||null,qty:parseInt(q.value,10)||0,location:loc.value.trim()||null,low_at:parseInt(lo.value,10)||0,
+          damaged_qty:Math.max(0,parseInt(dmg.value,10)||0),asin:asin.value.trim().toUpperCase()||null,barcode:bar.value.trim()||null,active:act.checked};
+        var was={product_name:row.product_name||null,qty:row.qty,location:row.location||null,low_at:row.low_at||0,
+          damaged_qty:row.damaged_qty||0,asin:row.asin||null,barcode:row.barcode||null,active:row.active!==false};
+        /* only send what staff changed: an old page must not undo dispatches or the customer's own edits */
+        var upd={}; Object.keys(now).forEach(function(k){ if(now[k]!==was[k]) upd[k]=now[k]; });
+        if(!Object.keys(upd).length){ sv.disabled=false; sv.hidden=true; tr.classList.remove('dirty'); return; }
+        upd.updated_at=new Date().toISOString();
+        sb.from('stock').update(upd).eq('id',row.id)
         .then(function(x){ sv.disabled=false; if(x.error){ msg('m_stock','Could not save.','bad'); return; } msg('m_stock','Saved '+row.sku,'good'); loadStock(); });
       };
       dl.onclick=function(){
@@ -1065,7 +1189,7 @@ function loadStock(){
         sb.from('stock').delete().eq('id',row.id).then(function(x){ if(x.error){ msg('m_stock','Could not remove.','bad'); return; } loadStock(); });
       };
       c6.appendChild(sv); c6.appendChild(dl);
-      [c1,c2,c3,c4,c5,c6].forEach(function(c){ tr.appendChild(c); }); tb.appendChild(tr);
+      [c1,c2,c3,cd,c4,c5,ca,cb,cx,c6].forEach(function(c){ tr.appendChild(c); }); tb.appendChild(tr);
     });
   });
 }
@@ -1084,6 +1208,264 @@ function openFile(path){
     window.open(r.data.signedUrl,'_blank');
   });
 }
+
+/* =====================  helpers for the phase 9 screens  ===================== */
+function ce(tag,cls,text){ var e=document.createElement(tag); if(cls) e.className=cls; if(text!==undefined&&text!==null) e.textContent=text; return e; }
+function openBucketFile(bucket,path){
+  var w=window.open('about:blank','_blank');
+  sb.storage.from(bucket).createSignedUrl(path,3600).then(function(r){
+    if(r.error||!r.data){ if(w) w.close(); alert('Could not open that file.'); return; }
+    if(w) w.location.href=r.data.signedUrl; else window.location.href=r.data.signedUrl;
+  });
+}
+function safeName(n){ return String(n||'file').replace(/[^\w.\-]/g,'_'); }
+function poundsToPence(v){ v=String(v||'').replace(/[£\s,]/g,''); if(!/^\d+(\.\d{0,2})?$/.test(v)) return NaN; return Math.round(parseFloat(v)*100); }
+function myEmail(){ return sb.auth.getUser().then(function(u){ return (u.data&&u.data.user&&u.data.user.email)||null; },function(){ return null; }); }
+
+/* =====================  SUPPORT TICKETS  ===================== */
+var TK=[], tkTab='open';
+function setTkTab(t){
+  tkTab=t;
+  Array.prototype.forEach.call($('tktabs').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.getAttribute('data-t')===t); });
+  renderTickets();
+}
+Array.prototype.forEach.call($('tktabs').querySelectorAll('button'),function(b){ b.onclick=function(){ setTkTab(b.getAttribute('data-t')); }; });
+$('b_tkreload').onclick=function(){ loadTickets(); };
+function loadTickets(){
+  busy('m_tk','Loading…');
+  return sb.from('tickets').select('*').order('updated_at',{ascending:false}).limit(500).then(function(r){
+    if(r.error){ msg('m_tk','Could not load. Is the Phase 9 script run?','bad'); return; }
+    TK=r.data||[]; msg('m_tk','');
+    var n=TK.filter(function(t){ return t.status==='open'; }).length;
+    $('c_tkopen').hidden=!n; $('c_tkopen').textContent=n||'';
+    $('c_support').hidden=!n; $('c_support').textContent=n||'';
+    renderTickets();
+  });
+}
+var TKLABEL={open:['waiting for us','wait'],answered:['answered','done'],closed:['closed','off']};
+function renderTickets(){
+  var box=$('tklist'); box.innerHTML='';
+  var list=TK.filter(function(t){ return t.status===tkTab; });
+  $('tk_empty').hidden=list.length>0;
+  list.forEach(function(t){
+    var card=ce('div','tk'+(t.status==='open'?' wait':''));
+    var head=ce('div','tkh');
+    var tt=ce('div','t'); tt.appendChild(ce('b',null,'#'+t.no+' · '+t.subject));
+    tt.appendChild(ce('span',null,(t.company||t.user_email||'Customer')+' · '+(t.category||'General')+' · '+when(t.updated_at)));
+    var lb=TKLABEL[t.status]||[t.status,'off'];
+    head.appendChild(tt); head.appendChild(ce('span','st '+lb[1],lb[0]));
+    var body=ce('div','tkb'); body.hidden=true;
+    head.onclick=function(){ body.hidden=!body.hidden; if(!body.hidden&&!body._loaded) fillTicket(t,body); };
+    card.appendChild(head); card.appendChild(body); box.appendChild(card);
+  });
+}
+function fillTicket(t,body){
+  body._loaded=true; body.innerHTML=''; body.appendChild(ce('div','msg','Loading…'));
+  sb.from('ticket_messages').select('*').eq('ticket_id',t.id).order('created_at').then(function(r){
+    body.innerHTML='';
+    if(r.error){ body.appendChild(ce('div','msg bad','Could not load the messages.')); return; }
+    (r.data||[]).forEach(function(m){
+      var d=ce('div','tkmsg '+(m.from_staff?'staff':'cust'));
+      d.appendChild(ce('div','who',(m.from_staff?'Ecomflex — '+(m.author||''):(t.company||t.user_email||'Customer'))+' · '+when(m.created_at)));
+      d.appendChild(document.createTextNode(m.body)); body.appendChild(d);
+    });
+    var ta=ce('textarea','ta'); ta.placeholder='Reply to the customer (in Turkish)…';
+    var acts=ce('div','acts2');
+    var send=ce('button','rowbtn save','Send reply');
+    send.onclick=function(){
+      var v=ta.value.trim(); if(!v){ ta.focus(); return; }
+      send.disabled=true;
+      sb.rpc('reply_ticket',{p_id:t.id,p_body:v}).then(function(x){
+        send.disabled=false;
+        if(x.error){ msg('m_tk',x.error.message,'bad'); return; }
+        msg('m_tk','Reply sent to #'+t.no,'good'); loadTickets(); loadToday();
+      });
+    };
+    acts.appendChild(send);
+    if(t.status!=='closed'){
+      var cl=ce('button','rowbtn','Close ticket');
+      cl.onclick=function(){
+        if(!confirm('Close ticket #'+t.no+'?')) return;
+        sb.rpc('close_ticket',{p_id:t.id}).then(function(x){ if(x.error){ msg('m_tk',x.error.message,'bad'); return; } loadTickets(); loadToday(); });
+      };
+      acts.appendChild(cl);
+    }
+    body.appendChild(ta); body.appendChild(acts);
+  });
+}
+
+/* =====================  CONTENT: announcements, price list, documents  ===================== */
+var ctTab='ann';
+function setCtTab(t){
+  ctTab=t;
+  Array.prototype.forEach.call($('cttabs').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.getAttribute('data-t')===t); });
+  $('ct_ann').hidden=(t!=='ann'); $('ct_price').hidden=(t!=='price'); $('ct_docs').hidden=(t!=='docs');
+  msg('m_ct','');
+  if(t==='ann') loadAnnAdmin(); else if(t==='price') loadPricesAdmin(); else loadDocsAdmin();
+}
+Array.prototype.forEach.call($('cttabs').querySelectorAll('button'),function(b){ b.onclick=function(){ setCtTab(b.getAttribute('data-t')); }; });
+
+function loadAnnAdmin(){
+  return sb.from('announcements').select('*').order('created_at',{ascending:false}).then(function(r){
+    var box=$('annlist'); box.innerHTML='';
+    if(r.error){ msg('m_ct','Could not load. Is the Phase 9 script run?','bad'); return; }
+    if(!(r.data||[]).length) box.appendChild(ce('div','empty','No announcements yet.'));
+    (r.data||[]).forEach(function(a){
+      var it=ce('div','item');
+      var top=ce('div'); top.style.cssText='display:flex;gap:8px;align-items:center;justify-content:space-between';
+      top.appendChild(ce('b',null,a.title)); top.appendChild(ce('span','st '+(a.active?'done':'off'),a.active?'showing':'hidden'));
+      it.appendChild(top); it.appendChild(ce('div','body',a.body)); it.appendChild(ce('div','meta',when(a.created_at)+(a.created_by?' · '+a.created_by:'')));
+      var acts=ce('div','acts2');
+      var tg=ce('button','rowbtn',a.active?'Hide from customers':'Show again');
+      tg.onclick=function(){ sb.from('announcements').update({active:!a.active}).eq('id',a.id).then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; } loadAnnAdmin(); }); };
+      var del=ce('button','rowbtn del','Delete');
+      del.onclick=function(){ if(!confirm('Delete this announcement for good?')) return;
+        sb.from('announcements').delete().eq('id',a.id).then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; } loadAnnAdmin(); }); };
+      acts.appendChild(tg); acts.appendChild(del); it.appendChild(acts); box.appendChild(it);
+    });
+  });
+}
+$('b_anpost').onclick=function(){
+  var t=$('an_title').value.trim(), b=$('an_body').value.trim();
+  if(!t||!b){ msg('m_ct','Write a title and a message.','bad'); return; }
+  $('b_anpost').disabled=true;
+  myEmail().then(function(me){
+    return sb.from('announcements').insert({title:t,body:b,created_by:me});
+  }).then(function(x){
+    $('b_anpost').disabled=false;
+    if(x.error){ msg('m_ct',x.error.message,'bad'); return; }
+    $('an_title').value=''; $('an_body').value=''; msg('m_ct','Announcement posted. Customers see it now.','good'); loadAnnAdmin();
+  });
+};
+
+function loadPricesAdmin(){
+  return sb.from('price_items').select('*').order('sort').order('name').then(function(r){
+    var tb=$('pricebody'); tb.innerHTML='';
+    if(r.error){ msg('m_ct','Could not load. Is the Phase 9 script run?','bad'); return; }
+    var rows=r.data||[]; $('price_empty').hidden=rows.length>0;
+    rows.forEach(function(p){
+      var tr=ce('tr');
+      var cat=ce('input'); cat.value=p.category||'';
+      var nm=ce('input'); nm.value=p.name; nm.style.minWidth='220px';
+      var un=ce('input'); un.value=p.unit||'';
+      var pr=ce('input','n'); pr.value=(Number(p.price_pence)/100).toFixed(2); pr.inputMode='decimal';
+      var so=ce('input','n'); so.type='number'; so.value=p.sort||0;
+      var ac=ce('input'); ac.type='checkbox'; ac.checked=!!p.active; ac.style.width='auto'; ac.style.minWidth='0';
+      var sv=ce('button','rowbtn save','Save'); sv.hidden=true;
+      var dl=ce('button','rowbtn del','×'); dl.title='Delete'; dl.style.marginLeft='6px';
+      [cat,nm,un,pr,so,ac].forEach(function(i){ i.oninput=i.onchange=function(){ sv.hidden=false; tr.classList.add('dirty'); }; });
+      sv.onclick=function(){
+        var pence=poundsToPence(pr.value);
+        if(!nm.value.trim()||!(pence>=0)){ msg('m_ct','Each line needs a name and a price like 1.25','bad'); return; }
+        sb.from('price_items').update({category:cat.value.trim()||null,name:nm.value.trim(),unit:un.value.trim()||null,price_pence:pence,sort:parseInt(so.value,10)||0,active:ac.checked,updated_at:new Date().toISOString()}).eq('id',p.id)
+          .then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; } msg('m_ct','Saved.','good'); loadPricesAdmin(); });
+      };
+      dl.onclick=function(){ if(!confirm('Delete "'+p.name+'" from the price list?')) return;
+        sb.from('price_items').delete().eq('id',p.id).then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; } loadPricesAdmin(); }); };
+      [cat,nm,un,pr,so,ac].forEach(function(i){ var td=ce('td'); td.appendChild(i); tr.appendChild(td); });
+      var tdb=ce('td'); tdb.style.whiteSpace='nowrap'; tdb.appendChild(sv); tdb.appendChild(dl); tr.appendChild(tdb);
+      tb.appendChild(tr);
+    });
+  });
+}
+$('b_npadd').onclick=function(){
+  var pence=poundsToPence($('np_price').value), nm=$('np_name').value.trim();
+  if(!nm||!(pence>=0)){ msg('m_ct','Write a service name and a price like 1.25','bad'); return; }
+  sb.from('price_items').insert({category:$('np_cat').value.trim()||null,name:nm,unit:$('np_unit').value.trim()||null,price_pence:pence,sort:999})
+    .then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; }
+      ['np_name','np_unit','np_price'].forEach(function(i){ $(i).value=''; }); msg('m_ct','Added.','good'); loadPricesAdmin(); });
+};
+
+function loadDocsAdmin(){
+  return sb.from('documents').select('*').order('sort').order('created_at',{ascending:false}).then(function(r){
+    var box=$('doclist'); box.innerHTML='';
+    if(r.error){ msg('m_ct','Could not load. Is the Phase 9 script run?','bad'); return; }
+    if(!(r.data||[]).length) box.appendChild(ce('div','empty','No documents shared yet.'));
+    (r.data||[]).forEach(function(d){
+      var it=ce('div','item');
+      var top=ce('div'); top.style.cssText='display:flex;gap:8px;align-items:center;justify-content:space-between';
+      top.appendChild(ce('b',null,d.title)); top.appendChild(ce('span','st '+(d.active?'done':'off'),d.active?'showing':'hidden'));
+      it.appendChild(top);
+      if(d.description) it.appendChild(ce('div','body',d.description));
+      it.appendChild(ce('div','meta',(d.file_name||d.path)+' · '+when(d.created_at)));
+      var acts=ce('div','acts2');
+      var op=ce('button','rowbtn','Open'); op.onclick=function(){ openBucketFile('documents',d.path); };
+      var tg=ce('button','rowbtn',d.active?'Hide':'Show');
+      tg.onclick=function(){ sb.from('documents').update({active:!d.active}).eq('id',d.id).then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; } loadDocsAdmin(); }); };
+      var del=ce('button','rowbtn del','Delete');
+      del.onclick=function(){ if(!confirm('Delete "'+d.title+'"? Customers will no longer see it.')) return;
+        sb.storage.from('documents').remove([d.path]).then(function(){ return sb.from('documents').delete().eq('id',d.id); })
+          .then(function(x){ if(x&&x.error){ msg('m_ct',x.error.message,'bad'); return; } loadDocsAdmin(); }); };
+      acts.appendChild(op); acts.appendChild(tg); acts.appendChild(del); it.appendChild(acts); box.appendChild(it);
+    });
+  });
+}
+$('b_dcup').onclick=function(){
+  var t=$('dc_title').value.trim(), f=$('dc_file').files[0];
+  if(!t||!f){ msg('m_ct','Give the document a title and choose the file.','bad'); return; }
+  var path='shared/'+Date.now()+'-'+safeName(f.name);
+  $('b_dcup').disabled=true; busy('m_ct','Uploading…');
+  sb.storage.from('documents').upload(path,f,{upsert:false}).then(function(r){
+    if(r.error) throw r.error;
+    return sb.from('documents').insert({title:t,description:$('dc_desc').value.trim()||null,path:path,file_name:f.name});
+  }).then(function(x){
+    $('b_dcup').disabled=false;
+    if(x.error) throw x.error;
+    $('dc_title').value=''; $('dc_desc').value=''; $('dc_file').value='';
+    msg('m_ct','Document shared with every customer.','good'); loadDocsAdmin();
+  }).catch(function(e){ $('b_dcup').disabled=false; msg('m_ct','Upload failed: '+((e&&e.message)||''),'bad'); });
+};
+
+/* =====================  INVOICES (Customers tab)  ===================== */
+var INVCUST={};
+function loadInvoicesAdmin(){
+  sb.rpc('customer_directory').then(function(r){
+    var sel=$('inv_cust'), keep=sel.value; sel.innerHTML='<option value="">Choose a customer…</option>'; INVCUST={};
+    (r.data||[]).forEach(function(c){
+      if(!c.user_id) return;
+      INVCUST[c.user_id]=c;
+      var o=document.createElement('option'); o.value=c.user_id; o.textContent=(c.business_name||c.full_name)+' — '+c.email; sel.appendChild(o);
+    });
+    sel.value=keep;
+  });
+  return sb.from('invoices').select('*').order('created_at',{ascending:false}).limit(200).then(function(r){
+    var box=$('invlist'); box.innerHTML='';
+    if(r.error){ msg('m_cl','Could not load invoices. Is the Phase 9 script run?','bad'); return; }
+    var rows=r.data||[]; $('inv_empty').hidden=rows.length>0;
+    rows.forEach(function(v){
+      var it=ce('div','item');
+      it.appendChild(ce('b',null,v.title+(v.amount_pence!==null&&v.amount_pence!==undefined?' · '+gbp(v.amount_pence):'')));
+      it.appendChild(ce('div','meta',(v.user_email||'')+(v.period?' · '+v.period:'')+' · '+when(v.created_at)));
+      var acts=ce('div','acts2');
+      var op=ce('button','rowbtn','Open'); op.onclick=function(){ openBucketFile('invoices',v.path); };
+      var del=ce('button','rowbtn del','Delete');
+      del.onclick=function(){ if(!confirm('Delete invoice "'+v.title+'"? The customer will no longer see it.')) return;
+        sb.storage.from('invoices').remove([v.path]).then(function(){ return sb.from('invoices').delete().eq('id',v.id); })
+          .then(function(x){ if(x&&x.error){ msg('m_cl',x.error.message,'bad'); return; } loadInvoicesAdmin(); }); };
+      acts.appendChild(op); acts.appendChild(del); it.appendChild(acts); box.appendChild(it);
+    });
+  });
+}
+$('b_invup').onclick=function(){
+  var uid=$('inv_cust').value, f=$('inv_file').files[0], t=$('inv_title').value.trim();
+  var amt=$('inv_amount').value.trim(), pence=amt?poundsToPence(amt):null;
+  if(!uid||!f||!t){ msg('m_cl','Choose the customer, write a title and choose the PDF.','bad'); return; }
+  if(amt&&!(pence>=0)){ msg('m_cl','Amount must look like 273.30','bad'); return; }
+  var c=INVCUST[uid]||{}, path=uid+'/'+Date.now()+'-'+safeName(f.name);
+  $('b_invup').disabled=true; busy('m_cl','Uploading…');
+  sb.storage.from('invoices').upload(path,f,{upsert:false}).then(function(r){
+    if(r.error) throw r.error;
+    return myEmail().then(function(me){
+      return sb.from('invoices').insert({user_id:uid,user_email:c.email||null,title:t,period:$('inv_period').value.trim()||null,
+        amount_pence:pence,path:path,file_name:f.name,created_by:me});
+    });
+  }).then(function(x){
+    $('b_invup').disabled=false;
+    if(x.error) throw x.error;
+    ['inv_title','inv_period','inv_amount','inv_file'].forEach(function(i){ $(i).value=''; });
+    msg('m_cl','Invoice uploaded. The customer can see it now.','good'); loadInvoicesAdmin();
+  }).catch(function(e){ $('b_invup').disabled=false; msg('m_cl','Upload failed: '+((e&&e.message)||''),'bad'); });
+};
 
 /* =====================  SERVICES  ===================== */
 var svAll=[], svKind='return';
@@ -1689,9 +2071,13 @@ function loadReport(){
     $('reptbl').hidden=!repRows.length; $('rep_empty').hidden=repRows.length>0;
     repRows.forEach(function(x){
       var tr=document.createElement('tr');
-      tr.innerHTML='<td><strong>'+x.business+'</strong><br><span style="font-size:.76rem;color:var(--muted)">'+x.email+'</span></td>'
-        +[x.dispatched,x.units_out,x.received,x.units_in,x.returns,x.forwarded,x.fba_jobs,x.skus,x.units_held]
-          .map(function(v){return '<td>'+v+'</td>';}).join('');
+      var who=document.createElement('td');
+      var wb=document.createElement('strong'); wb.textContent=x.business||''; who.appendChild(wb);
+      who.appendChild(document.createElement('br'));
+      var we=document.createElement('span'); we.style.cssText='font-size:.76rem;color:var(--muted)'; we.textContent=x.email||''; who.appendChild(we);
+      tr.appendChild(who);
+      [x.dispatched,x.units_out,x.received,x.units_in,x.returns,x.forwarded,x.fba_jobs,x.skus,x.units_held].forEach(function(v){
+        var td=document.createElement('td'); td.textContent=String(v===null||v===undefined?0:v); tr.appendChild(td); });
       tb.appendChild(tr);
     });
   });
@@ -1778,10 +2164,11 @@ function setClTab(c){
   Array.prototype.forEach.call(document.querySelectorAll('#cltabs button'),function(x){
     x.classList.toggle('on', x.getAttribute('data-c')===c);
   });
-  $('cl_board').hidden=(c==='setup'||c==='pay');
+  $('cl_board').hidden=(c==='setup'||c==='pay'||c==='inv');
   $('cl_setup').hidden=(c!=='setup');
   $('cl_pay').hidden=(c!=='pay');
-  if(c==='setup') loadSetup(); else if(c==='pay') loadPayments(); else renderClients();
+  $('cl_inv').hidden=(c!=='inv');
+  if(c==='setup') loadSetup(); else if(c==='pay') loadPayments(); else if(c==='inv') loadInvoicesAdmin(); else renderClients();
 }
 Array.prototype.forEach.call(document.querySelectorAll('#cltabs button'),function(b){
   b.onclick=function(){ setClTab(b.getAttribute('data-c')); };
@@ -1861,7 +2248,7 @@ function loadPayments(){
   });
 }
 function renderClients(){
-  if(clTab==='setup'||clTab==='pay') return;
+  if(clTab==='setup'||clTab==='pay'||clTab==='inv') return;
   var list=CLIENTS.filter(function(c){ return clTab==='new' ? !c.complete : c.complete; });
   var tb=$('clbody'); tb.innerHTML='';
   $('cl_empty').hidden=list.length>0;

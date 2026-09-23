@@ -1,8 +1,8 @@
 /* Ecomflex offline cache.
    Pages are fetched from the network first so an update always lands,
    with the cached copy used only when the phone is offline. */
-var CACHE = 'ecomflex-v17';
-var CORE = ['./', 'index.html', 'scanner.html', 'labels.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'logo.png', 'favicon.png', 'apple-touch-icon.png', 'admin.html', 'panel.html', 'signup.html', 'ecomflex-config.js', 'shared.js'];
+var CACHE = 'ecomflex-v18';
+var CORE = ['./', 'index.html', 'scanner.html', 'labels.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'logo.png', 'favicon.png', 'apple-touch-icon.png', 'admin.html', 'panel.html', 'signup.html', 'ecomflex-config.js', 'shared.js', 'panel2.html'];
 
 self.addEventListener('install', function(e){
   self.skipWaiting();
