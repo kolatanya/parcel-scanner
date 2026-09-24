@@ -477,6 +477,178 @@ input[type=month].inl{width:180px}
   .card{padding:18px 16px}
   .tkmsg{max-width:92%}
 }
+
+/* =================== v6: accounts, statements, service orders, chat =================== */
+.accbtn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:7px;border:1px solid var(--blueline);
+  background:var(--bluesoft);color:var(--bluetext);font-size:.76rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.accbtn:hover{background:#DDF0F5}
+.accbtn svg.i{width:14px;height:14px}
+.accbtn:disabled{opacity:.45;cursor:default}
+.tbl .t1 button.namelink{all:unset;cursor:pointer;font-weight:600;color:var(--ink)}
+.tbl .t1 button.namelink:hover{text-decoration:underline}
+
+/* key figures on an account */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-width:0}
+.kpi .l{font-size:.74rem;color:var(--muted);font-weight:500}
+.kpi .v{font-size:1.45rem;font-weight:650;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi .v.neg{color:var(--redtext)}
+.kpi .v.warn{color:var(--amber)}
+#ac_sttools select{width:auto;min-width:150px}
+
+/* statement: header like the old spreadsheets, then the lines */
+.sthead{display:flex;gap:18px;align-items:stretch;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);
+  border-bottom:0;border-radius:var(--radius) var(--radius) 0 0;padding:16px 18px}
+.sthead dl{margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,auto));gap:10px 28px;flex:1;min-width:0}
+.sthead dl .wide{grid-column:1/-1}
+.sthead dt{font-size:.66rem;letter-spacing:.1em;text-transform:lowercase;color:var(--muted);font-weight:600}
+.sthead dd{margin:2px 0 0;font-size:.86rem;overflow-wrap:anywhere}
+.stbal{text-align:right;padding-left:18px;border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.stbal .l{font-size:.66rem;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.stbal .v{font-size:1.6rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stbal .v.neg{color:var(--redtext)}
+.stwrap{border-radius:0 0 var(--radius) var(--radius)}
+.tbl.stmt td{border-bottom:1px solid var(--line);vertical-align:top}
+.tbl.stmt tr.first td{border-top:1px solid #D9DBE3}
+.tbl.stmt tbody tr:first-child td{border-top:0}
+.tbl.stmt tbody tr:hover td{background:transparent}
+.tbl.stmt td[rowspan]{background:var(--soft)}
+.tbl.stmt tr.payrow td{background:#F3FAF6}
+.tbl.stmt .paylabel{color:var(--green);font-weight:650}
+.tbl.stmt .pay{color:var(--green)}
+.tbl.stmt .desc{color:var(--navy);font-size:.8rem;max-width:280px;overflow-wrap:anywhere}
+.tbl.stmt .bal{font-weight:700}
+.tbl.stmt .num{white-space:nowrap}
+.tbl.stmt .svcdate{font-size:.7rem;color:var(--muted);margin-top:2px}
+.loadrow{padding:26px 14px!important;color:var(--muted);text-align:center}
+.detgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px 26px}
+.codeinline{display:inline-flex;align-items:center;gap:8px}
+.codeinline code{font-family:var(--mono);font-weight:600;color:var(--deep)}
+
+/* service orders */
+.sorow .reqhead .amt{font-family:var(--mono);font-size:.88rem;font-weight:650;white-space:nowrap}
+.tbl tr.totrow td{font-weight:700;background:var(--soft)}
+.req>.body>.acts2{margin-top:0}
+
+/* pop-up window */
+.overlay{position:fixed;inset:0;background:rgba(20,20,40,.34);z-index:140}
+.dialog{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+  background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);z-index:141}
+.dialog.wide{width:min(860px,calc(100vw - 24px))}
+.dlh{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+.dlh h3{margin:0;font-size:1.02rem;font-weight:650}
+.dlh p{margin:3px 0 0;font-size:.8rem;color:var(--muted)}
+.dlh .ib{margin-left:auto;width:32px;height:32px}
+.dlb{padding:18px 20px;overflow-y:auto;flex:1}
+.dlf{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlf .msg{margin:0 auto 0 0}
+.chargetbl td{vertical-align:top}
+.chargetbl td:first-child{min-width:260px}
+.chargetbl td:first-child .inl+.inl{margin-top:6px}
+.chargetbl input[type=number]{width:80px}
+.chargetbl .pound{display:flex;align-items:center;gap:4px;color:var(--muted)}
+.chargetbl .pound .inl{width:96px;text-align:right}
+.chargetbl .lt{font-family:var(--mono);font-weight:600;line-height:38px}
+.chargetbl .ib{width:32px;height:32px;margin-top:3px}
+.chsum{display:flex;gap:22px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px;font-size:.84rem;color:var(--muted)}
+.chsum b{color:var(--ink);font-family:var(--mono);margin-left:4px}
+.chsum b.neg{color:var(--redtext)}
+
+/* alert for new work */
+.ntoast{position:fixed;right:20px;bottom:20px;z-index:150;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;background:var(--ink);color:#fff;
+  border-radius:12px;box-shadow:var(--shadow-lg);font-size:.86rem;font-weight:600;max-width:calc(100vw - 32px)}
+.ntoast svg.i{color:#7FD6A8}
+.ntoast .btn{height:32px}
+.ntoast .ib{width:30px;height:30px;background:transparent;border-color:rgba(255,255,255,.25);color:#fff}
+
+/* chat, looks like WhatsApp */
+.chat{display:flex;flex-direction:column;height:calc(100vh - 290px);min-height:440px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.chh{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface);min-height:62px}
+.chh .av{width:40px;height:40px;border-radius:50%;background:var(--soft2);border:1px solid var(--line);display:grid;place-items:center;flex:none;font-weight:700;font-size:.78rem;color:var(--navy)}
+.chh .tt{min-width:0;flex:1}
+.chh .tt b{display:block;font-size:.92rem;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chh .tt span{display:block;font-size:.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chh .back{display:none}
+.msgs{flex:1;overflow-y:auto;padding:14px 5% 18px;display:flex;flex-direction:column;background-color:#EFEAE2;
+  background-image:radial-gradient(rgba(84,101,111,.07) 1px,transparent 1.2px);background-size:16px 16px}
+.cday{align-self:center;margin:12px 0 8px;background:#FFFFFF;color:#54656F;font-size:.72rem;font-weight:500;padding:5px 12px;border-radius:8px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+.cb{position:relative;max-width:min(560px,78%);padding:6px 9px 7px 10px;border-radius:8px;font-size:.87rem;line-height:1.42;color:#111B21;
+  box-shadow:0 1px .5px rgba(11,20,26,.13);margin-top:2px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cb.in{align-self:flex-start;background:#FFFFFF}
+.cb.out{align-self:flex-end;background:#D9FDD3}
+.cb.first{margin-top:8px}
+.cb.in.first{border-top-left-radius:0}
+.cb.out.first{border-top-right-radius:0}
+.cb.in.first::before{content:"";position:absolute;left:-8px;top:0;border-style:solid;border-width:0 8px 10px 0;border-color:transparent #FFFFFF transparent transparent}
+.cb.out.first::before{content:"";position:absolute;right:-8px;top:0;border-style:solid;border-width:0 0 10px 8px;border-color:transparent transparent transparent #D9FDD3}
+.cb .by{display:block;font-size:.7rem;font-weight:600;color:#1B6E83;margin-bottom:1px;white-space:normal}
+.cb .cm{float:right;display:inline-flex;align-items:center;gap:3px;margin:8px 0 -5px 14px;font-size:.66rem;color:#667781;white-space:nowrap;line-height:1}
+.cb.fail{cursor:pointer}
+.cb.fail .cm{color:var(--redtext);font-weight:600}
+.wtick{width:17px;height:11px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wtick.sent,.wtick.dlv,.wtick.wait{stroke:#8696A0}
+.wtick.read{stroke:#53BDEB}
+.cnote{align-self:center;margin:auto 0;max-width:420px;text-align:center;background:#FFEECD;color:#54656F;font-size:.8rem;line-height:1.5;padding:10px 14px;border-radius:8px}
+.comp{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;background:#F0F2F5;border-top:1px solid var(--line)}
+.comp textarea{flex:1;min-width:0;resize:none;border:0;border-radius:22px;padding:11px 16px;font-size:.88rem;line-height:1.4;height:44px;max-height:140px;background:#FFFFFF;outline:none}
+.comp textarea:focus-visible{outline:2px solid var(--blue);outline-offset:0}
+.comp .send{width:44px;height:44px;border-radius:50%;border:0;background:#00A884;color:#FFFFFF;display:grid;place-items:center;cursor:pointer;flex:none}
+.comp .send:hover{background:#008F72}
+.comp .send:disabled{opacity:.45;cursor:default}
+.comp .send svg.i{width:19px;height:19px;margin-left:-2px}
+
+/* messages: conversations on the left, the chat on the right */
+.inbox{display:grid;grid-template-columns:340px minmax(0,1fr);height:calc(100vh - 200px);min-height:500px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden}
+.ilist{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0;min-height:0}
+.ihead{display:flex;gap:8px;padding:12px;border-bottom:1px solid var(--line)}
+.ithreads{flex:1;overflow-y:auto}
+.thr{all:unset;box-sizing:border-box;display:flex;gap:12px;align-items:center;width:100%;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.thr:hover{background:var(--soft)}
+.thr.on{background:#F0F2F5}
+.thr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.thr .avatar{width:44px;height:44px;font-size:.8rem}
+.thr .tx{flex:1;min-width:0}
+.thr .l1,.thr .l2{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.thr .l1 b{font-size:.88rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thr .tm{font-size:.7rem;color:var(--muted);flex:none}
+.thr.unread .tm{color:#00A884;font-weight:600}
+.thr .pv{display:flex;align-items:center;gap:3px;font-size:.8rem;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.thr.unread .pv{color:var(--ink)}
+.thr .count{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#25D366;color:#fff;font-size:.68rem;font-weight:700;display:grid;place-items:center;flex:none}
+.thempty{padding:26px 16px;text-align:center;color:var(--muted);font-size:.84rem}
+.ipane{min-width:0;min-height:0;display:flex}
+.ipane .chat{flex:1;height:auto;min-height:0;border:0;border-radius:0}
+.ipempty{margin:auto;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);text-align:center;padding:30px;font-size:.86rem}
+.ipempty svg.i{width:40px;height:40px;color:var(--line2);margin-bottom:6px}
+.ipempty b{color:var(--ink);font-size:1rem}
+.chtools{display:flex;gap:8px}
+#ac_chat .chat{height:max(420px,calc(100vh - 380px))}
+
+@media (max-width:1279px){ .kpis{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:959px){
+  .inbox{grid-template-columns:minmax(0,1fr);height:max(440px,calc(100vh - 215px))}
+  .inbox .ipane{display:none}
+  .inbox.open .ilist{display:none}
+  .inbox.open .ipane{display:flex}
+  .chh .back{display:inline-grid}
+  .chat{height:calc(100vh - 230px)}
+}
+@media (max-width:640px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi .v{font-size:1.2rem}
+  .sthead dl{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .stbal{text-align:left;border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:10px;width:100%}
+  .msgs{padding:12px 10px 16px}
+  .cb{max-width:86%}
+  .chtools .btn{padding:0 10px}
+}
+
+/* twelve tiles on Today */
+.tiles{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media (max-width:1439px){ .tiles{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:1100px){ .tiles{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:640px){ .tiles{grid-template-columns:repeat(2,minmax(0,1fr))} }
 </style>
 </head>
 <body>
@@ -516,6 +688,11 @@ input[type=month].inl{width:180px}
   <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10.5 8v8M14 8v8M17 8v8"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
   <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20.5l1.5-5.2A8.5 8.5 0 1 1 21 11.5z"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
   <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
 </svg>
 
@@ -530,7 +707,7 @@ input[type=month].inl{width:180px}
     <button class="btn brand block" id="b_in" type="button">Sign in</button>
     <div class="msg" id="m_login"></div>
   </div>
-  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v5</span></p>
+  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v6</span></p>
 </main>
 
 <main class="auth" id="v_error" hidden>
@@ -550,10 +727,12 @@ input[type=month].inl{width:180px}
       <div class="gl">operations</div>
       <a href="#orders" data-s="needs"><svg class="i"><use href="#i-box"/></svg>Orders<span class="count" id="c_needs" hidden></span></a>
       <a href="#inbound" data-s="inbound"><svg class="i"><use href="#i-inbox"/></svg>Inbound<span class="count" id="c_inbound" hidden></span></a>
+      <a href="#service-orders" data-s="sorders"><svg class="i"><use href="#i-bag"/></svg>Service orders<span class="count" id="c_sorders" hidden></span></a>
       <a href="#services" data-s="services"><svg class="i"><use href="#i-tool"/></svg>Services<span class="count" id="c_services" hidden></span></a>
       <a href="#stock" data-s="stock"><svg class="i"><use href="#i-archive"/></svg>Stock<span class="count" id="c_stock" hidden></span></a>
       <div class="gl">customers</div>
       <a href="#customers" data-s="clients"><svg class="i"><use href="#i-users"/></svg>Customers<span class="count" id="c_clients" hidden></span></a>
+      <a href="#messages" data-s="messages"><svg class="i"><use href="#i-chat"/></svg>Messages<span class="count" id="c_messages" hidden></span></a>
       <a href="#support" data-s="support"><svg class="i"><use href="#i-life"/></svg>Support<span class="count" id="c_support" hidden></span></a>
       <a href="#access" data-s="access"><svg class="i"><use href="#i-userplus"/></svg>Access requests<span class="count" id="c_access" hidden></span></a>
       <div class="gl">customer panel</div>
@@ -569,7 +748,7 @@ input[type=month].inl{width:180px}
     </nav>
     <div class="me">
       <div class="avatar" id="me_av">EF</div>
-      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v5</span></div></div>
+      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v6</span></div></div>
       <button class="ib" id="b_out" type="button" title="Sign out" aria-label="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
     </div>
   </aside>
@@ -712,7 +891,7 @@ input[type=month].inl{width:180px}
 
         <div id="cl_board">
           <div class="tblwrap"><table class="tbl" id="cltbl">
-            <thead><tr><th>#</th><th>Customer</th><th>Code</th><th>Unit</th><th>Form sent</th><th>Paid</th><th class="r">Balance</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Customer</th><th></th><th>Code</th><th>Unit</th><th>Form sent</th><th>Paid</th><th class="r">Balance</th><th></th></tr></thead>
             <tbody id="clbody"></tbody></table></div>
           <div class="empty" id="cl_empty" hidden>No customers yet.</div>
         </div>
@@ -803,9 +982,9 @@ input[type=month].inl{width:180px}
           <div class="itemlist" id="annlist"></div>
         </div>
         <div id="ct_price" hidden>
-          <p class="help top"><svg class="i"><use href="#i-info"/></svg><span>The price list customers see on their Fiyat Listesi page. Prices in pounds. Untick “show” to hide a line without deleting it.</span></p>
+          <p class="help top"><svg class="i"><use href="#i-info"/></svg><span>The price list customers see on their Fiyat Listesi page. Prices in pounds. Untick “show” to hide a line without deleting it. “Can order” lines appear on the customer’s Hizmet Satın Al page, where they pay from their balance.</span></p>
           <div class="tblwrap"><table class="tbl">
-            <thead><tr><th>Category</th><th>Service</th><th>Unit</th><th>Price £</th><th>Order</th><th>Show</th><th></th></tr></thead>
+            <thead><tr><th>Category</th><th>Service</th><th>Unit</th><th>Price £</th><th>Order</th><th>Show</th><th>Can order</th><th></th></tr></thead>
             <tbody id="pricebody"></tbody></table></div>
           <div class="empty" id="price_empty" hidden>No prices yet. Add the first line below.</div>
           <div class="addline" style="grid-template-columns:1fr 1.6fr .7fr .6fr auto">
@@ -858,6 +1037,88 @@ input[type=month].inl{width:180px}
             <button class="rowbtn save" id="b_addadmin" type="button">Add admin</button>
           </div>
         </div>
+      </section>
+
+      <!-- one customer's account -->
+      <section id="sec_customer" aria-label="Customer account" hidden>
+        <div class="toolbar">
+          <div class="tl"><a class="btn" href="#customers" id="ac_back"><svg class="i"><use href="#i-left"/></svg>All customers</a></div>
+          <div class="tr">
+            <button class="btn" id="ac_msg" type="button"><svg class="i"><use href="#i-chat"/></svg>Message</button>
+            <button class="btn" id="ac_charge" type="button"><svg class="i"><use href="#i-plus"/></svg>Add charge</button>
+            <button class="btn primary" id="ac_topup" type="button"><svg class="i"><use href="#i-wallet"/></svg>Record top-up</button>
+            <button class="btn" id="ac_more" type="button" aria-label="More actions"><svg class="i"><use href="#i-dots"/></svg></button>
+          </div>
+        </div>
+        <div class="msg" id="m_ac"></div>
+        <div class="kpis" id="ac_kpis"></div>
+        <div class="toolbar" style="margin-top:20px">
+          <div class="tl"><div class="tabs" id="actabs">
+            <button data-t="statement" class="on" type="button">Statement</button>
+            <button data-t="chat" type="button">Messages<span class="count" id="c_acchat" hidden></span></button>
+            <button data-t="orders" type="button">Service orders<span class="count" id="c_acorders" hidden></span></button>
+            <button data-t="details" type="button">Details</button>
+          </div></div>
+          <div class="tr" id="ac_sttools">
+            <label class="sr" for="ac_period">Period</label>
+            <select class="inl" id="ac_period">
+              <option value="all">All time</option><option value="month">This month</option><option value="last">Last month</option>
+              <option value="90">Last 90 days</option><option value="year">This year</option>
+            </select>
+            <button class="btn" id="ac_xls" type="button"><svg class="i"><use href="#i-download"/></svg>Download Excel</button>
+          </div>
+        </div>
+        <div id="ac_statement">
+          <div class="sthead">
+            <dl>
+              <div><dt>Company</dt><dd id="st_company">—</dd></div>
+              <div><dt>Manager</dt><dd id="st_manager">—</dd></div>
+              <div><dt>Email</dt><dd id="st_email">—</dd></div>
+              <div><dt>Phone</dt><dd id="st_phone">—</dd></div>
+              <div class="wide"><dt>Address</dt><dd id="st_address">—</dd></div>
+            </dl>
+            <div class="stbal"><div class="l">balance</div><div class="v" id="st_balance">£0.00</div></div>
+          </div>
+          <div class="tblwrap stwrap"><table class="tbl stmt">
+            <thead><tr><th>Date</th><th>Service</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Total</th><th class="r">Payment</th><th>Description</th><th class="r">Balance</th></tr></thead>
+            <tbody id="ac_stbody"></tbody></table></div>
+          <div class="empty" id="ac_stempty" hidden>No transactions yet.</div>
+          <p class="help"><svg class="i"><use href="#i-info"/></svg><span id="st_sum"></span></p>
+        </div>
+        <div id="ac_chat" hidden></div>
+        <div id="ac_orders" hidden><div class="rows" id="ac_olist"></div><div class="empty" id="ac_oempty" hidden>No service orders yet.</div></div>
+        <div id="ac_details" hidden><div class="card"><div class="detgrid" id="ac_dl"></div></div></div>
+      </section>
+
+      <!-- messages -->
+      <section id="sec_messages" aria-label="Messages" hidden>
+        <div class="msg" id="m_th"></div>
+        <div class="inbox" id="msgbox">
+          <div class="ilist">
+            <div class="ihead">
+              <input class="inl" id="th_q" type="search" placeholder="Search conversations" aria-label="Search conversations">
+              <button class="btn" id="th_new" type="button"><svg class="i"><use href="#i-plus"/></svg>New</button>
+            </div>
+            <div class="ithreads" id="th_list"></div>
+          </div>
+          <div class="ipane" id="th_pane"><div class="ipempty"><svg class="i"><use href="#i-chat"/></svg><b>Customer messages</b><span>Choose a conversation on the left, or start a new one.</span></div></div>
+        </div>
+      </section>
+
+      <!-- service orders -->
+      <section id="sec_sorders" aria-label="Service orders" hidden>
+        <div class="toolbar">
+          <div class="tl"><div class="tabs" id="sotabs">
+            <button data-s="pending" class="on" type="button">Waiting<span class="count" id="c_sowait" hidden></span></button>
+            <button data-s="done" type="button">Done</button>
+            <button data-s="cancelled" type="button">Cancelled</button>
+          </div></div>
+          <div class="tr"><button class="btn" id="b_soreload" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
+        </div>
+        <div class="msg" id="m_so"></div>
+        <div class="rows" id="solist"></div>
+        <div class="empty" id="so_empty" hidden>Nothing waiting.</div>
+        <p class="help"><svg class="i"><use href="#i-info"/></svg><span>Customers order these from the price list and have already paid from their balance. Mark each one done when the work is finished; the customer is told in their panel. Cancelling refunds the full amount.</span></p>
       </section>
 
       <!-- access requests -->
@@ -1033,7 +1294,7 @@ function enter(){ $('v_login').hidden=true; $('v_main').hidden=false;
   $('ptitle').appendChild($('h1'));
   $('pmeta').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   myEmail().then(function(me){ if(me){ $('me_email').textContent=me; $('me_av').textContent=initials(me); } });
-  setSection(sectionFromHash()||'today',true); load().then(loadNeeds).then(counts); }
+  setSection(sectionFromHash()||'today',true); load().then(loadNeeds).then(counts); startPulse(); }
 
 $('b_in').onclick=function(){
   var em=$('e').value.trim(), pw=$('p').value;
@@ -1067,11 +1328,21 @@ var SECMETA={
   access:  {slug:'access',    crumb:'customers',      title:'Access requests',    desc:'Requests from the older sign-up form. Approving one lets that person into the customer panel.'},
   content: {slug:'content',   crumb:'customer panel', title:'Content',            desc:'Announcements, the price list and the documents shown in the customer panel.'},
   report:  {slug:'reports',   crumb:'insights',       title:'Reports',            desc:'Monthly activity per customer for invoicing, and a log of every action taken in the system.'},
-  staff:   {slug:'staff',     crumb:'settings',       title:'Staff',              desc:'Who can sign in to this console.'}
+  staff:   {slug:'staff',     crumb:'settings',       title:'Staff',              desc:'Who can sign in to this console.'},
+  customer:{slug:'customer',  crumb:'customers',      title:'Customer account',   desc:''},
+  messages:{slug:'messages',  crumb:'customers',      title:'Messages',           desc:'Chat with customers. One grey tick: sent. Two grey ticks: it reached their panel. Two blue ticks: they have read it.'},
+  sorders: {slug:'service-orders', crumb:'operations', title:'Service orders',   desc:'Services customers have ordered from the price list and already paid for from their balance.'}
 };
+var CUST_ID=null, MSG_ID=null, APPLIED='';
 function sectionFromHash(){
-  var h=(location.hash||'').replace('#','');
-  for(var k in SECMETA){ if(SECMETA.hasOwnProperty(k)&&SECMETA[k].slug===h) return k; }
+  var parts=(location.hash||'').replace('#','').split('/'), h=parts[0], id=parts[1]||'';
+  var okId=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  for(var k in SECMETA){
+    if(!SECMETA.hasOwnProperty(k)||SECMETA[k].slug!==h) continue;
+    if(k==='customer'){ if(!okId) return 'clients'; CUST_ID=id; }
+    if(k==='messages') MSG_ID=okId?id:null;
+    return k;
+  }
   return null;
 }
 function initials(t){
@@ -1087,8 +1358,9 @@ function closeNav(){ $('side').classList.remove('open'); $('scrim').hidden=true;
 $('burger').onclick=openNav; $('scrim').onclick=closeNav;
 Array.prototype.forEach.call(document.querySelectorAll('#nav a'),function(a){ a.addEventListener('click',closeNav); });
 window.addEventListener('hashchange',function(){
+  if($('v_main').hidden||location.hash===APPLIED) return;
   var s=sectionFromHash();
-  if(s&&s!==section&&!$('v_main').hidden) setSection(s,true);
+  if(s) setSection(s,true);
 });
 
 /* small menu of extra actions on a table row */
@@ -1123,14 +1395,16 @@ function setSection(sec,replace){
   var M=SECMETA[sec];
   Object.keys(SECMETA).forEach(function(k){ $('sec_'+k).hidden=(sec!==k); });
   Array.prototype.forEach.call(document.querySelectorAll('#nav a[data-s]'),function(a){
-    var on=a.getAttribute('data-s')===sec;
+    var on=a.getAttribute('data-s')===(sec==='customer'?'clients':sec);
     a.classList.toggle('on',on);
     if(on) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
   $('h1').textContent=M.title; $('crumb').textContent=M.crumb; $('pdesc').textContent=M.desc;
-  document.title=M.title+' \u00B7 Ecomflex Admin';
-  if(location.hash!=='#'+M.slug){ try{ history[replace?'replaceState':'pushState'](null,'','#'+M.slug); }catch(e){} }
-  closeNav(); closeRowMenu(); window.scrollTo(0,0);
+  setTitle();
+  var want='#'+M.slug+(sec==='customer'&&CUST_ID?'/'+CUST_ID:'')+(sec==='messages'&&MSG_ID?'/'+MSG_ID:'');
+  if(location.hash!==want){ try{ history[replace?'replaceState':'pushState'](null,'',want); }catch(e){} }
+  APPLIED=location.hash;
+  closeNav(); closeRowMenu(); stopChat(); if(DLG) DLG.close(); window.scrollTo(0,0);
   if(sec==='needs') loadNeeds();
   if(sec==='today') loadToday();
   if(sec==='inbound') loadInbound();
@@ -1141,6 +1415,9 @@ function setSection(sec,replace){
   if(sec==='staff') loadStaff();
   if(sec==='support') loadTickets();
   if(sec==='content') setCtTab(ctTab);
+  if(sec==='customer') loadAccount();
+  if(sec==='messages') loadThreads();
+  if(sec==='sorders') loadSOrders();
 }
 
 function counts(){
@@ -1396,6 +1673,8 @@ function loadToday(){
     t.appendChild(tile(c.forward_waiting||0,'Parcels to forward','services','hot'));
     t.appendChild(tile(c.fba_waiting||0,'FBA jobs to prep','services','hot'));
     t.appendChild(tile(c.payments_waiting||0,'Bank transfers to confirm','clients:pay','hot'));
+    t.appendChild(tile(c.service_orders_waiting||0,'Service orders to do','sorders','hot'));
+    t.appendChild(tile(c.chats_unread||0,'Unread messages','messages','hot'));
     t.appendChild(tile(c.tickets_waiting||0,'Support tickets waiting','support','hot'));
     $('c_support').hidden=!c.tickets_waiting; $('c_support').textContent=c.tickets_waiting||'';
     t.appendChild(tile(c.access_waiting||0,'Access requests','access','hot'));
@@ -1436,6 +1715,15 @@ function loadToday(){
       L.insertBefore(g4.el,L.firstChild);
     });
 
+    sb.from('service_orders').select('*,service_order_lines(*)').eq('status','pending').order('created_at',{ascending:true}).then(function(so){
+      var sol=(so.data)||[];
+      if(!sol.length||tok!==todayTok) return;
+      var g5=group('Service orders waiting',sol.length,'sorders');
+      sol.slice(0,SHOW).forEach(function(o){ g5.body.appendChild(mini('#'+o.no+' \u00B7 '+soSummaryA(o),(o.company||o.user_email)+' \u00B7 '+gbp(o.total_pence)+' paid \u00B7 '+when(o.created_at),'sorders')); });
+      more(g5,sol.length);
+      var e1=L.querySelector('.empty'); if(e1) e1.remove();
+      L.insertBefore(g5.el,L.firstChild);
+    });
     if(!od.length&&!ib.length&&!lo.length){ var e=document.createElement('div'); e.className='empty'; e.textContent='All clear. Nothing is waiting right now.'; L.appendChild(e); }
     $('c_inbound').hidden=!(c.inbound_expected); $('c_inbound').textContent=c.inbound_expected||'';
     $('c_stock').hidden=!(c.low_stock); $('c_stock').textContent=c.low_stock||'';
@@ -1755,18 +2043,19 @@ function loadPricesAdmin(){
       var pr=ce('input','n'); pr.value=(Number(p.price_pence)/100).toFixed(2); pr.inputMode='decimal';
       var so=ce('input','n'); so.type='number'; so.value=p.sort||0;
       var ac=ce('input'); ac.type='checkbox'; ac.checked=!!p.active; ac.style.width='auto'; ac.style.minWidth='0';
+      var od=ce('input'); od.type='checkbox'; od.checked=p.orderable!==false; od.title='Customers can order this themselves and pay from their balance';
       var sv=ce('button','rowbtn save','Save'); sv.hidden=true;
       var dl=ce('button','rowbtn del','×'); dl.title='Delete'; dl.style.marginLeft='6px';
-      [cat,nm,un,pr,so,ac].forEach(function(i){ i.oninput=i.onchange=function(){ sv.hidden=false; tr.classList.add('dirty'); }; });
+      [cat,nm,un,pr,so,ac,od].forEach(function(i){ i.oninput=i.onchange=function(){ sv.hidden=false; tr.classList.add('dirty'); }; });
       sv.onclick=function(){
         var pence=poundsToPence(pr.value);
         if(!nm.value.trim()||!(pence>=0)){ msg('m_ct','Each line needs a name and a price like 1.25','bad'); return; }
-        sb.from('price_items').update({category:cat.value.trim()||null,name:nm.value.trim(),unit:un.value.trim()||null,price_pence:pence,sort:parseInt(so.value,10)||0,active:ac.checked,updated_at:new Date().toISOString()}).eq('id',p.id)
+        sb.from('price_items').update({category:cat.value.trim()||null,name:nm.value.trim(),unit:un.value.trim()||null,price_pence:pence,sort:parseInt(so.value,10)||0,active:ac.checked,orderable:od.checked,updated_at:new Date().toISOString()}).eq('id',p.id)
           .then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; } msg('m_ct','Saved.','good'); loadPricesAdmin(); });
       };
       dl.onclick=function(){ if(!confirm('Delete "'+p.name+'" from the price list?')) return;
         sb.from('price_items').delete().eq('id',p.id).then(function(x){ if(x.error){ msg('m_ct',x.error.message,'bad'); return; } loadPricesAdmin(); }); };
-      [cat,nm,un,pr,so,ac].forEach(function(i){ var td=ce('td'); td.appendChild(i); tr.appendChild(td); });
+      [cat,nm,un,pr,so,ac,od].forEach(function(i){ var td=ce('td'); td.appendChild(i); tr.appendChild(td); });
       var tdb=ce('td'); tdb.style.whiteSpace='nowrap'; tdb.appendChild(sv); tdb.appendChild(dl); tr.appendChild(tdb);
       tb.appendChild(tr);
     });
@@ -2657,6 +2946,10 @@ function renderClients(){
     who.appendChild(ce('div','t1',c.company||c.full_name));
     who.appendChild(ce('div','t2',c.full_name+' \u00B7 '+c.email+(c.phone?' \u00B7 '+c.phone:'')));
 
+    var acc=document.createElement('td');
+    var ab=document.createElement('button'); ab.type='button'; ab.className='accbtn'; ab.title='Statement, messages and service orders';
+    ab.innerHTML='<svg class="i"><use href="#i-user"/></svg>Account';
+    ab.onclick=function(){ openAccount(c.user_id); }; acc.appendChild(ab);
     var cd=document.createElement('td'); cd.className='codecell'; cd.textContent=c.code||'\u2014';
     cd.title='Tap to copy'; cd.onclick=function(){ if(c.code) EFCopy(c.code,'Access code copied',cd); };
 
@@ -2751,7 +3044,7 @@ function renderClients(){
     [pay,more].forEach(function(b){ wrap.appendChild(b); });
     act.appendChild(wrap);
 
-    [n,who,cd,un,fs,pd,bal,act].forEach(function(td){ tr.appendChild(td); });
+    [n,who,acc,cd,un,fs,pd,bal,act].forEach(function(td){ tr.appendChild(td); });
     tb.appendChild(tr);
   });
 }
@@ -2787,6 +3080,663 @@ Array.prototype.forEach.call($('acctabs').querySelectorAll('button'),function(b)
   };
 });
 document.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!$('v_login').hidden) $('b_in').click(); });
+
+
+/* =====================================================================
+   v6: customer accounts, statements, service orders, chat
+   ===================================================================== */
+var SVGNS='http://www.w3.org/2000/svg';
+function noopA(){}
+/* small element builder: el('div',{class:'x',text:'y'},[children]) */
+function el(tag,a,kids){
+  var e=document.createElement(tag);
+  if(a) for(var k in a){
+    if(!Object.prototype.hasOwnProperty.call(a,k)) continue;
+    var v=a[k]; if(v===null||v===undefined||v===false) continue;
+    if(k==='class') e.className=v; else if(k==='text') e.textContent=v; else if(k==='style') e.style.cssText=v;
+    else if(k.slice(0,2)==='on') e[k]=v;
+    else if(k==='value'||k==='checked'||k==='disabled'||k==='hidden') e[k]=v;
+    else e.setAttribute(k,v===true?'':String(v));
+  }
+  (function put(x){
+    if(x===null||x===undefined||x===false) return;
+    if(Object.prototype.toString.call(x)==='[object Array]'){ x.forEach(put); return; }
+    if(typeof x==='object'&&x.nodeType) e.appendChild(x); else e.appendChild(document.createTextNode(String(x)));
+  })(kids);
+  return e;
+}
+function svgI(name,cls){
+  var s=document.createElementNS(SVGNS,'svg'); s.setAttribute('class','i'+(cls?' '+cls:''));
+  var u=document.createElementNS(SVGNS,'use'); u.setAttribute('href','#i-'+name); s.appendChild(u); return s;
+}
+function setMsg(node,t,k){ node.textContent=t||''; node.className='msg'+(k?' '+k:''); }
+function setCount(id,n){ var e=$(id); if(!e) return; n=Number(n)||0; e.hidden=!n; e.textContent=n>99?'99+':(n||''); }
+function pad2(n){ return ('0'+n).slice(-2); }
+function dmy(v){
+  if(!v) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ var p=String(v).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  var d=new Date(v); return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();
+}
+function ymdOf(v){
+  if(/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return String(v);
+  var d=new Date(v); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+}
+function todayYmdA(){ return ymdOf(new Date().toISOString()); }
+function short(t,n){ t=String(t||''); return t.length>n? t.slice(0,n-1)+'…' : t; }
+
+/* ---------------- a pop-up window used by "Add charge" and "New message" ---------------- */
+var DLG=null;
+function dialog(o){
+  if(DLG) DLG.close();
+  var ov=el('div',{class:'overlay'});
+  var x=el('button',{class:'ib',type:'button','aria-label':'Close'},[svgI('x')]);
+  var m=el('div',{class:'msg'});
+  var foot=el('div',{class:'dlf'},[m]);
+  var box=el('div',{class:'dialog'+(o.wide?' wide':''),role:'dialog','aria-modal':'true','aria-label':o.title},[
+    el('div',{class:'dlh'},[el('div',{style:'min-width:0'},[el('h3',{text:o.title}),o.sub?el('p',{text:o.sub}):null]),x]),
+    el('div',{class:'dlb'},[o.body]), foot]);
+  var D={box:box,msg:function(t,k){ setMsg(m,t,k); },busy:function(t){ m.className='msg'; m.textContent=''; m.appendChild(el('span',{class:'spin'})); m.appendChild(document.createTextNode(t||'')); }};
+  (o.actions||[]).forEach(function(a){
+    if(!a) return;
+    var b=el('button',{type:'button',class:'btn'+(a.primary?' primary':'')},[a.i?svgI(a.i):null,a.t]);
+    b.onclick=function(){ if(a.close) D.close(); else a.on(D,b); };
+    foot.appendChild(b);
+  });
+  function esc(e){ if(e.key==='Escape') D.close(); }
+  D.close=function(){ document.removeEventListener('keydown',esc); [ov,box].forEach(function(n){ if(n.parentNode) n.parentNode.removeChild(n); }); if(DLG===D) DLG=null; };
+  x.onclick=D.close; ov.onclick=D.close;
+  document.addEventListener('keydown',esc);
+  document.body.appendChild(ov); document.body.appendChild(box); DLG=D;
+  setTimeout(function(){ var f=box.querySelector('.dlb input,.dlb select,.dlb textarea'); if(f) try{ f.focus(); }catch(e){} },40);
+  return D;
+}
+
+/* ---------------- alerts for new work while the console is open ---------------- */
+function beepA(){
+  try{ var a=new (window.AudioContext||window.webkitAudioContext)(), o=a.createOscillator(), g=a.createGain();
+    o.connect(g); g.connect(a.destination); o.frequency.value=740; o.type='sine';
+    g.gain.setValueAtTime(.05,a.currentTime); g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.18);
+    o.start(); o.stop(a.currentTime+.18); }catch(e){}
+}
+function notify(text,sec){
+  var old=document.querySelector('.ntoast'); if(old) old.remove();
+  var go=el('button',{class:'btn',type:'button',text:'Open'});
+  var close=el('button',{class:'ib',type:'button','aria-label':'Dismiss'},[svgI('x')]);
+  var t=el('div',{class:'ntoast',role:'status'},[svgI(sec==='messages'?'chat':'bag'),el('span',{text:text}),go,close]);
+  go.onclick=function(){ t.remove(); setSection(sec); };
+  close.onclick=function(){ t.remove(); };
+  document.body.appendChild(t); beepA();
+  setTimeout(function(){ if(t.parentNode) t.remove(); },10000);
+}
+var PULSE={so:null,chat:null,timer:null}, UNSEEN=0;
+function setTitle(){
+  var M=SECMETA[section]||SECMETA.today;
+  var base=(section==='customer'&&ACC.prof)? (ACC.prof.company||ACC.prof.full_name||'Customer') : M.title;
+  document.title=(UNSEEN?'('+UNSEEN+') ':'')+base+' · Ecomflex Admin';
+}
+function pulse(){
+  sb.rpc('chat_mark_delivered').then(noopA,noopA);
+  return sb.rpc('today_counts').then(function(r){
+    if(r.error||!r.data) return;
+    var c=r.data, so=Number(c.service_orders_waiting)||0, ch=Number(c.chats_unread)||0;
+    setCount('c_sorders',so); setCount('c_messages',ch);
+    setCount('c_needs',c.orders_waiting); setCount('c_inbound',c.inbound_expected); setCount('c_stock',c.low_stock);
+    setCount('c_support',c.tickets_waiting); setCount('c_access',c.access_waiting);
+    setCount('c_services',(c.returns_waiting||0)+(c.forward_waiting||0)+(c.fba_waiting||0));
+    if(PULSE.so!==null&&so>PULSE.so) notify(so-PULSE.so===1?'A customer has ordered a service':(so-PULSE.so)+' new service orders','sorders');
+    else if(PULSE.chat!==null&&ch>PULSE.chat) notify('New message from a customer','messages');
+    PULSE.so=so; PULSE.chat=ch; UNSEEN=so+ch; setTitle();
+    if(section==='messages') loadThreads(true);
+    if(section==='sorders'&&SOS.tab==='pending'&&so!==SOS.list.length) loadSOrders(true);
+  },noopA);
+}
+function startPulse(){
+  if(PULSE.timer) return;
+  pulse(); PULSE.timer=setInterval(function(){ if(document.visibilityState==='visible') pulse(); },30000);
+}
+
+/* ---------------- chat, looks like WhatsApp ----------------
+   staff messages: one grey tick = sent, two grey = the customer's panel has it, two blue = read */
+var ACTIVE_CHAT=null;
+function stopChat(){ if(ACTIVE_CHAT){ ACTIVE_CHAT.stop(); ACTIVE_CHAT=null; } }
+function tickSvgA(state){
+  var s=document.createElementNS(SVGNS,'svg'); s.setAttribute('viewBox','0 0 18 11'); s.setAttribute('class','wtick '+state);
+  function p(d){ var e=document.createElementNS(SVGNS,'path'); e.setAttribute('d',d); s.appendChild(e); }
+  if(state==='wait'){ var c=document.createElementNS(SVGNS,'circle'); c.setAttribute('cx','9'); c.setAttribute('cy','5.5'); c.setAttribute('r','4.3'); s.appendChild(c); p('M9 3.2v2.5l1.7 1.1'); }
+  else { p('M1.6 5.9 5 9.3 12.3 1.8'); if(state!=='sent') p('M7.4 7.7 9 9.3 16.3 1.8'); }
+  return s;
+}
+var EN_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function dayLabelA(d){
+  var t=new Date(); t.setHours(0,0,0,0);
+  var x=new Date(d.getTime()); x.setHours(0,0,0,0);
+  var diff=Math.round((t-x)/86400000);
+  if(diff===0) return 'Today'; if(diff===1) return 'Yesterday';
+  return d.getDate()+' '+EN_MONTHS[d.getMonth()]+(d.getFullYear()!==t.getFullYear()?' '+d.getFullYear():'');
+}
+function ChatView(host,uid,o){
+  var self=this;
+  self.uid=uid; self.rows=[]; self.sig=''; self.tmp=[]; self.n=0; self.jump=true; self.alive=true; self.host=host;
+  host.innerHTML='';
+  self.box=el('div',{class:'msgs','aria-live':'polite'});
+  self.ta=el('textarea',{rows:'1',maxlength:'4000',placeholder:'Type a message','aria-label':'Message'});
+  self.btn=el('button',{class:'send',type:'button','aria-label':'Send',disabled:true},[svgI('send')]);
+  var head=el('div',{class:'chh'},[el('div',{class:'av',text:initials(o.title||'')}),
+    el('div',{class:'tt'},[el('b',{text:o.title||'Customer'}),el('span',{text:o.sub||''})]),o.tools||null]);
+  host.appendChild(el('div',{class:'chat'},[head,self.box,el('div',{class:'comp'},[self.ta,self.btn])]));
+  function size(){ self.ta.style.height='44px'; self.ta.style.height=Math.min(140,Math.max(44,self.ta.scrollHeight))+'px'; }
+  self.ta.addEventListener('input',function(){ size(); self.btn.disabled=!self.ta.value.trim(); });
+  self.ta.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); self.send(); } });
+  self.btn.onclick=function(){ self.send(); };
+  self.draw(); self.load();
+  self.timer=setInterval(function(){ if(document.visibilityState==='visible') self.load(); },4000);
+}
+ChatView.prototype.stop=function(){ this.alive=false; clearInterval(this.timer); };
+ChatView.prototype.load=function(){
+  var self=this;
+  return sb.from('chat_messages').select('*').eq('user_id',self.uid).order('created_at',{ascending:false}).limit(300).then(function(r){
+    if(!self.alive||r.error) return;
+    var rows=(r.data||[]).slice().reverse();
+    var sig=rows.map(function(m){ return m.id+(m.delivered_at?'d':'')+(m.read_at?'r':''); }).join('|');
+    if(sig!==self.sig){ self.rows=rows; self.sig=sig; self.draw(); }
+    var unread=rows.some(function(m){ return !m.from_staff&&!m.read_at; });
+    if(unread&&self.host.offsetParent!==null&&document.visibilityState==='visible'){
+      sb.rpc('chat_mark_read',{p_user:self.uid}).then(function(){
+        pulse(); if(section==='customer') setCount('c_acchat',0);
+      },noopA);
+    }
+  },noopA);
+};
+ChatView.prototype.draw=function(){
+  var self=this, box=self.box;
+  var near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
+  box.innerHTML='';
+  var all=self.rows.concat(self.tmp), me=($('me_email').textContent||'').toLowerCase();
+  if(!all.length){ box.appendChild(el('div',{class:'cnote',text:'No messages yet. Write the first one below; the customer sees it in their panel under Mesajlar.'})); return; }
+  var lastDay='', lastSide='';
+  all.forEach(function(m){
+    var d=new Date(m.created_at), dl=dayLabelA(d);
+    if(dl!==lastDay){ box.appendChild(el('div',{class:'cday',text:dl})); lastDay=dl; lastSide=''; }
+    var mine=!!m.from_staff, side=mine?'out':'in';
+    var meta=el('span',{class:'cm'},[pad2(d.getHours())+':'+pad2(d.getMinutes())]);
+    if(mine) meta.appendChild(tickSvgA(m._fail||m._pending?'wait':m.read_at?'read':m.delivered_at?'dlv':'sent'));
+    var by=(mine&&m.author&&String(m.author).toLowerCase()!==me)? el('span',{class:'by',text:m.author}) : null;
+    var b=el('div',{class:'cb '+side+(side!==lastSide?' first':'')+(m._fail?' fail':''),title:mine&&m.author?m.author:null},[by,m.body,meta]);
+    if(m._fail){ meta.insertBefore(document.createTextNode('Not sent · tap to retry '),meta.firstChild); b.onclick=function(){ m._fail=false; m._pending=true; self.draw(); self.push(m); }; }
+    box.appendChild(b); lastSide=side;
+  });
+  if(near||self.jump){ box.scrollTop=box.scrollHeight; self.jump=false; }
+};
+ChatView.prototype.send=function(){
+  var self=this, v=self.ta.value.trim(); if(!v||!self.alive) return;
+  self.ta.value=''; self.ta.style.height='44px'; self.btn.disabled=true;
+  var m={id:'tmp'+(++self.n),from_staff:true,body:v,author:$('me_email').textContent,created_at:new Date().toISOString(),_pending:true};
+  self.tmp.push(m); self.jump=true; self.draw(); self.push(m);
+};
+ChatView.prototype.push=function(m){
+  var self=this;
+  sb.rpc('send_chat',{p_body:m.body,p_user:self.uid}).then(function(r){
+    if(!self.alive) return;
+    if(r.error){ m._pending=false; m._fail=true; self.draw(); return; }
+    self.tmp=self.tmp.filter(function(x){ return x!==m; });
+    if(r.data){ self.rows.push(r.data); self.sig=''; }
+    self.jump=true; self.draw(); self.load();
+    if(section==='messages') loadThreads(true);
+  });
+};
+
+/* ---------------- service orders ---------------- */
+var SOS={list:[],tab:'pending'};
+function soLinesA(o){ return (o.service_order_lines||[]).slice().sort(function(a,b){ return (a.sort||0)-(b.sort||0); }); }
+function soSummaryA(o){
+  var ls=soLinesA(o); if(!ls.length) return 'Service order';
+  return ls.slice(0,2).map(function(l){ return l.name+' × '+l.qty; }).join(', ')+(ls.length>2?' +'+(ls.length-2)+' more':'');
+}
+var SO_TAG={pending:['waiting','pending'],done:['done','approved'],cancelled:['cancelled','rejected']};
+function soRow(o,withCust,after){
+  var ls=soLinesA(o), tg=SO_TAG[o.status]||[o.status,'pending'];
+  var li=el('div',{class:'req '+(o.status==='pending'?'pending':'')+' sorow'});
+  var head=el('div',{class:'reqhead'},[
+    el('div',{class:'who'},[el('div',{class:'nm',text:'#'+o.no+' · '+soSummaryA(o)}),
+      el('div',{class:'bz',text:(withCust?(o.company||o.user_email)+' · ':'')+when(o.created_at)+' · '+(o.source==='staff'?'charge added by staff':'ordered in the panel, paid from balance')})]),
+    el('b',{class:'amt',text:gbp(o.total_pence)}),
+    el('span',{class:'tag '+tg[1],text:o.source==='staff'&&o.status==='done'?'charged':tg[0]})]);
+  var body=el('div',{class:'body'}); body.hidden=o.status!=='pending';
+  var tb=el('tbody',null,ls.map(function(l){ return el('tr',null,[el('td',null,[el('div',{class:'t1',text:l.name}),l.unit?el('div',{class:'t2',text:'per '+l.unit}):null]),
+    el('td',{class:'num',text:String(l.qty)}),el('td',{class:'num',text:gbp(l.unit_pence)}),el('td',{class:'money',text:gbp(l.line_pence)})]); }));
+  tb.appendChild(el('tr',{class:'totrow'},[el('td',{colspan:'3',text:'Total'}),el('td',{class:'money',text:gbp(o.total_pence)})]));
+  body.appendChild(el('div',{class:'tblwrap'},[el('table',{class:'tbl'},[el('thead',null,[el('tr',null,[el('th',{text:'Service'}),el('th',{class:'r',text:'Qty'}),el('th',{class:'r',text:'Unit price'}),el('th',{class:'r',text:'Total'})])]),tb])]));
+  function kv(k,v){ return el('div',{class:'kv'},[el('div',{class:'k',text:k}),el('div',{class:'v',text:v})]); }
+  if(o.note) body.appendChild(kv(o.source==='staff'?'Description':'Customer note',o.note));
+  body.appendChild(kv('Service date',dmy(o.service_date)));
+  if(o.status!=='pending'&&o.resolved_at) body.appendChild(kv(o.status==='cancelled'?'Cancelled':'Done',when(o.resolved_at)+(o.resolved_by?' by '+o.resolved_by:'')));
+  if(o.staff_note) body.appendChild(kv('Note to customer',o.staff_note));
+  var acts=el('div',{class:'acts2'});
+  var note=null;
+  if(o.status==='pending'){
+    note=el('input',{class:'inl',placeholder:'Note for the customer (optional), e.g. labels on, boxes ready','aria-label':'Note for the customer'});
+    body.appendChild(note);
+    var done=el('button',{class:'rowbtn save',type:'button'},[svgI('check'),'Mark done']);
+    done.onclick=function(){
+      done.disabled=true;
+      sb.rpc('resolve_service_order',{p_id:o.id,p_note:note.value.trim()||null}).then(function(r){
+        done.disabled=false;
+        if(r.error){ alert('Could not save: '+r.error.message); return; }
+        if(after) after('#'+o.no+' marked done. The customer is notified in their panel.');
+      });
+    };
+    acts.appendChild(done);
+  }
+  if(o.status!=='cancelled'){
+    var cx=el('button',{class:'rowbtn del',type:'button',text:'Cancel and refund'});
+    cx.onclick=function(){
+      var why=prompt('Cancel #'+o.no+' and refund '+gbp(o.total_pence)+' to '+(o.company||o.user_email)+'?\n\nReason (the customer sees it):');
+      if(!why||!why.trim()) return;
+      cx.disabled=true;
+      sb.rpc('cancel_service_order',{p_id:o.id,p_reason:why.trim()}).then(function(r){
+        cx.disabled=false;
+        if(r.error){ alert('Could not cancel: '+r.error.message); return; }
+        if(after) after('#'+o.no+' cancelled. '+gbp(o.total_pence)+' refunded; balance now '+gbp(r.data)+'.');
+      });
+    };
+    acts.appendChild(cx);
+  }
+  if(withCust){
+    var op=el('button',{class:'rowbtn',type:'button'},[svgI('user'),'Open account']);
+    op.onclick=function(){ openAccount(o.user_id); };
+    var chatb=el('button',{class:'rowbtn',type:'button'},[svgI('chat'),'Message']);
+    chatb.onclick=function(){ openAccount(o.user_id,'chat'); };
+    acts.appendChild(op); acts.appendChild(chatb);
+  }
+  body.appendChild(acts);
+  head.onclick=function(){ body.hidden=!body.hidden; };
+  li.appendChild(head); li.appendChild(body);
+  return li;
+}
+function setSoTab(t){
+  SOS.tab=t;
+  Array.prototype.forEach.call($('sotabs').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.getAttribute('data-s')===t); });
+  loadSOrders();
+}
+Array.prototype.forEach.call($('sotabs').querySelectorAll('button'),function(b){ b.onclick=function(){ setSoTab(b.getAttribute('data-s')); }; });
+$('b_soreload').onclick=function(){ loadSOrders(); };
+function loadSOrders(quiet){
+  if(!quiet) busy('m_so','Loading…');
+  var q=sb.from('service_orders').select('*,service_order_lines(*)').eq('status',SOS.tab);
+  q=SOS.tab==='pending'? q.order('created_at',{ascending:true}) : q.order('created_at',{ascending:false}).limit(200);
+  return q.then(function(r){
+    if(r.error){ if(!quiet) msg('m_so','Could not load. Is the Phase 10 script run?','bad'); return; }
+    var list=r.data||[]; SOS.list=list;
+    if(!quiet) msg('m_so','');
+    if(SOS.tab==='pending'){ setCount('c_sowait',list.length); setCount('c_sorders',list.length); }
+    var box=$('solist'); box.innerHTML='';
+    list.forEach(function(o){ box.appendChild(soRow(o,true,function(t){ msg('m_so',t,'good'); loadSOrders(true); pulse(); })); });
+    $('so_empty').hidden=list.length>0;
+    $('so_empty').textContent=SOS.tab==='pending'?'Nothing waiting. New orders appear here the moment a customer pays for them.':'Nothing here yet.';
+  });
+}
+
+/* ---------------- customer account ---------------- */
+var ACC={uid:null,prof:null,st:null,tab:'statement'}, ACC_TAB=null;
+/* the customer on screen, but only once their details have loaded (money buttons use this) */
+function current(){ var P=ACC.prof; return (P&&ACC.uid&&P.user_id===ACC.uid&&section==='customer')? P : null; }
+function openAccount(uid,tab){
+  if(!uid){ alert('This customer has not signed in to the panel yet, so there is no account to open.'); return; }
+  CUST_ID=uid; ACC_TAB=tab||null; setSection('customer');
+}
+function setAcTab(t){
+  ACC.tab=t;
+  Array.prototype.forEach.call($('actabs').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.getAttribute('data-t')===t); });
+  ['statement','chat','orders','details'].forEach(function(k){ $('ac_'+k).hidden=(k!==t); });
+  $('ac_sttools').hidden=(t!=='statement');
+  if(t!=='chat') stopChat();
+  if(t==='statement') loadStatement();
+  if(t==='chat') openAccChat();
+  if(t==='orders') loadAccOrders();
+}
+Array.prototype.forEach.call($('actabs').querySelectorAll('button'),function(b){ b.onclick=function(){ setAcTab(b.getAttribute('data-t')); }; });
+function loadAccount(){
+  var uid=CUST_ID;
+  if(!uid){ setSection('clients',true); return; }
+  if(ACC.uid!==uid){ ACC={uid:uid,prof:null,st:null,tab:'statement'}; }
+  if(ACC_TAB){ ACC.tab=ACC_TAB; ACC_TAB=null; }
+  $('ac_kpis').innerHTML=''; $('ac_stbody').innerHTML=''; $('ac_olist').innerHTML='';
+  busy('m_ac','Loading…');
+  return sb.rpc('customer_profile',{p_user:uid}).then(function(r){
+    if(section!=='customer'||CUST_ID!==uid) return;
+    if(r.error||!r.data){ msg('m_ac','Could not open this customer: '+((r.error&&r.error.message)||'not found'),'bad'); return; }
+    ACC.prof=r.data; msg('m_ac','');
+    drawAccHead(); drawKpis(); drawDetails(); setAcTab(ACC.tab);
+  });
+}
+function reloadAccount(){
+  var uid=ACC.uid;
+  return sb.rpc('customer_profile',{p_user:uid}).then(function(r){
+    if(uid!==ACC.uid||section!=='customer'||r.error||!r.data) return;
+    ACC.prof=r.data; drawAccHead(); drawKpis(); drawDetails();
+    if(ACC.tab==='statement') loadStatement(); if(ACC.tab==='orders') loadAccOrders();
+  });
+}
+function drawAccHead(){
+  var P=ACC.prof;
+  $('h1').textContent=P.company||P.full_name||P.email;
+  $('pdesc').textContent=[P.full_name,P.email,P.phone].filter(Boolean).join(' · ');
+  setTitle();
+  setCount('c_acchat',P.unread); setCount('c_acorders',P.orders_open);
+}
+function drawKpis(){
+  var P=ACC.prof, b=Number(P.balance)||0, box=$('ac_kpis'); box.innerHTML='';
+  [['Balance',gbp(b),b<0?'neg':''],['Topped up (all time)',gbp(P.topped)],['Spent (all time)',gbp(P.spent)],['Spent this month',gbp(P.month_spent)],
+   ['Service orders waiting',String(P.orders_open||0),P.orders_open?'warn':'']].forEach(function(k){
+    box.appendChild(el('div',{class:'kpi'},[el('div',{class:'l',text:k[0]}),el('div',{class:'v '+(k[2]||''),text:k[1]})]));
+  });
+}
+function drawDetails(){
+  var P=ACC.prof, box=$('ac_dl'); box.innerHTML='';
+  function row(k,v){ box.appendChild(el('div',{class:'kv'},[el('div',{class:'k',text:k}),el('div',{class:'v'},[v||'—'])])); }
+  row('Company',P.company); row('Manager',P.full_name);
+  row('Email',P.email?el('a',{href:'mailto:'+P.email,text:P.email}):null);
+  row('Phone',P.phone?el('a',{href:'tel:'+String(P.phone).replace(/\s+/g,''),text:P.phone}):null);
+  row('Company address',P.address); row('Unit number',P.unit);
+  if(P.code){ var cb=el('button',{class:'rowbtn',type:'button',text:'Copy'}); cb.onclick=function(){ EFCopy(P.code,'Access code copied',cb); };
+    row('Access code',el('span',{class:'codeinline'},[el('code',{text:P.code}),cb])); }
+  row('Customer since',P.since?dmy(P.since):null);
+  row('Account type',P.kind==='signup'?'Self sign-up (access code)':'Older approval flow');
+  if(P.notes) row('Internal notes',P.notes);
+}
+$('ac_back').onclick=function(e){ e.preventDefault(); setSection('clients'); };
+$('ac_msg').onclick=function(){ setAcTab('chat'); };
+$('ac_topup').onclick=function(){
+  var P=current(); if(!P) return; var uid=P.user_id;
+  var p=askMoney('Top-up for '+(P.company||P.full_name)); if(!p) return;
+  var note=prompt('Reference (optional), e.g. Wise 12 Sep')||null;
+  sb.rpc('record_topup',{p_user:uid,p_pence:p,p_note:note}).then(function(x){
+    if(x.error){ msg('m_ac',x.error.message,'bad'); return; }
+    msg('m_ac','Top-up recorded · new balance '+gbp(x.data),'good'); reloadAccount();
+  });
+};
+$('ac_charge').onclick=function(){ if(current()) chargeDialog(); };
+$('ac_more').onclick=function(){
+  var P=current(); if(!P) return; var uid=P.user_id;
+  rowMenu($('ac_more'),[
+    {label:'Adjust balance…',run:function(){
+      var p=askMoney('Adjustment for '+(P.company||P.full_name)+'\nUse a minus sign to take money off'); if(!p) return;
+      var why=prompt('Reason (required)'); if(!why) return;
+      sb.rpc('adjust_balance',{p_user:uid,p_pence:p,p_note:why}).then(function(x){
+        if(x.error){ msg('m_ac',x.error.message,'bad'); return; } msg('m_ac','Adjusted · new balance '+gbp(x.data),'good'); reloadAccount(); }); }},
+    P.kind==='signup'?{label:'Copy welcome message',run:function(){
+      sb.rpc('welcome_for',{p_user:uid}).then(function(x){ if(x.error||!x.data){ msg('m_ac','Could not build the message.','bad'); return; } EFCopy(x.data,'Welcome message copied',$('ac_more')); }); }}:null,
+    P.kind==='signup'?{label:'Issue a new access code…',run:function(){
+      if(!confirm('Issue a new access code for '+(P.company||P.full_name)+'?\n\nTheir old code stops working straight away.')) return;
+      sb.rpc('regenerate_code',{p_user:uid}).then(function(x){ if(x.error){ msg('m_ac',x.error.message,'bad'); return; } msg('m_ac','New code: '+x.data,'good'); reloadAccount(); }); }}:null,
+    '-',
+    {label:'TEST: add £50 (not real money)',cls:'warn',run:function(){
+      if(!confirm('Add £50 of TEST money to '+(P.company||P.full_name)+'?\n\nNo real payment. For testing only.')) return;
+      sb.rpc('record_topup',{p_user:uid,p_pence:5000,p_note:'TEST — gerçek ödeme değil'}).then(function(x){
+        if(x.error){ msg('m_ac',x.error.message,'bad'); return; } msg('m_ac','TEST £50 added · new balance '+gbp(x.data),'good'); reloadAccount(); }); }}
+  ].filter(Boolean));
+};
+function openAccChat(){
+  stopChat();
+  var P=ACC.prof||{};
+  ACTIVE_CHAT=new ChatView($('ac_chat'),ACC.uid,{title:P.company||P.full_name||'Customer',sub:(P.full_name?P.full_name+' · ':'')+(P.email||'')+' · they read and reply in Turkish'});
+}
+function loadAccOrders(){
+  var uid=ACC.uid, box=$('ac_olist'); box.innerHTML=''; box.appendChild(el('div',{class:'muted',style:'padding:14px 18px'},[el('span',{class:'spin'}),'Loading…']));
+  sb.from('service_orders').select('*,service_order_lines(*)').eq('user_id',uid).order('created_at',{ascending:false}).limit(300).then(function(r){
+    if(uid!==ACC.uid||section!=='customer') return;
+    box.innerHTML='';
+    if(r.error){ msg('m_ac','Could not load service orders.','bad'); return; }
+    (r.data||[]).forEach(function(o){ box.appendChild(soRow(o,false,function(t){ msg('m_ac',t,'good'); reloadAccount(); pulse(); })); });
+    $('ac_oempty').hidden=(r.data||[]).length>0;
+  });
+}
+
+/* ---------------- statement, like the old per-customer spreadsheets ---------------- */
+function stEntry(e,tr){
+  var d=e.detail||{}, p=Number(e.pence)||0, rows=[], desc=e.note||'', date=e.at, svc=null;
+  if(e.ref_table==='service_orders'&&d&&d.lines&&e.kind==='charge'){
+    if(d.service_date&&d.service_date!==ymdOf(e.at)) svc=d.service_date;
+    rows=d.lines.map(function(l){ return {svc:l.name+(l.unit&&!tr?' ('+l.unit+')':''),qty:l.qty,unit:l.unit_pence,total:l.line_pence}; });
+    desc=[d.note,'#'+d.no+(d.source==='customer'?(tr?' · panelden sipariş':' · ordered in the panel'):'')].filter(Boolean).join(' · ');
+    if(d.status==='cancelled') desc+=tr?' · iptal edildi':' · later cancelled';
+  } else if(e.kind==='topup'){
+    rows=[{svc:tr?'ÖDEME':'Payment received',pay:p}];
+  } else if(e.kind==='refund'){
+    rows=[{svc:(tr?'İADE':'Refund')+(d&&d.no?' · #'+d.no:''),pay:p}]; desc=(d&&d.staff_note)||e.note||'';
+  } else if(e.kind==='adjustment'){
+    rows=[p>=0?{svc:tr?'Düzeltme':'Adjustment',pay:p}:{svc:tr?'Düzeltme':'Adjustment',qty:1,unit:-p,total:-p}];
+  } else if(e.ref_table==='orders'&&d&&d.product){
+    rows=[{svc:(tr?'Gönderi: ':'Shipment: ')+d.product+' × '+d.qty+' → '+(d.recipient||''),qty:1,unit:-p,total:-p}];
+    desc=[d.courier,d.service,d.tracking].filter(Boolean).join(' · ');
+  } else {
+    rows=[{svc:e.note||(tr?'Hizmet bedeli':'Charge'),qty:1,unit:-p,total:-p}]; desc='';
+  }
+  if(svc&&tr) desc=(desc?desc+' ':'')+'(hizmet tarihi '+dmy(svc)+')';
+  return {e:e,date:date,svc:tr?null:svc,rows:rows,desc:desc,bal:Number(e.balance_after)||0};
+}
+function periodOk(ymd){
+  var v=$('ac_period').value; if(v==='all') return true;
+  var t=new Date(), y=t.getFullYear(), m=t.getMonth();
+  function ym(yy,mm){ var d=new Date(yy,mm,1); return d.getFullYear()+'-'+pad2(d.getMonth()+1); }
+  if(v==='month') return ymd.slice(0,7)===ym(y,m);
+  if(v==='last') return ymd.slice(0,7)===ym(y,m-1);
+  if(v==='90') return ymd>=ymdOf(new Date(Date.now()-90*86400000).toISOString());
+  if(v==='year') return ymd.slice(0,4)===String(y);
+  return true;
+}
+$('ac_period').onchange=function(){ drawStatement(); };
+function loadStatement(){
+  var uid=ACC.uid, tb=$('ac_stbody'); tb.innerHTML='';
+  tb.appendChild(el('tr',null,[el('td',{colspan:'8',class:'loadrow'},[el('span',{class:'spin'}),'Loading statement…'])]));
+  return sb.rpc('customer_statement',{p_user:uid}).then(function(r){
+    if(uid!==ACC.uid||section!=='customer') return;
+    if(r.error){ tb.innerHTML=''; msg('m_ac','Could not load the statement. Is the Phase 10 script run?','bad'); return; }
+    ACC.st=r.data||[]; ACC.stUid=uid; drawStatement();
+  });
+}
+function drawStatement(){
+  var P=ACC.prof||{}, tb=$('ac_stbody'); tb.innerHTML='';
+  $('st_company').textContent=P.company||'—'; $('st_manager').textContent=P.full_name||'—';
+  $('st_email').textContent=P.email||'—'; $('st_phone').textContent=P.phone||'—';
+  $('st_address').textContent=P.address||'—';
+  var b=Number(P.balance)||0; $('st_balance').textContent=gbp(b); $('st_balance').className='v'+(b<0?' neg':'');
+  var list=(ACC.st||[]).map(function(e){ return stEntry(e,false); }).filter(function(x){ return periodOk(ymdOf(x.date)); }).reverse();
+  var inP=0, outP=0;
+  list.forEach(function(x){
+    x.rows.forEach(function(r,i){
+      if(r.pay) inP+=r.pay; if(r.total) outP+=r.total;
+      var tr=el('tr',{class:(r.pay?'payrow':'')+(i===0?' first':'')});
+      if(i===0) tr.appendChild(el('td',{class:'nowrap',rowspan:x.rows.length>1?String(x.rows.length):null},[dmy(x.date),
+        x.svc?el('div',{class:'svcdate',text:'service '+dmy(x.svc)}):null]));
+      tr.appendChild(el('td',{class:r.pay?'paylabel':'',text:r.svc}));
+      tr.appendChild(el('td',{class:'num',text:r.qty?String(r.qty):''}));
+      tr.appendChild(el('td',{class:'num',text:r.unit!==undefined&&r.unit!==null?gbp(r.unit):''}));
+      tr.appendChild(el('td',{class:'money',text:r.total?gbp(r.total):''}));
+      tr.appendChild(el('td',{class:'money pay',text:r.pay?gbp(r.pay):''}));
+      if(i===0){
+        tr.appendChild(el('td',{class:'desc',rowspan:x.rows.length>1?String(x.rows.length):null,text:x.desc}));
+        tr.appendChild(el('td',{class:'money bal'+(x.bal<0?' zero':''),rowspan:x.rows.length>1?String(x.rows.length):null,text:gbp(x.bal)}));
+      }
+      tb.appendChild(tr);
+    });
+  });
+  $('ac_stempty').hidden=list.length>0;
+  $('ac_stempty').textContent=(ACC.st||[]).length?'No transactions in this period.':'No transactions yet.';
+  $('st_sum').textContent=list.length? list.length+' transaction'+(list.length===1?'':'s')+' · payments '+gbp(inP)+' · charges '+gbp(outP) : '';
+}
+function needXLSXA(){
+  return window.XLSX? Promise.resolve() : loadScript([
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js']);
+}
+/* the Excel copy follows the old Turkish spreadsheets, so it can be sent to the customer as it is */
+$('ac_xls').onclick=function(){
+  var P=current(), btn=$('ac_xls'); if(!P||!ACC.st||ACC.stUid!==P.user_id) return;
+  btn.disabled=true;
+  needXLSXA().then(function(){
+    var rows=[['ecomFLEX hesap ekstresi'],[],['Şirket Adı',P.company||'','','','Adres',P.address||''],['Yönetici',P.full_name||''],['E-posta',P.email||''],
+      ['Telefon',P.phone||''],['Bakiye (£)',(Number(P.balance)||0)/100],['Tarih',dmy(todayYmdA())],[],
+      ['Tarih','Servis Adı','Adet','Servis Ücreti (£)','Toplam (£)','Ödeme (£)','Açıklama','Bakiye (£)']];
+    (ACC.st||[]).map(function(e){ return stEntry(e,true); }).filter(function(x){ return periodOk(ymdOf(x.date)); }).forEach(function(x){
+      x.rows.forEach(function(r,i){
+        rows.push([i===0?dmy(x.date):'',r.svc,r.qty||'',r.unit!==undefined&&r.unit!==null?r.unit/100:'',r.total?r.total/100:'',r.pay?r.pay/100:'',i===0?x.desc:'',i===0?x.bal/100:'']);
+      });
+    });
+    var ws=window.XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[12,46,7,16,12,12,44,12].map(function(w){ return {wch:w}; });
+    var wb=window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb,ws,'Ekstre');
+    window.XLSX.writeFile(wb,'ecomflex-ekstre-'+safeName(P.company||P.email||'musteri')+'-'+todayYmdA()+'.xlsx');
+  }).catch(function(){ msg('m_ac','The Excel file could not be made. Check the connection and try again.','bad'); }).then(function(){ btn.disabled=false; });
+};
+
+/* ---------------- add service charges (what the spreadsheets were for) ---------------- */
+function chargeDialog(){
+  var P=current(); if(!P) return; var uid=P.user_id;
+  sb.from('price_items').select('*').order('sort').order('name').then(function(r){
+    var prices=(r.data||[]).filter(function(p){ return p.active!==false; });
+    var lines=[];
+    var date=el('input',{class:'inl',type:'date',value:todayYmdA(),max:ymdOf(new Date(Date.now()+31*86400000).toISOString())});
+    var desc=el('input',{class:'inl',maxlength:'1000',placeholder:'e.g. Palet işlemleri - 874552700070'});
+    var tbody=el('tbody');
+    var tot=el('b',{text:gbp(0)}), after=el('b',{text:gbp(P.balance)});
+    function recalc(){
+      var t=0; lines.forEach(function(L){ var q=parseInt(L.qty.value,10)||0, u=poundsToPence(L.price.value); var v=(q>0&&u>=0)?q*u:0; L.total.textContent=gbp(v); t+=v; });
+      tot.textContent=gbp(t); var a=(Number(P.balance)||0)-t; after.textContent=gbp(a); after.className=a<0?'neg':'';
+      return t;
+    }
+    function addLine(){
+      var s=el('select',{class:'inl','aria-label':'Service'},[el('option',{value:'',text:'Choose a service…'})]);
+      var cats={}, order=[];
+      prices.forEach(function(p){ var c=p.category||'Other'; if(!cats[c]){ cats[c]=el('optgroup',{label:c}); order.push(c); } cats[c].appendChild(el('option',{value:p.id,text:p.name+(p.unit?' ('+p.unit+')':'')+' — '+gbp(p.price_pence)})); });
+      order.forEach(function(c){ s.appendChild(cats[c]); });
+      s.appendChild(el('option',{value:'__other',text:'Something else (type a name)…'}));
+      var name=el('input',{class:'inl',placeholder:'Service name','aria-label':'Service name',hidden:true,maxlength:'200'});
+      var qty=el('input',{class:'inl',type:'number',min:'1',step:'1',value:'1',inputmode:'numeric','aria-label':'Quantity'});
+      var price=el('input',{class:'inl',inputmode:'decimal',placeholder:'0.00','aria-label':'Unit price in pounds'});
+      var total=el('span',{class:'lt',text:gbp(0)});
+      var rm=el('button',{class:'ib',type:'button','aria-label':'Remove line'},[svgI('x')]);
+      var L={s:s,name:name,qty:qty,price:price,total:total};
+      var tr=el('tr',null,[el('td',null,[s,name]),el('td',null,[qty]),el('td',null,[el('div',{class:'pound'},['£',price])]),el('td',{class:'money'},[total]),el('td',null,[rm])]);
+      s.onchange=function(){
+        name.hidden=s.value!=='__other';
+        var p=prices.filter(function(x){ return x.id===s.value; })[0];
+        if(p) price.value=(Number(p.price_pence)/100).toFixed(2); else if(s.value==='__other'){ price.value=''; name.focus(); }
+        recalc();
+      };
+      qty.oninput=recalc; price.oninput=recalc;
+      rm.onclick=function(){ if(lines.length===1) return; lines.splice(lines.indexOf(L),1); tr.remove(); recalc(); };
+      lines.push(L); tbody.appendChild(tr);
+    }
+    addLine();
+    var more=el('button',{class:'additem',type:'button',text:'+ Add another line'}); more.onclick=function(){ addLine(); };
+    var body=el('div',null,[
+      el('div',{class:'frm'},[el('div',null,[el('label',{text:'Service date'}),date]),el('div',null,[el('label',{text:'Description (the customer sees it)'}),desc])]),
+      el('div',{class:'tblwrap'},[el('table',{class:'tbl chargetbl'},[el('thead',null,[el('tr',null,[el('th',{text:'Service'}),el('th',{text:'Qty'}),el('th',{text:'Unit price'}),el('th',{class:'r',text:'Total'}),el('th',null,[])])]),tbody])]),
+      more,
+      el('div',{class:'chsum'},[el('div',null,['Total ',tot]),el('div',null,['Balance now ',el('b',{text:gbp(P.balance)})]),el('div',null,['Balance after ',after])]),
+      el('p',{class:'hint',style:'margin:10px 0 0',text:'Prices fill in from the price list and can be changed for this customer. Staff charges may take the balance below zero, as on the old spreadsheets.'})]);
+    dialog({title:'Add charge · '+(P.company||P.full_name),sub:'Adds service lines to the statement and takes the total from the balance.',wide:true,body:body,
+      actions:[{t:'Cancel',close:true},{t:'Charge',primary:true,i:'check',on:function(D,b){
+        var out=[], bad='';
+        lines.forEach(function(L,i){
+          var q=parseInt(L.qty.value,10), u=poundsToPence(L.price.value);
+          if(!L.s.value){ bad='Choose a service on line '+(i+1)+'.'; return; }
+          if(L.s.value==='__other'&&!L.name.value.trim()){ bad='Type a name for line '+(i+1)+'.'; return; }
+          if(!(q>=1&&q<=100000)){ bad='Quantity on line '+(i+1)+' must be a whole number.'; return; }
+          if(!(u>=0)){ bad='Price on line '+(i+1)+' must look like 12.80'; return; }
+          out.push(L.s.value==='__other'?{name:L.name.value.trim(),qty:q,unit_pence:u}:{id:L.s.value,qty:q,unit_pence:u});
+        });
+        if(bad){ D.msg(bad,'bad'); return; }
+        var t=recalc(); if(!(t>0)){ D.msg('The total must be more than £0.','bad'); return; }
+        var a=(Number(P.balance)||0)-t;
+        if(a<0&&!confirm('This takes '+(P.company||'the customer')+' to '+gbp(a)+'. Charge anyway?')) return;
+        b.disabled=true; D.busy('Charging…');
+        sb.rpc('staff_add_charge',{p_user:uid,p_lines:out,p_note:desc.value.trim()||null,p_date:date.value||null}).then(function(x){
+          b.disabled=false;
+          if(x.error){ D.msg('Could not charge: '+x.error.message,'bad'); return; }
+          D.close(); msg('m_ac','Charged '+gbp(x.data.total)+' (#'+x.data.no+') · new balance '+gbp(x.data.balance),'good');
+          reloadAccount();
+        });
+      }}]});
+  });
+}
+
+/* ---------------- Messages: every conversation ---------------- */
+var THREADS=[];
+function fmtWhen(iso){
+  var d=new Date(iso), t=new Date(); t.setHours(0,0,0,0);
+  var x=new Date(d.getTime()); x.setHours(0,0,0,0);
+  var diff=Math.round((t-x)/86400000);
+  if(diff===0) return pad2(d.getHours())+':'+pad2(d.getMinutes());
+  if(diff===1) return 'Yesterday';
+  return dmy(iso);
+}
+function loadThreads(quiet){
+  if(!quiet){ $('th_list').innerHTML=''; $('th_list').appendChild(el('div',{class:'muted',style:'padding:16px'},[el('span',{class:'spin'}),'Loading…'])); }
+  return sb.rpc('chat_threads').then(function(r){
+    if(section!=='messages') return;
+    if(r.error){ if(!quiet){ $('th_list').innerHTML=''; msg('m_th','Could not load. Is the Phase 10 script run?','bad'); } return; }
+    THREADS=r.data||[]; drawThreads();
+    if(MSG_ID&&(!ACTIVE_CHAT||ACTIVE_CHAT.uid!==MSG_ID)) openThread(MSG_ID,true);
+    if(!MSG_ID) threadPlaceholder();
+  });
+}
+function threadPlaceholder(){
+  if(ACTIVE_CHAT&&ACTIVE_CHAT.host===$('th_pane')) stopChat();
+  var pane=$('th_pane'); pane.innerHTML='';
+  pane.appendChild(el('div',{class:'ipempty'},[svgI('chat'),el('b',{text:'Customer messages'}),el('span',{text:'Choose a conversation on the left, or start a new one.'})]));
+  $('msgbox').classList.remove('open');
+}
+function drawThreads(){
+  var box=$('th_list'), q=($('th_q').value||'').toLowerCase().trim(); box.innerHTML='';
+  var list=THREADS.filter(function(t){ return !q||[t.company,t.full_name,t.email,t.last_body].join(' ').toLowerCase().indexOf(q)>-1; });
+  list.forEach(function(t){
+    var prev=el('span',{class:'pv'});
+    if(t.last_from_staff) prev.appendChild(tickSvgA(t.last_read?'read':t.last_delivered?'dlv':'sent'));
+    prev.appendChild(document.createTextNode(short(t.last_body,70)));
+    var row=el('button',{type:'button',class:'thr'+(t.user_id===MSG_ID?' on':'')+(Number(t.unread)?' unread':'')},[
+      el('div',{class:'avatar',text:initials(t.company||t.full_name||t.email)}),
+      el('div',{class:'tx'},[el('div',{class:'l1'},[el('b',{text:t.company||t.full_name||t.email}),el('span',{class:'tm',text:fmtWhen(t.last_at)})]),
+        el('div',{class:'l2'},[prev,Number(t.unread)?el('span',{class:'count',text:String(t.unread)}):null])])]);
+    row.onclick=function(){ openThread(t.user_id); };
+    box.appendChild(row);
+  });
+  if(!list.length) box.appendChild(el('div',{class:'thempty',text:THREADS.length?'No conversation matches.':'No conversations yet. Start one with “New”.'}));
+}
+$('th_q').oninput=drawThreads;
+function openThread(uid,keepHash){
+  MSG_ID=uid;
+  if(!keepHash){ try{ history.replaceState(null,'','#messages/'+uid); APPLIED=location.hash; }catch(e){} }
+  var t=THREADS.filter(function(x){ return x.user_id===uid; })[0]||{};
+  stopChat();
+  var open=el('button',{class:'btn',type:'button'},[svgI('user'),'Open account']);
+  open.onclick=function(){ openAccount(uid); };
+  var back=el('button',{class:'ib back',type:'button','aria-label':'Back to conversations'},[svgI('left')]);
+  back.onclick=function(){ stopChat(); MSG_ID=null; try{ history.replaceState(null,'','#messages'); APPLIED=location.hash; }catch(e){} threadPlaceholder(); drawThreads(); };
+  ACTIVE_CHAT=new ChatView($('th_pane'),uid,{title:t.company||t.full_name||t.email||'Customer',sub:t.full_name&&t.email?t.full_name+' · '+t.email:(t.email||''),tools:el('div',{class:'chtools'},[open])});
+  var head=$('th_pane').querySelector('.chh'); if(head) head.insertBefore(back,head.firstChild);
+  $('msgbox').classList.add('open');
+  drawThreads();
+}
+$('th_new').onclick=function(){
+  sb.rpc('customer_directory').then(function(r){
+    var s=el('select',{class:'inl'},[el('option',{value:'',text:'Choose a customer…'})]);
+    (r.data||[]).forEach(function(c){ if(c.user_id) s.appendChild(el('option',{value:c.user_id,text:(c.business_name||c.full_name)+' — '+c.email})); });
+    dialog({title:'New message',sub:'Choose who to write to.',body:el('div',{class:'frm'},[el('div',{class:'full'},[el('label',{text:'Customer'}),s])]),
+      actions:[{t:'Cancel',close:true},{t:'Open chat',primary:true,i:'chat',on:function(D){
+        if(!s.value){ D.msg('Choose a customer.','bad'); return; }
+        D.close();
+        if(!THREADS.some(function(t){ return t.user_id===s.value; })){
+          var c=(r.data||[]).filter(function(x){ return x.user_id===s.value; })[0]||{};
+          THREADS.unshift({user_id:s.value,company:c.business_name,full_name:c.full_name,email:c.email,last_body:'',last_at:new Date().toISOString(),unread:0});
+        }
+        openThread(s.value);
+      }}]});
+  });
+};
+
 
 connect().then(function(){
   return sb.auth.getSession().then(function(r){

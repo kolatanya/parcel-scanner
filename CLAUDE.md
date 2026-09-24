@@ -118,7 +118,7 @@ All files sit **flat in the repository root**. There are no folders except a str
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll. **Not currently in the repo**; harmless while no file starts with `_`. |
 | `_shared.js` | Old copy of `shared.js` from the underscore mistake. Unused; can be deleted. |
 | `supabase-schema.sql` | Snapshot of the whole live database, taken 21 Sep 2026. See 6. |
-| `supabase-phase7.sql`, `-phase8.sql`, `-phase9.sql` | Migrations since the snapshot. |
+| `supabase-phase7.sql` … `-phase10.sql` | Migrations since the snapshot. |
 | `supabase-function-create-topup.ts`, `supabase-function-stripe-webhook.ts` | The two Supabase Edge Functions for Stripe card top-ups. Not run from GitHub; pasted into Supabase. |
 | `CLAUDE.md` | This handover. |
 
@@ -173,7 +173,8 @@ Run once each, in order, in Supabase → SQL Editor → **Create a new snippet**
 1. `supabase-schema.sql` — only on an empty project.
 2. `supabase-phase7.sql` — fixes: self-signup customers could not enter the panel; "New code" locked customers out; reports/stock picker/balances ignored self-signup customers; undo-dispatch did not restore stock; `balance_of` was callable by anyone. Adds `customer_directory()`, first-top-up gate on requests and inbounds. **Deployed 21 Sep 2026.**
 3. `supabase-phase8.sql` — balance page totals, bank-transfer payment declarations, card payments table and functions for Stripe. **Deployed 23 Sep 2026.**
-4. `supabase-phase9.sql` — everything behind `panel2.html`: product details on stock rows, saved recipients, announcements, price list, documents, invoices, support tickets, dashboard figures. **Not yet deployed** (see 10).
+4. `supabase-phase9.sql` — everything behind `panel2.html`: product details on stock rows, saved recipients, announcements, price list, documents, invoices, support tickets, dashboard figures. **Deployed 23 Sep 2026.**
+5. `supabase-phase10.sql` — services paid from the balance (`service_orders`, `service_order_lines`, `price_items.orderable`, the Ecomflex price list), customer statements and profiles, the customer chat with delivery/read ticks, `today_counts` with service orders and unread chat. **Not yet deployed** (see 10).
 
 When Supabase warns "creates a table without enabling Row Level Security", choose **Run and enable RLS**. To see what is really live, the export query used on 21 Sep (functions, policies, triggers, tables, one CSV cell) can be rerun; ask Claude for it.
 
@@ -191,7 +192,9 @@ When Supabase warns "creates a table without enabling Row Level Security", choos
 - **`card_payments`** — one row per Stripe checkout; credited once by the webhook.
 - **`contacts`** — each customer's saved recipients (own rows only).
 - **`announcements`** + **`announcement_reads`** — staff news; per-customer read state.
-- **`price_items`** — the price list staff maintain; customers see active lines.
+- **`price_items`** — the price list staff maintain; customers see active lines. `orderable` (phase 10) = customers may buy the line themselves on "Hizmet Satın Al" (storage lines are not orderable).
+- **`service_orders`** + **`service_order_lines`** (phase 10) — one order = one or more price-list lines with name, unit, quantity, unit price and line total copied at the time. `source` = `customer` (bought in the panel, paid at once, `status` `pending` until staff mark it `done`, or `cancelled` with a refund) or `staff` (a charge staff added, recorded as `done`). `no` is a running number shown as #41. Read-only for browsers; every change goes through the functions.
+- **`chat_messages`** (phase 10) — one conversation per customer (`user_id` = the customer). `from_staff`, `author`, `body`, `delivered_at` (the other side's panel has fetched it: two grey ticks), `read_at` (the other side opened the conversation: two blue ticks). Read-only for browsers.
 - **`documents`** — PDFs shared with every customer (storage bucket `documents`).
 - **`invoices`** — PDFs for one customer (storage bucket `invoices`, path `<user_id>/<file>`).
 - **`tickets`** + **`ticket_messages`** — support conversations; `no` is a running ticket number; status `open` (waiting for staff) / `answered` / `closed`; `customer_seen` drives the customer's "new reply" badge.
@@ -223,7 +226,18 @@ set_fba_labels                                legacy, still used by panel.html
 set_fba_boxes / close_fba_job / close_return / receive_inbound  admin
 open_ticket / reply_ticket / close_ticket / mark_ticket_seen   customer (own) or admin (any)
 my_announcements / mark_announcements_read    customer
-today_counts()                                admin Today board (includes payments_waiting, tickets_waiting)
+today_counts()                                admin Today board (payments_waiting, tickets_waiting, service_orders_waiting, chats_unread)
+buy_services(items, note)                     customer: [{id, qty}] from orderable price lines; price taken from the database;
+                                              refused with INSUFFICIENT_FUNDS; one lock per customer so two orders cannot spend the same pounds
+cancel_service_order(id, reason)              customer: own, while waiting. staff: waiting or done, reason required. Full refund either way
+resolve_service_order(id, note)               staff: waiting -> done; the note is shown to the customer
+staff_add_charge(user, lines, note, date)     staff: lines [{id?, name?, unit?, qty, unit_pence}]; may take the balance below zero
+customer_statement(user)                      staff any / customer own: ledger oldest first, balance after each entry, service lines or parcel details
+customer_profile(user)                        staff: details, balance, topped up, spent, this month, waiting orders, unread chat
+send_chat(body, user)                         customer (own conversation) or staff (pass the customer's id); 20 per minute limit for customers
+chat_mark_delivered() / chat_mark_read(user)  ticks; staff pass the customer's id to mark read
+chat_threads()                                staff: every conversation with its last message and unread count
+customer_exists(user), company_of(user)       internal only
 list_admins / add_admin / remove_admin, onboarding, set_client_field, welcome_for, month_report, all_balances, next_ref
 ```
 
@@ -248,7 +262,9 @@ list_admins / add_admin / remove_admin, onboarding, set_client_field, welcome_fo
 - Kinds: `topup` (positive), `charge` (negative), `refund` (positive), `adjustment` (either sign; reason required).
 - **The browser cannot write to the ledger at all.** Every movement goes through a `security definer` function.
 - **Charging and dispatching happen together** in `dispatch_order`; refused with `INSUFFICIENT_FUNDS` if the balance is short.
-- Prices are **set by hand by staff at dispatch time**. The price list page is information for customers, not an automatic rate card.
+- **Dispatch prices are set by hand by staff** at dispatch time.
+- **Services customers buy themselves** (phase 10) are charged at the price-list price **read by the database** when the order is placed; the page only sends which lines and how many. The whole order is paid at once from the balance and refused if the balance is short. Cancelling (customer while waiting, or staff) refunds the full amount as a separate `refund` entry.
+- **Staff "Add charge"** may use any price and may take a balance **below zero**, as the old per-customer spreadsheets did. Customer purchases never can.
 - **Top-ups:** (a) bank transfer — customer declares it, staff confirm the amount that actually arrived; (b) admin "Record top-up"; (c) card via Stripe (built, not yet live) — only the `stripe-webhook` Edge Function credits card money, after checking Stripe's signature, and the database refuses to credit the same checkout twice. **Ecomflex absorbs the Stripe fee** (customer pays £50, gets £50). Card limits £50–£5,000 per payment.
 - Admin → Customers → **"TEST: +£50"** adds pretend money for testing. **Remove it before real customers use the system.** Use it only on test accounts; entries stay in the statement forever.
 - **Unresolved, and outside the software:** prepaid balances affect revenue recognition and VAT timing; unspent balances are a liability. Mert has been advised to ask his accountant.
@@ -267,13 +283,23 @@ Pages: **Genel Bakış** (greeting, stock/damaged/active products/balance cards,
 
 Notifications are worked out in the browser from the customer's own records (dispatched orders, received deliveries, FBA boxes ready, payments confirmed/rejected, ticket replies, new invoices) with a "last seen" time in localStorage.
 
+Phase 10 added **Hizmet Satın Al** (price list as a shop: quantities, basket with balance before/after, "Bakiyeden öde", confirmation, "Hizmet siparişlerim" with detail and cancel) and **Mesajlar** (one WhatsApp-style conversation with the Ecomflex team, also on a chat button in the top bar with an unread count; Enter sends, Shift+Enter new line; failed messages can be retried). The panel checks every 25 seconds for new messages and tells the server it is open (that is what turns staff messages to two grey ticks). The bell also reports completed or cancelled service orders and staff charges.
+
 ### `panel.html` — current customer panel (Turkish)
 
 The older, simpler panel. Still live until `panel2.html` is approved; then `panel2.html` is renamed to `panel.html`. Has the phase 8 balance page and (23 Sep) the FBA label-file fix.
 
-### `admin.html` — admin console (English, v5)
+### `admin.html` — admin console (English, v6)
 
 Sections: **Today, Orders, Inbound, Services, Stock, Customers, Support, Access requests, Content, Reports, Staff**, plus links to the label reader, scanner and customer panel. Each section has an address (`admin.html#orders`, `#customers`, `#reports`…), so refresh keeps the place and Back works. On phones the menu slides in from a button at the top left.
+
+**v6 (24 Sep 2026)**:
+- **Customer account screen** (`#customer/<user id>`), opened from the **Account** button in the Customers table (and from service orders and chats): header with company, manager, email, phone; key figures (balance, topped up, spent, this month, waiting orders); buttons Message, Add charge, Record top-up, More (adjust, welcome message, new code, TEST +£50); tabs **Statement** (like the old spreadsheets: date, service, qty, unit price, total, payment, description, running balance; period filter; **Download Excel** in the Turkish spreadsheet layout, ready to send to the customer), **Messages**, **Service orders**, **Details**.
+- **Add charge**: service lines from the price list (price filled in, can be changed) or "something else" with a typed name; quantity; service date; description; shows the balance after.
+- **Service orders** (menu, Operations): Waiting / Done / Cancelled. Waiting orders open with the lines, the customer's note, a note box and **Mark done** / **Cancel and refund**.
+- **Messages** (menu, Customers): conversations on the left with unread counts and ticks, the chat on the right (`#messages/<user id>`), New message, Open account. On phones the list and the chat take turns.
+- Every 30 seconds the console checks for new service orders and customer messages: menu counts, a count in the browser tab title, and a pop-up with a short sound. An open chat refreshes every 4 seconds.
+- Price list: a **Can order** column.
 
 v5 (24 Sep 2026) was a redesign only: every element ID, database call and workflow is the same as v4. Changes beyond looks: Today groups waiting work into panels with "View all"; Orders lists customers with waiting orders first and folds dispatched orders behind "Show N dispatched orders"; the customer table's less common actions (adjust balance, copy welcome message, new access code, TEST +£50) sit under a **More** menu next to **Record top-up**; the audit log shows amounts in pounds.
 
@@ -301,7 +327,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v19`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v20`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 
@@ -313,10 +339,18 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - Phase 7 (fixes) and phase 8 (balance page, payment declarations, TEST +£50 button, admin v3). Mert tested: self-signup + code login, declaration → admin confirm → unlock, test top-up, Excel download. Bank details are entered.
 - Phase 9 (23 Sep): `supabase-phase9.sql` run; `panel2.html`, admin v4, `panel.html` FBA fix, `sw.js` v18 uploaded.
 
-### Ready to deploy (built and tested, not uploaded)
+### Deployed 24 Sep 2026
 
-- Admin v5 redesign, new hub, `404.html`, `robots.txt`, `sitemap.xml`, page tags and single `h1` on every page, scanner/label reader colours, `manifest.webmanifest`, `sw.js` v19, `CLAUDE.md`. No SQL.
+- Admin v5 redesign, new hub, `404.html`, `robots.txt`, `sitemap.xml`, page tags and single `h1` on every page, scanner/label reader colours, `manifest.webmanifest`, `sw.js` v19, `CLAUDE.md`. No SQL. Mert confirmed v5 live.
 - Tested with: 48 admin click-through checks (the 27 from v4 plus section addresses, single `h1`, tab titles, Back button, folded orders, dispatch call, More menu, TEST top-up amount, phone menu, no sideways scrolling), the 52 customer checks on `panel2.html` again, a page audit (title, description, robots, canonical, one `h1` per file, no duplicate titles), the 404 page served at both `/` and `/parcel-scanner/`, and screenshots at 1440×900 and 390×844.
+
+### Phase 10 (built and tested, not uploaded)
+
+- `supabase-phase10.sql`, `admin.html` v6, `panel2.html` (Hizmet Satın Al, Mesajlar), `sw.js` v20, `CLAUDE.md`.
+- Tested with: 91 database checks (buying, refunds, staff charges, statement, profile, chat and ticks, including every forbidden path), 58 admin click-through checks, 44 customer click-through checks, the earlier 48 admin and 53 customer checks again, and screenshots at 1440×900 and 390×844.
+- An independent review found 9 problems, all fixed before handing over: existing and new price lines would have become buyable (now off unless ticked, and £0 lines can never be bought); a stale chat could stay on screen in Messages and keep sending; dispatches and adjustments did not share the per-customer lock with purchases; late replies could show one customer's data on another's account screen; a customer could be charged a price changed after they looked (the page now sends the price shown and the database refuses PRICE_CHANGED); a customer cancelling could write the "note from our team"; the statement mixed service dates with entry dates (now ordered, dated and filtered by when the money moved, with the service date as a label); cancelled staff charges showed as charges; an invalid price on a price-list line silently fell back to the list price.
+- Known and accepted: staff email addresses are visible to customers in chat and order records (`author`, `resolved_by`).
+- The chat and service orders are only in `panel2.html`; customers on the old `panel.html` do not see them. Another reason to switch to `panel2.html` soon.
 
 ### Custom domain
 
@@ -356,6 +390,11 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 17. **A `CNAME` file before the DNS record exists** takes the whole site down (GitHub redirects to an address that does not answer). Let GitHub write it from Settings → Pages after DNS is in place.
 18. **Relative links on the 404 page.** GitHub serves `404.html` at whatever address was missing (`/a/b/c`), so `panel.html` would resolve to `/a/b/panel.html` and 404 again. The page sets a `<base>` from a tiny script at the top of `<head>` (`/parcel-scanner/` on github.io, `/` on the custom domain). Keep that script first.
 19. **The staff app manifest on a customer page.** `panel2.html` linked `manifest.webmanifest`, so a customer who installed it would have got the staff hub. Removed; customer pages have no manifest.
+20. **Class name clashes.** The chat's tick icons used the class `tk`, which support ticket cards already used, and squashed every ticket row to 36px wide. Give new components distinctive class names (`wtick`) and search the page for a class before using it.
+21. **Checks that cannot fail.** `['a','b'].every(async t => ...)` is always true (a promise is truthy). Compute the text first, then test it synchronously.
+22. **New "allow" flags must default to off.** `price_items.orderable` first defaulted to true, which would have made every existing line (storage, £0 "ask us" lines) buyable. Add such columns with default false and switch on only what is meant.
+23. **Late replies on screens that change subject.** On the customer account screen a slow reply for customer A could land after staff opened customer B, and the money buttons would then act on B under A's name. Every request remembers who it was for and ignores a reply that no longer matches; money buttons read the customer from the loaded details (`current()`).
+24. **One lock for every debit.** Anything that takes money off a balance takes `pg_advisory_xact_lock(hashtext('wallet:' || user_id))` before reading the balance (buy_services, staff_add_charge, cancel refunds, dispatch_order, adjust_balance).
 
 ---
 
@@ -366,6 +405,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - **Behaviour**: `playwright-core` driving the installed Chrome headless, against a copy of the page served locally with a fake in-browser Supabase (`window.supabase.createClient` returning a client with `from/rpc/auth/storage/functions` backed by sample data, recording every call). Click through each action and assert on the recorded calls; take full-page screenshots at 1440×900 and 390×844 and look at them.
 - **Edge Functions**: run the `.ts` files in Node with a `Deno` shim and a fake `fetch`; sign test webhook bodies with HMAC-SHA256 like Stripe.
 - **Label parsing**: reportlab test PDFs through the page's parsing functions via pdfjs-dist 3.11.174.
+- **Phase 10**: `test_phase10.mjs` (database), `admin_v6_flows.mjs` and `flows10.mjs` (click-through) in the working scratch folder; the fake Supabase knows the new tables and functions.
 - **Page tags**: for every `.html` check one `<h1`, a unique `<title>`, description, robots and canonical. Test `404.html` with a small local server that serves the repo at both `/` and `/parcel-scanner/` and answers missing paths with `404.html` and status 404.
 
 ---
@@ -380,4 +420,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - **Customer directory import** from a spreadsheet of ~200 customers with shelf numbers. It contains **plain-text passwords**: never import those; recommend a password manager.
 - **Root address for customers**: `panel.ecomflex.co.uk/` currently opens the staff hub (with a link to the customer panel). It could open the customer sign-in instead, with the hub moved to its own page. Not done without asking: it changes the staff app's start page.
 - **Moving label-reader product names into Supabase.**
+- **Chat attachments** (photos of damaged boxes, PDFs) — needs a storage bucket and policies.
+- **Email alerts** to staff for new service orders and messages, and to customers for replies (Resend through an Edge Function).
+- **Supabase Realtime** instead of polling for the chat (instant messages); polling every 4 s is fine at the current size.
 - **Supabase Pro**, recommended before real money flows through the ledger.

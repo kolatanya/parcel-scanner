@@ -477,6 +477,96 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
   .toasts{bottom:14px}
 }
 @media print{ .side,.top,.lock{display:none} .app{display:block} }
+
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* ---------- services paid from the balance ---------- */
+.shop{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.shop>*{min-width:0}
+.scat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.scat h3{margin:0;padding:14px 18px;font-size:.9rem;font-weight:650;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;background:var(--soft)}
+.scat h3 .n{margin-left:auto;font-size:.72rem;font-weight:500;color:var(--muted)}
+.svc{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);transition:background .15s}
+.svc:last-child{border-bottom:0}
+.svc.on{background:#FFF8F8}
+.svc .nm{flex:1;min-width:0}
+.svc .nm b{display:block;font-size:.87rem;font-weight:600;overflow-wrap:anywhere}
+.svc .nm span{font-size:.75rem;color:var(--muted)}
+.svc .pr{font-family:var(--mono);font-weight:600;font-size:.85rem;white-space:nowrap;text-align:right;min-width:78px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:999px;overflow:hidden;background:var(--surface);flex:none}
+.qty button{width:34px;height:34px;border:0;background:none;cursor:pointer;color:var(--navy);display:grid;place-items:center;font-size:1.05rem;line-height:1}
+.qty button:hover{background:var(--soft2)}
+.qty button:disabled{opacity:.35;cursor:default;background:none}
+.qty input{width:48px;height:34px;border:0;text-align:center;font-weight:650;font-size:.88rem;background:transparent;-moz-appearance:textfield;appearance:textfield}
+.qty input::-webkit-inner-spin-button,.qty input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.svc.on .qty{border-color:var(--red)}
+.cart{position:sticky;top:78px}
+.cart .ln{display:flex;justify-content:space-between;gap:12px;font-size:.84rem;padding:8px 0;border-bottom:1px dashed var(--line)}
+.cart .ln span:first-child{min-width:0;overflow-wrap:anywhere}
+.cart .ln b{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.cart .emp{color:var(--muted);font-size:.84rem;padding:6px 0 14px}
+.cart .sum{margin:12px 0 14px;display:flex;flex-direction:column;gap:6px;font-size:.84rem}
+.cart .sum div{display:flex;justify-content:space-between;gap:10px}
+.cart .sum b{font-family:var(--mono)}
+.cart .sum .big{font-size:1.05rem;font-weight:700;padding-top:8px;border-top:1px solid var(--line)}
+.cart .sum .neg{color:#B4232F}
+.cart textarea{width:100%;min-height:74px;border:1px solid var(--line2);border-radius:12px;padding:10px 12px;resize:vertical;font-size:.86rem}
+.cartbar{display:none}
+@media (max-width:1100px){
+  .shop{grid-template-columns:minmax(0,1fr)}
+  .cart{position:static}
+  .cartbar{position:fixed;left:12px;right:12px;bottom:12px;z-index:50;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 18px;
+    background:var(--ink);color:#fff;border-radius:16px;box-shadow:var(--shadow-lg)}
+  .cartbar[hidden]{display:none!important}
+  .cartbar span{flex:1;font-size:.84rem}
+  .cartbar b{font-family:var(--mono)}
+}
+
+@media (max-width:520px){ #b_ann{display:none} }
+/* ---------- chat (looks like WhatsApp) ---------- */
+.chat{display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:460px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden}
+.chh{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.chh .av{width:42px;height:42px;border-radius:50%;background:var(--soft2);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex:none;
+  font-weight:700;font-size:.8rem;color:var(--navy)}
+.chh .av img{width:30px;height:30px;object-fit:contain}
+.chh .tt{min-width:0;flex:1}
+.chh .tt h2,.chh .tt b{display:block;margin:0;font-size:.95rem;font-weight:650;letter-spacing:-.01em;color:var(--ink)}
+.chh .tt span{font-size:.76rem;color:var(--muted)}
+.msgs{flex:1;overflow-y:auto;padding:14px 6% 18px;display:flex;flex-direction:column;background-color:#EFEAE2;
+  background-image:radial-gradient(rgba(84,101,111,.07) 1px,transparent 1.2px);background-size:16px 16px}
+.cday{align-self:center;margin:12px 0 8px;background:#FFFFFF;color:#54656F;font-size:.72rem;font-weight:500;padding:5px 12px;border-radius:8px;
+  box-shadow:0 1px .5px rgba(11,20,26,.13)}
+.cb{position:relative;max-width:min(560px,80%);padding:6px 9px 7px 10px;border-radius:8px;font-size:.88rem;line-height:1.42;color:#111B21;
+  box-shadow:0 1px .5px rgba(11,20,26,.13);margin-top:2px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cb.in{align-self:flex-start;background:#FFFFFF}
+.cb.out{align-self:flex-end;background:#D9FDD3}
+.cb.first{margin-top:8px}
+.cb.in.first{border-top-left-radius:0}
+.cb.out.first{border-top-right-radius:0}
+.cb.in.first::before{content:"";position:absolute;left:-8px;top:0;border-style:solid;border-width:0 8px 10px 0;border-color:transparent #FFFFFF transparent transparent}
+.cb.out.first::before{content:"";position:absolute;right:-8px;top:0;border-style:solid;border-width:0 0 10px 8px;border-color:transparent transparent transparent #D9FDD3}
+.cb .by{display:block;font-size:.72rem;font-weight:600;color:#1B6E83;margin-bottom:1px;white-space:normal}
+.cb .cm{float:right;display:inline-flex;align-items:center;gap:3px;margin:8px 0 -5px 14px;font-size:.66rem;color:#667781;white-space:nowrap;line-height:1}
+.cb.fail{cursor:pointer}
+.cb.fail .cm{color:#B4232F;font-weight:600}
+.wtick{width:17px;height:11px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wtick.sent,.wtick.dlv,.wtick.wait{stroke:#8696A0}
+.wtick.read{stroke:#53BDEB}
+.cnote{align-self:center;margin:auto 0;max-width:420px;text-align:center;background:#FFEECD;color:#54656F;font-size:.8rem;line-height:1.5;padding:10px 14px;border-radius:8px;
+  box-shadow:0 1px .5px rgba(11,20,26,.13)}
+.comp{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;background:#F0F2F5;border-top:1px solid var(--line)}
+.comp textarea{flex:1;min-width:0;resize:none;border:0;border-radius:22px;padding:11px 16px;font-size:.9rem;line-height:1.4;height:44px;max-height:140px;
+  background:#FFFFFF;outline:none;overflow-y:auto}
+.comp textarea:focus-visible{outline:2px solid var(--blue);outline-offset:0}
+.comp .send{width:44px;height:44px;border-radius:50%;border:0;background:#00A884;color:#FFFFFF;display:grid;place-items:center;cursor:pointer;flex:none}
+.comp .send:hover{background:#008F72}
+.comp .send:disabled{opacity:.45;cursor:default}
+.comp .send svg.i{width:19px;height:19px;margin-left:-2px}
+@media (max-width:760px){
+  .chat{height:calc(100vh - 118px);border-radius:14px}
+  .msgs{padding:12px 10px 16px}
+  .cb{max-width:86%}
+}
 </style>
 </head>
 <body>
@@ -516,6 +606,8 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
   <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20.5l1.5-5.2A8.5 8.5 0 1 1 21 11.5z"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></symbol>
   <symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
@@ -603,6 +695,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
           <a href="#/shipments" data-p="shipments">Gönderiler<span class="badge soft" id="nb_shipments" hidden></span></a>
           <a href="#/goodsin" data-p="goodsin">Gelen Kargo<span class="badge soft" id="nb_goodsin" hidden></span></a>
           <a href="#/services" data-p="services">Hizmet Talepleri<span class="badge" id="nb_services" hidden></span></a>
+          <a href="#/buy" data-p="buy">Hizmet Satın Al<span class="badge soft" id="nb_buy" hidden></span></a>
         </div>
       </div>
       <div class="grp" data-g="acc">
@@ -622,6 +715,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
           <a href="#/address" data-p="address">Depo Adresim</a>
         </div>
       </div>
+      <a class="top" href="#/chat" data-p="chat"><svg class="i"><use href="#i-chat"/></svg>Mesajlar<span class="badge" id="nb_chat" hidden></span></a>
       <a class="top" href="#/support" data-p="support"><svg class="i"><use href="#i-life"/></svg>Destek Talepleri<span class="badge" id="nb_support" hidden></span></a>
     </nav>
     <div class="me">
@@ -639,6 +733,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <div class="tools">
         <button class="balchip" id="b_bal" type="button"><span>bakiye</span><b id="t_bal">£0.00</b></button>
         <button class="ib" id="b_ann" type="button" title="Duyurular" aria-label="Duyurular"><svg class="i"><use href="#i-mega"/></svg><span class="dot" id="t_ann" hidden></span></button>
+        <button class="ib" id="b_chat" type="button" title="Mesajlar" aria-label="Mesajlar"><svg class="i"><use href="#i-chat"/></svg><span class="dot" id="t_chat" hidden></span></button>
         <button class="ib" id="b_bell" type="button" title="Bildirimler" aria-label="Bildirimler"><svg class="i"><use href="#i-bell"/></svg><span class="dot" id="t_bell" hidden></span></button>
         <button class="ib" id="b_user" type="button" title="Hesabım" aria-label="Hesabım" style="padding:0;overflow:hidden"><span class="avatar" id="t_avatar" style="border:0;width:36px;height:36px">·</span></button>
       </div>
@@ -927,6 +1022,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <section class="page" id="pg-prices" hidden>
         <div class="ph">
           <div><div class="eyebrow">araçlar</div><h2>Fiyat Listesi</h2><p>Hizmetlerimizin güncel fiyatları. Kargo ücretleri gönderi sırasında ayrıca bildirilir.</p></div>
+          <div class="acts"><a class="btn primary" href="#/buy"><svg class="i"><use href="#i-bag"/></svg>Hizmet satın al</a></div>
         </div>
         <div class="filters" data-f="prices">
           <div class="fld"><label>kategori</label><select id="xf_cat"><option value="">Tümü</option></select></div>
@@ -971,6 +1067,52 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
           <div class="fbtn"><button class="btn sm" type="button" data-clear="support">Temizle</button></div>
         </div>
         <div id="t_tickets"></div>
+      </section>
+
+      <!-- ===== buy services ===== -->
+      <section class="page" id="pg-buy" hidden>
+        <div class="ph">
+          <div><div class="eyebrow">operasyonlar</div><h2>Hizmet Satın Al</h2>
+            <p>İhtiyacınız olan hizmetleri seçin ve bakiyenizden ödeyin. Siparişiniz ekibimize anında düşer; tamamlandığında size bildirim gelir.</p></div>
+          <div class="acts"><a class="btn" href="#/prices"><svg class="i"><use href="#i-tag"/></svg>Fiyat listesi</a></div>
+        </div>
+        <div class="shop">
+          <div id="shop_list"><div class="muted"><span class="spin"></span>Yükleniyor…</div></div>
+          <aside class="card cart" id="cart">
+            <div class="chead"><div><h3>Sipariş özeti</h3><p class="csub">Tutar bakiyenizden hemen düşülür.</p></div></div>
+            <div id="cart_lines"></div>
+            <div class="sum">
+              <div class="big"><span>Toplam</span><b id="cart_total">£0.00</b></div>
+              <div><span>Bakiyeniz</span><b id="cart_bal">£0.00</b></div>
+              <div><span>Sipariş sonrası bakiye</span><b id="cart_after">£0.00</b></div>
+            </div>
+            <div class="fld" style="margin-bottom:12px"><label for="cart_note">not (isteğe bağlı)</label>
+              <textarea id="cart_note" maxlength="1000" placeholder="Örn. ASIN, koli sayısı veya özel bir isteğiniz"></textarea></div>
+            <div class="note warn" id="cart_low" hidden style="margin-bottom:12px">Bakiyeniz bu sipariş için yetersiz. <a href="#/balance">Bakiye yükleyin</a>, ardından siparişinizi tamamlayın.</div>
+            <button class="btn primary block" id="cart_pay" type="button" disabled><svg class="i"><use href="#i-bag"/></svg><span id="cart_paytext">Bakiyeden öde</span></button>
+          </aside>
+        </div>
+        <div class="gap"></div>
+        <div class="chead" style="margin:6px 2px 12px"><div><h3 style="margin:0;font-size:1rem;font-weight:650">Hizmet siparişlerim</h3>
+          <p class="csub" style="margin:3px 0 0;color:var(--muted);font-size:.8rem">Bekleyen bir siparişi iptal ederseniz tutarın tamamı bakiyenize iade edilir.</p></div></div>
+        <div id="t_sorders"></div>
+        <div class="cartbar" id="cartbar" hidden><span>Toplam <b id="cartbar_total">£0.00</b></span><button class="btn primary sm" id="cartbar_go" type="button">Siparişi tamamla</button></div>
+      </section>
+
+      <!-- ===== chat ===== -->
+      <section class="page" id="pg-chat" hidden>
+        <div class="chat" id="chatbox">
+          <div class="chh">
+            <div class="av"><img src="favicon.png" alt=""></div>
+            <div class="tt"><h2>ecomFLEX Destek</h2><span>Ekibimizle doğrudan yazışın. Mesajınız okunduğunda iki mavi tik görünür.</span></div>
+          </div>
+          <div class="msgs" id="c_msgs" aria-live="polite"></div>
+          <div class="comp">
+            <label class="sr" for="c_text">Mesajınız</label>
+            <textarea id="c_text" rows="1" maxlength="4000" placeholder="Bir mesaj yazın"></textarea>
+            <button class="send" id="c_send" type="button" aria-label="Gönder" disabled><svg class="i"><use href="#i-send"/></svg></button>
+          </div>
+        </div>
       </section>
     </main>
     <footer class="foot"><span>© <span id="yr">2026</span> ecomFLEX Ltd · Company No. 15810627</span>
@@ -1599,7 +1741,7 @@ function startApp(){
   sb.rpc('link_my_account').then(noop,noop);
   refreshAccount(); refreshDash(); loadAnns().catch(noop);
   if(lsGet('ecomflex:seen:'+ME.id,null)===null) lsSet('ecomflex:seen:'+ME.id,String(Date.now()-7*86400000));
-  loadBell();
+  loadBell(); startPulse();
   if(!location.hash||location.hash==='#'||location.hash==='#/') history.replaceState(null,'','#/dashboard');
   router();
 }
@@ -1661,6 +1803,11 @@ function events(){
     if(t.status==='answered') push(t.updated_at,'Destek talebinize yanıt geldi','#'+t.no+' · '+t.subject,'support',function(){ ticketDrawer(t); });
   });
   (S.invoices||[]).forEach(function(v){ push(v.created_at,'Yeni fatura',v.title,'invoices'); });
+  (S.sorders||[]).forEach(function(o){
+    if(o.source==='staff'&&o.status==='done') push(o.created_at,'Hesabınıza hizmet bedeli işlendi','#'+o.no+' · '+money(o.total_pence)+(o.note?' · '+o.note:''),'balance');
+    else if(o.status==='done') push(o.resolved_at,'Hizmet siparişiniz tamamlandı','#'+o.no+(o.staff_note?' · '+o.staff_note:''),'buy',function(){ soDrawer(o); });
+    else if(o.status==='cancelled'&&o.resolved_by&&o.resolved_by!==o.user_email) push(o.resolved_at,'Hizmet siparişiniz iptal edildi','#'+o.no+' · '+money(o.total_pence)+' bakiyenize iade edildi'+(o.staff_note?' · '+o.staff_note:''),'buy',function(){ soDrawer(o); });
+  });
   ev.sort(function(a,b){ return b.t-a.t; });
   return ev.slice(0,40);
 }
@@ -1670,7 +1817,7 @@ function drawBellDot(){
 }
 function loadBell(){
   return Promise.all([loadOrders().catch(noop),loadInbounds().catch(noop),loadReqs().catch(noop),
-    loadDecls().catch(noop),loadTickets().catch(noop),loadInvoices().catch(noop)]).then(drawBellDot);
+    loadDecls().catch(noop),loadTickets().catch(noop),loadInvoices().catch(noop),loadSOrders().catch(noop)]).then(drawBellDot);
 }
 $('b_bell').onclick=function(e){
   e.stopPropagation();
@@ -3174,6 +3321,266 @@ function newTicketModal(){
   setTimeout(function(){ subj.focus(); },80);
 }
 $('tk_new').onclick=newTicketModal;
+
+/* =====================================================================
+   SERVICES PAID FROM THE BALANCE
+   The price of every line is taken from the database when the order is
+   placed; this page only sends which lines and how many.
+   ===================================================================== */
+var SO_ST={pending:['ekibimizde','amber'],done:['tamamlandı','blue'],cancelled:['iptal edildi','grey']};
+var CART={};
+var loadSOrders=simple('sorders',function(){ return sb.from('service_orders').select('*,service_order_lines(*)').eq('user_id',ME.id).order('created_at',{ascending:false}); });
+function soLines(o){ return (o.service_order_lines||[]).slice().sort(function(a,b){ return (a.sort||0)-(b.sort||0); }); }
+function soSummary(o){
+  var ls=soLines(o);
+  if(!ls.length) return 'Hizmet siparişi';
+  return ls.slice(0,2).map(function(l){ return l.name+' × '+l.qty; }).join(', ')+(ls.length>2?' +'+(ls.length-2)+' kalem':'');
+}
+function soPill(o){
+  if(o.status==='cancelled') return pill(o.source==='staff'?'iptal edildi, iade':'iptal edildi','grey');
+  if(o.source==='staff') return pill('hizmet bedeli','navy');
+  var x=SO_ST[o.status]||[o.status,'grey']; return pill(x[0],x[1]);
+}
+function shopItems(){ return (S.prices||[]).filter(function(p){ return p.active!==false && p.orderable===true && Number(p.price_pence)>0; }); }
+
+page('buy','Hizmet Satın Al',function(){
+  if(!T.sorders) T.sorders=new Table($('t_sorders'),{
+    cols:[
+      {l:'no',k:'no',sort:function(r){ return Number(r.no); },first:'desc',v:function(r){ return h('span',{class:'mono',style:'font-size:.8rem;color:var(--muted)',text:'#'+r.no}); }},
+      {l:'tarih',k:'date',sort:function(r){ return r.created_at; },first:'desc',v:function(r){ return h('span',{class:'nowrap',text:dt(r.created_at)}); }},
+      {l:'hizmetler',v:function(r){ return two(soSummary(r),r.note||(r.source==='staff'?'Ekibimiz tarafından işlendi':null)); }},
+      {l:'tutar',k:'amt',cls:'num',sort:function(r){ return Number(r.total_pence); },v:function(r){ return money(r.total_pence); }},
+      {l:'durum',k:'st',sort:function(r){ return r.status; },v:soPill},
+      {l:'',cls:'r',v:function(r){ return actBtn([{t:'Detaylar',i:'eye',on:function(){ soDrawer(r); }},
+        (r.status==='pending'&&r.source==='customer')?{t:'Siparişi iptal et',i:'x',danger:true,on:function(){ cancelSO(r); }}:null]); }}],
+    text:function(r){ return ['#'+r.no,soSummary(r),r.note,r.staff_note].join(' '); },
+    sort:'date',dir:'desc',click:function(r){ soDrawer(r); },
+    empty:'Henüz hizmet siparişiniz yok. Yukarıdan hizmet seçerek başlayabilirsiniz.',ph:'Siparişlerde ara…'});
+  T.sorders.busy();
+  refreshAccount().then(drawCart);
+  loadPrices(true).then(drawShop,function(){ $('shop_list').innerHTML=''; $('shop_list').appendChild(h('div',{class:'note bad',text:'Hizmetler yüklenemedi. Lütfen sayfayı yenileyin.'})); });
+  loadSOrders(true).then(function(r){ T.sorders.set(r); drawBellDot(); },function(){ T.sorders.set([]); });
+});
+
+function drawShop(){
+  var box=$('shop_list'); box.innerHTML='';
+  var items=shopItems(), cats=[], by={};
+  items.forEach(function(p){ var c=p.category||'Diğer'; if(!by[c]){ by[c]=[]; cats.push(c); } by[c].push(p); });
+  /* drop anything in the basket that is no longer on offer */
+  Object.keys(CART).forEach(function(id){ if(!items.some(function(p){ return p.id===id; })) delete CART[id]; });
+  if(!items.length){
+    box.appendChild(h('div',{class:'card'},[h('div',{class:'muted',text:'Şu anda çevrim içi sipariş edilebilen bir hizmet yok. Sorularınız için Mesajlar sayfasından bize yazabilirsiniz.'})]));
+  }
+  cats.forEach(function(c){
+    var card=h('div',{class:'scat'},[h('h3',null,[ic('tag','width:16px;height:16px;color:var(--red)'),c,h('span',{class:'n',text:by[c].length+' hizmet'})])]);
+    by[c].forEach(function(p){ card.appendChild(svcRow(p)); });
+    box.appendChild(card);
+  });
+  drawCart();
+}
+function svcRow(p){
+  var q=Number(CART[p.id])||0;
+  var input=h('input',{type:'number',min:'0',max:'10000',step:'1',inputmode:'numeric',value:String(q),'aria-label':p.name+' adet'});
+  var minus=h('button',{type:'button','aria-label':'Azalt',disabled:q<=0,text:'−'});
+  var plus=h('button',{type:'button','aria-label':'Artır',text:'+'});
+  var row=h('div',{class:'svc'+(q>0?' on':'')},[
+    h('div',{class:'nm'},[h('b',{text:p.name}),h('span',{text:p.unit?'birim: '+p.unit:''})]),
+    h('div',{class:'pr',text:money(p.price_pence)}),
+    h('div',{class:'qty'},[minus,input,plus])]);
+  function setQ(v){
+    v=Math.max(0,Math.min(10000,Math.floor(Number(v)||0)));
+    if(v>0) CART[p.id]=v; else delete CART[p.id];
+    input.value=String(v); minus.disabled=v<=0; row.classList.toggle('on',v>0);
+    drawCart();
+  }
+  minus.onclick=function(){ setQ((Number(CART[p.id])||0)-1); };
+  plus.onclick=function(){ setQ((Number(CART[p.id])||0)+1); };
+  input.oninput=function(){ setQ(input.value); };
+  input.onfocus=function(){ input.select(); };
+  return row;
+}
+function cartLines(){
+  var out=[];
+  shopItems().forEach(function(p){ var q=Number(CART[p.id])||0; if(q>0) out.push({p:p,q:q,t:q*Number(p.price_pence)}); });
+  return out;
+}
+function drawCart(){
+  if(!$('cart_lines')) return;
+  var ls=cartLines(), tot=0, box=$('cart_lines'); box.innerHTML='';
+  ls.forEach(function(l){ tot+=l.t; box.appendChild(h('div',{class:'ln'},[h('span',{text:l.p.name+' × '+l.q}),h('b',{text:money(l.t)})])); });
+  if(!ls.length) box.appendChild(h('div',{class:'emp',text:'Henüz hizmet seçmediniz. Adet girerek sepete ekleyin.'}));
+  var bal=Number((S.acc||{}).balance)||0, after=bal-tot;
+  $('cart_total').textContent=money(tot); $('cart_bal').textContent=money(bal);
+  $('cart_after').textContent=money(after); $('cart_after').classList.toggle('neg',after<0);
+  var low=ls.length>0&&after<0;
+  $('cart_low').hidden=!low;
+  $('cart_pay').disabled=!ls.length||low;
+  $('cart_paytext').textContent=ls.length?'Bakiyeden öde · '+money(tot):'Bakiyeden öde';
+  $('cartbar').hidden=!ls.length||CUR!=='buy';
+  $('cartbar_total').textContent=money(tot);
+  badge('nb_buy',ls.length);
+}
+$('cartbar_go').onclick=function(){ $('cart').scrollIntoView({behavior:'smooth',block:'start'}); };
+$('cart_pay').onclick=function(){
+  var ls=cartLines(); if(!ls.length) return;
+  var tot=0; ls.forEach(function(l){ tot+=l.t; });
+  var bal=Number((S.acc||{}).balance)||0;
+  var list=h('div',{class:'kvl',style:'grid-template-columns:1fr auto'});
+  ls.forEach(function(l){ list.appendChild(h('div',{text:l.p.name+' × '+l.q})); list.appendChild(h('div',{class:'mono',style:'text-align:right',text:money(l.t)})); });
+  list.appendChild(h('div',{class:'k',style:'font-weight:700;color:var(--ink)',text:'Toplam'})); list.appendChild(h('div',{class:'mono',style:'text-align:right;font-weight:700',text:money(tot)}));
+  var note=val('cart_note');
+  modal({title:'Siparişi onaylayın',sub:money(tot)+' bakiyenizden düşülecek. Sipariş sonrası bakiye: '+money(bal-tot),narrow:true,
+    body:h('div',null,[list, note?h('div',{class:'note info',style:'margin-top:12px',text:'Notunuz: '+note}):null,
+      h('p',{class:'muted',style:'font-size:.8rem;margin:12px 0 0',text:'Ekibimiz siparişinizi işleme alır. Başlamadan önce iptal ederseniz tutar bakiyenize iade edilir.'})]),
+    actions:[{t:'Vazgeç',close:true},{t:'Onayla ve öde',primary:true,i:'check',on:function(L,b){
+      b.disabled=true; L.busy('Ödeme alınıyor…');
+      /* the price the customer saw goes along; the database refuses the order if it has changed since */
+      sb.rpc('buy_services',{p_items:ls.map(function(l){ return {id:l.p.id,qty:l.q,price:Number(l.p.price_pence)}; }),p_note:note||null}).then(function(r){
+        b.disabled=false;
+        if(r.error){
+          var m=dbErr(r.error);
+          if(/PRICE_CHANGED|ITEM_UNAVAILABLE/.test(m)) loadPrices(true).then(drawShop,noop);
+          L.msg(/PRICE_CHANGED/.test(m)?'Bazı fiyatlar az önce güncellendi. Sayfadaki yeni fiyatları kontrol edip tekrar onaylayın.'
+            :/INSUFFICIENT_FUNDS/.test(m)?'Bakiyeniz bu sipariş için yetersiz. Lütfen önce bakiye yükleyin.'
+            :/ITEM_UNAVAILABLE/.test(m)?'Seçtiğiniz hizmetlerden biri artık sunulmuyor. Sayfayı yenileyip tekrar deneyin.'
+            :/QTY_INVALID/.test(m)?'Adetler 1 ile 10.000 arasında olmalı.'
+            :'Sipariş verilemedi. Lütfen tekrar deneyin.','bad');
+          return;
+        }
+        var d=r.data||{};
+        L.close(); CART={}; $('cart_note').value='';
+        toast('Siparişiniz alındı (#'+d.no+'). '+money(d.total)+' bakiyenizden düşüldü.','good');
+        refreshAccount().then(function(){ drawShop(); }); refreshDash();
+        loadSOrders(true).then(function(x){ if(T.sorders) T.sorders.set(x); drawBellDot(); },noop);
+      });
+    }}]});
+};
+function soDrawer(o){
+  var ls=soLines(o);
+  var tbl=h('table',{class:'dt'},[h('thead',null,[h('tr',null,[h('th',{text:'hizmet'}),h('th',{class:'num',text:'adet'}),h('th',{class:'num',text:'birim'}),h('th',{class:'num',text:'tutar'})])]),
+    h('tbody',null,ls.map(function(l){ return h('tr',null,[h('td',null,[two(l.name,l.unit)]),h('td',{class:'num',text:String(l.qty)}),
+      h('td',{class:'num',text:money(l.unit_pence)}),h('td',{class:'num',text:money(l.line_pence)})]); }))]);
+  var pairs=[['Sipariş no','#'+o.no],['Durum',soPill(o)],['Tarih',o.source==='staff'?ymd2tr(o.service_date):dt(o.created_at)],['Tutar',money(o.total_pence)]];
+  if(o.note) pairs.push([o.source==='staff'?'Açıklama':'Notunuz',o.note]);
+  if(o.staff_note) pairs.push(['Ekibimizin notu',o.staff_note]);
+  if(o.resolved_at&&o.status!=='pending') pairs.push([o.status==='cancelled'?'İptal':'Tamamlandı',dt(o.resolved_at)]);
+  drawer({title:'Hizmet siparişi #'+o.no,sub:soSummary(o),
+    body:h('div',null,[kvl(pairs),dsec('hizmetler',h('div',{class:'tcard'},[h('div',{class:'tscroll'},[tbl])])),
+      o.status==='cancelled'?h('div',{class:'note good',style:'margin-top:14px',text:money(o.total_pence)+' bakiyenize iade edildi.'}):null]),
+    actions:(o.status==='pending'&&o.source==='customer')?[{t:'Siparişi iptal et',danger:true,i:'x',on:function(){ cancelSO(o); }}]:[]});
+}
+function cancelSO(o){
+  if(!confirm('#'+o.no+' numaralı sipariş iptal edilsin mi?\n\n'+money(o.total_pence)+' bakiyenize iade edilir.')) return;
+  sb.rpc('cancel_service_order',{p_id:o.id}).then(function(r){
+    if(r.error){ toast(/ONLY_WAITING/.test(dbErr(r.error))?'Bu sipariş işleme alındığı için artık iptal edilemiyor.':'İptal edilemedi. Lütfen tekrar deneyin.','bad'); return; }
+    closeAll(); toast('Sipariş iptal edildi. '+money(o.total_pence)+' bakiyenize iade edildi.','good');
+    refreshAccount().then(drawCart); refreshDash();
+    loadSOrders(true).then(function(x){ if(T.sorders) T.sorders.set(x); drawBellDot(); },noop);
+  });
+}
+
+/* =====================================================================
+   MESSAGES: one conversation with the Ecomflex team, ticks like WhatsApp
+   one grey tick = sent, two grey = reached Ecomflex, two blue = read
+   ===================================================================== */
+var CHAT={rows:[],sig:'',tmp:[],timer:null,n:0};
+var TR_MONTHS=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function tickSvg(state){
+  var s=document.createElementNS(NS,'svg'); s.setAttribute('viewBox','0 0 18 11'); s.setAttribute('class','wtick '+state);
+  function p(d){ var e=document.createElementNS(NS,'path'); e.setAttribute('d',d); s.appendChild(e); }
+  if(state==='wait'){ var c=document.createElementNS(NS,'circle'); c.setAttribute('cx','9'); c.setAttribute('cy','5.5'); c.setAttribute('r','4.3'); s.appendChild(c); p('M9 3.2v2.5l1.7 1.1'); }
+  else { p('M1.6 5.9 5 9.3 12.3 1.8'); if(state!=='sent') p('M7.4 7.7 9 9.3 16.3 1.8'); }
+  return s;
+}
+function dayLabel(d){
+  var t=new Date(); t.setHours(0,0,0,0);
+  var x=new Date(d.getTime()); x.setHours(0,0,0,0);
+  var diff=Math.round((t-x)/86400000);
+  if(diff===0) return 'Bugün';
+  if(diff===1) return 'Dün';
+  return d.getDate()+' '+TR_MONTHS[d.getMonth()]+(d.getFullYear()!==t.getFullYear()?' '+d.getFullYear():'');
+}
+function chatSig(rows){ return rows.map(function(r){ return r.id+(r.delivered_at?'d':'')+(r.read_at?'r':''); }).join('|'); }
+function drawChat(){
+  var box=$('c_msgs'); if(!box) return;
+  var near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
+  box.innerHTML='';
+  var all=CHAT.rows.concat(CHAT.tmp);
+  if(!all.length){
+    box.appendChild(h('div',{class:'cnote',text:'Henüz mesaj yok. Sorularınızı buraya yazın; ekibimiz buradan yanıtlar. Gönderi, stok veya ödeme ile ilgili her konuda yazabilirsiniz.'}));
+    return;
+  }
+  var lastDay='', lastSide='';
+  all.forEach(function(m){
+    var d=new Date(m.created_at), dl=dayLabel(d);
+    if(dl!==lastDay){ box.appendChild(h('div',{class:'cday',text:dl})); lastDay=dl; lastSide=''; }
+    var mine=!m.from_staff, side=mine?'out':'in';
+    var meta=h('span',{class:'cm'},[pad(d.getHours())+':'+pad(d.getMinutes())]);
+    if(mine) meta.appendChild(tickSvg(m._fail?'wait':m._pending?'wait':m.read_at?'read':m.delivered_at?'dlv':'sent'));
+    var b=h('div',{class:'cb '+side+(side!==lastSide?' first':'')+(m._fail?' fail':'')},[m.body,meta]);
+    if(m._fail){ meta.insertBefore(document.createTextNode('Gönderilemedi · tekrar dene '),meta.firstChild); b.title='Tekrar göndermek için dokunun'; b.onclick=function(){ retryChat(m); }; }
+    box.appendChild(b); lastSide=side;
+  });
+  if(near||CHAT.jump){ box.scrollTop=box.scrollHeight; CHAT.jump=false; }
+}
+function chatLoad(){
+  return sb.from('chat_messages').select('*').eq('user_id',ME.id).order('created_at',{ascending:false}).limit(300).then(function(r){
+    if(r.error) return;
+    var rows=(r.data||[]).slice().reverse(), sig=chatSig(rows);
+    if(sig!==CHAT.sig){ CHAT.rows=rows; CHAT.sig=sig; drawChat(); }
+    var unread=rows.some(function(m){ return m.from_staff&&!m.read_at; });
+    if(unread&&CUR==='chat'&&document.visibilityState==='visible'){
+      sb.rpc('chat_mark_read').then(function(){ badge('nb_chat',0); badge('t_chat',0); },noop);
+    }
+  },noop);
+}
+page('chat','Mesajlar',function(){
+  CHAT.jump=true; drawChat(); chatLoad();
+  if(CHAT.timer) clearInterval(CHAT.timer);
+  CHAT.timer=setInterval(function(){
+    if(CUR!=='chat'){ clearInterval(CHAT.timer); CHAT.timer=null; return; }
+    if(document.visibilityState==='visible') chatLoad();
+  },4000);
+  setTimeout(function(){ try{ $('c_text').focus(); }catch(e){} },80);
+});
+function sizeBox(){ var t=$('c_text'); t.style.height='44px'; t.style.height=Math.min(140,Math.max(44,t.scrollHeight))+'px'; }
+$('c_text').addEventListener('input',function(){ sizeBox(); $('c_send').disabled=!$('c_text').value.trim(); });
+$('c_text').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); sendChat(); } });
+$('c_send').onclick=sendChat;
+function sendChat(){
+  var t=$('c_text'), v=t.value.trim(); if(!v) return;
+  t.value=''; sizeBox(); $('c_send').disabled=true;
+  var m={id:'tmp'+(++CHAT.n),from_staff:false,body:v,created_at:new Date().toISOString(),_pending:true};
+  CHAT.tmp.push(m); CHAT.jump=true; drawChat();
+  pushChat(m);
+}
+function pushChat(m){
+  sb.rpc('send_chat',{p_body:m.body}).then(function(r){
+    if(r.error){
+      m._pending=false; m._fail=true; drawChat();
+      if(/SLOW_DOWN/.test(dbErr(r.error))) toast('Çok hızlı mesaj gönderiyorsunuz. Lütfen biraz bekleyin.','bad');
+      return;
+    }
+    CHAT.tmp=CHAT.tmp.filter(function(x){ return x!==m; });
+    if(r.data){ CHAT.rows.push(r.data); CHAT.sig=''; }
+    CHAT.jump=true; drawChat(); chatLoad();
+  });
+}
+function retryChat(m){ m._fail=false; m._pending=true; drawChat(); pushChat(m); }
+$('b_chat').onclick=function(){ go('chat'); };
+
+/* every half minute: tell the server this panel is open (two grey ticks for Ecomflex's messages)
+   and update the unread count */
+function pulseOnce(){
+  sb.rpc('chat_mark_delivered').then(noop,noop);
+  if(CUR==='chat') return;
+  sb.from('chat_messages').select('id',{count:'exact',head:true}).eq('user_id',ME.id).eq('from_staff',true).is('read_at',null).then(function(r){
+    if(r.error) return;
+    var n=Number(r.count)||0; badge('nb_chat',n); badge('t_chat',n);
+  },noop);
+}
+function startPulse(){ pulseOnce(); setInterval(function(){ if(document.visibilityState==='visible') pulseOnce(); },25000); }
+window.addEventListener('hashchange',function(){ if($('cartbar')) $('cartbar').hidden=(CUR!=='buy')||!cartLines().length; });
 
 /* =====================================================================
    GO
