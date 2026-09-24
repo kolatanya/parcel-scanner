@@ -649,6 +649,92 @@ input[type=month].inl{width:180px}
 @media (max-width:1439px){ .tiles{grid-template-columns:repeat(4,minmax(0,1fr))} }
 @media (max-width:1100px){ .tiles{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:640px){ .tiles{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+
+/* =================== v7: business overview =================== */
+#bizwrap.loading{opacity:.55;transition:opacity .15s}
+.bkpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.bk{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 14px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.bk.hero{grid-column:span 2}
+.bk .l{font-size:.78rem;color:var(--muted);font-weight:500}
+.bk .v{font-size:1.55rem;font-weight:650;letter-spacing:-.02em;line-height:1.15;overflow-wrap:anywhere}
+.bk.hero .v{font-size:3rem;letter-spacing:-.035em;line-height:1.05;margin-top:2px}
+.bk .d{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.76rem}
+.bk .vs{color:var(--muted)}
+.bk .spark{margin-top:6px;display:block}
+.bk.hero .spark{width:100%;max-width:420px;height:52px}
+.bk .sub{font-size:.72rem;color:var(--faint);margin-top:auto;padding-top:6px}
+.chg{font-weight:650;font-size:.74rem;white-space:nowrap}
+.chg.up{color:var(--green)}
+.chg.down{color:var(--redtext)}
+.chg.flat{color:var(--muted);font-weight:500}
+.bgrid.two{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.bcard{margin-bottom:16px}
+.bgrid .bcard{margin-bottom:0}
+.bcard .bh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.bcard .lead{margin:2px 0 0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--navy);padding-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.chart{position:relative;min-height:110px}
+.chart svg{display:block;overflow:visible}
+.chart .tick{font-size:10.5px;fill:var(--muted);font-family:var(--font);font-variant-numeric:tabular-nums}
+.chart .tick.on{fill:var(--ink);font-weight:600}
+.chart .hit{outline:none}
+.chart .hit:focus-visible{stroke:var(--blue);stroke-width:1.5}
+.ctip{position:absolute;top:0;z-index:5;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-md);
+  padding:9px 11px;font-size:.78rem;min-width:170px}
+.ctip .th{font-weight:650;margin-bottom:4px;color:var(--ink)}
+.ctip .tr{display:flex;align-items:center;gap:8px;padding:2px 0}
+.ctip .key{width:12px;height:3px;border-radius:2px;flex:none}
+.ctip .key.blank{background:transparent}
+.ctip b{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:650}
+.ctip .nm{color:var(--muted)}
+.ctip .tot{border-top:1px solid var(--line);margin-top:4px;padding-top:5px}
+.split3{display:flex;gap:2px;height:14px;border-radius:4px;overflow:hidden;background:var(--soft2);margin:4px 0 12px}
+.split3 span{display:block;height:100%}
+.split3 .none{font-size:.72rem;color:var(--muted);padding:0 8px;line-height:14px;background:none}
+.splitleg .row{display:grid;grid-template-columns:12px minmax(0,1fr) auto 40px 64px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.85rem}
+.splitleg .row:last-child{border-bottom:0}
+.splitleg .sw{width:12px;height:12px;border-radius:3px}
+.splitleg b{font-variant-numeric:tabular-nums;font-weight:650}
+.splitleg .pc{color:var(--muted);text-align:right;font-size:.8rem}
+.splitleg .chg{text-align:right}
+.bcard .hint{margin:8px 0 0}
+.bcard .hint:empty{display:none}
+.posgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pos{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--soft);min-width:0}
+.pos .l{font-size:.74rem;color:var(--muted)}
+.pos .v{font-size:1.2rem;font-weight:650;margin-top:3px;overflow-wrap:anywhere}
+.pos .s{font-size:.72rem;color:var(--faint);margin-top:2px}
+.multi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.mini-ch{min-width:0}
+.mini-ch .mh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.mini-ch .mh span{font-size:.78rem;color:var(--muted)}
+.mini-ch .mh b{font-size:1.1rem;font-weight:650}
+.tblwrap.flat{border:0;border-radius:0;margin:0 -22px -20px;border-top:1px solid var(--line)}
+.empty.flat{border:0;padding:22px}
+.meter{display:inline-block;width:88px;height:6px;border-radius:3px;background:#E9EAF1;vertical-align:middle;margin-right:8px;overflow:hidden}
+.meter span{display:block;height:100%;background:#48486C;border-radius:3px}
+.tbl .pc{font-size:.76rem;color:var(--muted)}
+.tbl .idx{color:var(--faint);width:1%}
+.tbl.bmonths tr.sel td{background:#F6F9FB}
+.tbl.bmonths td,.tbl.bmonths th{white-space:nowrap;padding:9px 10px}
+.tbl.bmonths td{font-size:.8rem}
+@media (max-width:1279px){
+  .bkpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bk.hero{grid-column:1/-1}
+  .bgrid.two{grid-template-columns:minmax(0,1fr)}
+  .multi{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .bk.hero .v{font-size:2.25rem}
+  .bk .v{font-size:1.25rem}
+  .multi{grid-template-columns:minmax(0,1fr)}
+  .posgrid{grid-template-columns:minmax(0,1fr)}
+  .splitleg .row{grid-template-columns:12px minmax(0,1fr) auto 40px}
+  .splitleg .chg{display:none}
+  .tblwrap.flat{margin:0 -16px -18px}
+}
 </style>
 </head>
 <body>
@@ -693,6 +779,7 @@ input[type=month].inl{width:180px}
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></symbol>
   <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol>
   <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
 </svg>
 
@@ -707,7 +794,7 @@ input[type=month].inl{width:180px}
     <button class="btn brand block" id="b_in" type="button">Sign in</button>
     <div class="msg" id="m_login"></div>
   </div>
-  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v6</span></p>
+  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v7</span></p>
 </main>
 
 <main class="auth" id="v_error" hidden>
@@ -738,6 +825,7 @@ input[type=month].inl{width:180px}
       <div class="gl">customer panel</div>
       <a href="#content" data-s="content"><svg class="i"><use href="#i-mega"/></svg>Content</a>
       <div class="gl">insights</div>
+      <a href="#business" data-s="business"><svg class="i"><use href="#i-trend"/></svg>Business overview</a>
       <a href="#reports" data-s="report"><svg class="i"><use href="#i-chart"/></svg>Reports</a>
       <div class="gl">settings</div>
       <a href="#staff" data-s="staff"><svg class="i"><use href="#i-shield"/></svg>Staff</a>
@@ -748,7 +836,7 @@ input[type=month].inl{width:180px}
     </nav>
     <div class="me">
       <div class="avatar" id="me_av">EF</div>
-      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v6</span></div></div>
+      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v7</span></div></div>
       <button class="ib" id="b_out" type="button" title="Sign out" aria-label="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
     </div>
   </aside>
@@ -1004,6 +1092,53 @@ input[type=month].inl{width:180px}
             <button class="rowbtn save" id="b_dcup" type="button">Upload document</button>
           </div>
           <div class="itemlist" id="doclist"></div>
+        </div>
+      </section>
+
+      <!-- business overview -->
+      <section id="sec_business" aria-label="Business overview" hidden>
+        <div class="toolbar">
+          <div class="tl"><div class="tabs" id="biztabs">
+            <button data-p="month" class="on" type="button">This month</button>
+            <button data-p="last" type="button">Last month</button>
+            <button data-p="quarter" type="button">This quarter</button>
+            <button data-p="year" type="button">This year</button>
+            <button data-p="12m" type="button">Last 12 months</button>
+          </div><span class="tbnote" id="biz_range"></span></div>
+          <div class="tr">
+            <button class="btn" id="biz_xls" type="button"><svg class="i"><use href="#i-download"/></svg>Download Excel</button>
+            <button class="btn" id="biz_reload" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button>
+          </div>
+        </div>
+        <div class="msg" id="m_biz"></div>
+        <div id="bizwrap">
+          <div class="bkpis" id="biz_kpis"></div>
+          <div class="bgrid two">
+            <div class="card bcard"><div class="bh"><div><h2>Revenue by month</h2><p class="lead">The last 12 months. Shaded months are the period you chose.</p></div><div class="legend" aria-label="Legend"><span><i style="background:#1F94B8"></i>Services</span><span><i style="background:#EB6834"></i>Shipping</span><span><i style="background:#5B4BC4"></i>Other charges</span></div></div>
+              <div class="chart" id="ch_rev"></div></div>
+            <div class="card bcard"><div class="bh"><div><h2>Where the revenue came from</h2><p class="lead">In the period you chose, with the change against the comparison period.</p></div></div>
+              <div class="split3" id="biz_split"></div><div class="splitleg" id="biz_splitleg"></div>
+              <p class="hint" id="biz_adj"></p><p class="hint" id="biz_test"></p></div>
+          </div>
+          <div class="bgrid two">
+            <div class="card bcard"><div class="bh"><div><h2>Money received by month</h2><p class="lead">Top-ups from customers. Navy months are the period you chose; TEST top-ups are left out.</p></div></div>
+              <div class="chart" id="ch_cash"></div></div>
+            <div class="card bcard"><div class="bh"><div><h2>Money position</h2><p class="lead">Balances and stock as they are now.</p></div></div>
+              <div class="posgrid" id="biz_pos"></div></div>
+          </div>
+          <div class="card bcard"><div class="bh"><div><h2>Work done by month</h2><p class="lead">Navy months are the period you chose; the number is the total for that period.</p></div></div>
+            <div class="multi"><div class="mini-ch"><div class="mh"><span>Orders dispatched</span><b id="ch_w1_v">0</b></div><div class="chart" id="ch_w1"></div></div><div class="mini-ch"><div class="mh"><span>Units shipped</span><b id="ch_w2_v">0</b></div><div class="chart" id="ch_w2"></div></div><div class="mini-ch"><div class="mh"><span>Deliveries received</span><b id="ch_w3_v">0</b></div><div class="chart" id="ch_w3"></div></div><div class="mini-ch"><div class="mh"><span>Service orders completed</span><b id="ch_w4_v">0</b></div><div class="chart" id="ch_w4"></div></div></div></div>
+          <div class="bgrid two">
+            <div class="card bcard"><div class="bh"><div><h2>Top customers</h2><p class="lead">By revenue in the period you chose. Click a name to open the account.</p></div></div>
+              <div class="tblwrap flat"><table class="tbl"><thead><tr><th>#</th><th>Customer</th><th class="r">Revenue</th><th>Share</th><th class="r">Orders</th></tr></thead><tbody id="biz_topc"></tbody></table></div>
+              <div class="empty flat" id="biz_topc_empty" hidden>No revenue in this period yet.</div></div>
+            <div class="card bcard"><div class="bh"><div><h2>Top services</h2><p class="lead">Service orders and staff charges, by revenue.</p></div></div>
+              <div class="tblwrap flat"><table class="tbl"><thead><tr><th>Service</th><th class="r">Qty</th><th class="r">Orders</th><th class="r">Revenue</th></tr></thead><tbody id="biz_tops"></tbody></table></div>
+              <div class="empty flat" id="biz_tops_empty" hidden>No services in this period yet.</div></div>
+          </div>
+          <div class="card bcard"><div class="bh"><div><h2>Month by month</h2><p class="lead">Every figure behind the charts, newest month first. Highlighted rows are in the period you chose.</p></div></div>
+            <div class="tblwrap flat"><table class="tbl bmonths"><thead><tr><th>Month</th><th class="r">Revenue</th><th>vs month before</th><th class="r">Services</th><th class="r">Shipping</th><th class="r">Other</th><th class="r">Money received</th><th class="r">Orders</th><th class="r">Units shipped</th><th class="r">Deliveries</th><th class="r">Service orders</th><th class="r">New customers</th></tr></thead><tbody id="biz_months"></tbody></table></div></div>
+          <p class="help"><svg class="i"><use href="#i-info"/></svg><span>Revenue is what customers were charged for services, shipping and other charges, minus refunds. It is not profit: courier and other costs are not recorded in the system. Adjustments are corrections and are shown separately. Money received is customers' top-ups; TEST top-ups are left out. Days and months follow UK time.</span></p>
         </div>
       </section>
 
@@ -1331,7 +1466,8 @@ var SECMETA={
   staff:   {slug:'staff',     crumb:'settings',       title:'Staff',              desc:'Who can sign in to this console.'},
   customer:{slug:'customer',  crumb:'customers',      title:'Customer account',   desc:''},
   messages:{slug:'messages',  crumb:'customers',      title:'Messages',           desc:'Chat with customers. One grey tick: sent. Two grey ticks: it reached their panel. Two blue ticks: they have read it.'},
-  sorders: {slug:'service-orders', crumb:'operations', title:'Service orders',   desc:'Services customers have ordered from the price list and already paid for from their balance.'}
+  sorders: {slug:'service-orders', crumb:'operations', title:'Service orders',   desc:'Services customers have ordered from the price list and already paid for from their balance.'},
+  business:{slug:'business',  crumb:'insights',       title:'Business overview',  desc:'Money earned, money received and work done, compared with earlier periods.'}
 };
 var CUST_ID=null, MSG_ID=null, APPLIED='';
 function sectionFromHash(){
@@ -1418,6 +1554,7 @@ function setSection(sec,replace){
   if(sec==='customer') loadAccount();
   if(sec==='messages') loadThreads();
   if(sec==='sorders') loadSOrders();
+  if(sec==='business') loadBiz();
 }
 
 function counts(){
@@ -3735,6 +3872,298 @@ $('th_new').onclick=function(){
         openThread(s.value);
       }}]});
   });
+};
+
+
+
+/* =====================================================================
+   v7: business overview (figures from business_stats / business_trends)
+   ===================================================================== */
+var BIZ={period:'month',stats:null,trends:null,tok:0,range:null};
+/* chart colours: checked for colour-blind separation on white (services, shipping, other);
+   single-series charts use navy for the chosen period and grey for context */
+var BZC={services:'#1F94B8',shipping:'#EB6834',other:'#5B4BC4',accent:'#48486C',muted:'#CDD0D9',grid:'#EEF0F3',band:'#F2F7F9'};
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var MONL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function ukToday(){
+  try{ var s=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'}); if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s; }catch(e){}
+  return todayYmdA();
+}
+function ymdUTC(y,m,d){ return new Date(Date.UTC(y,m,d)).toISOString().slice(0,10); }
+function daysIn(y,m){ return new Date(Date.UTC(y,m+1,0)).getUTCDate(); }
+function shortDay(ymd){ var p=ymd.split('-'); return (+p[2])+' '+MON[+p[1]-1]; }
+/* each preset: the period, the one it is compared with, and how to say so */
+function bizRange(k){
+  var t=ukToday(), y=+t.slice(0,4), m=+t.slice(5,7)-1, d=+t.slice(8,10);
+  if(k==='month'){
+    var pd=Math.min(d,daysIn(y,m-1)), pm=ymdUTC(y,m-1,1);
+    return {from:ymdUTC(y,m,1),to:t,pfrom:pm,pto:ymdUTC(y,m-1,pd),label:MONL[m]+' '+y+' so far',vs:'vs 1–'+pd+' '+MON[new Date(pm).getUTCMonth()]};
+  }
+  if(k==='last'){
+    var lf=ymdUTC(y,m-1,1), lm=new Date(lf).getUTCMonth(), ly=new Date(lf).getUTCFullYear();
+    var bf=ymdUTC(ly,lm-1,1);
+    return {from:lf,to:ymdUTC(ly,lm,daysIn(ly,lm)),pfrom:bf,pto:ymdUTC(ly,lm-1,daysIn(ly,lm-1)),label:MONL[lm]+' '+ly,vs:'vs '+MONL[new Date(bf).getUTCMonth()]};
+  }
+  if(k==='quarter'){
+    var q=Math.floor(m/3)*3, qf=ymdUTC(y,q,1), days=Math.round((Date.parse(t)-Date.parse(qf))/86400000);
+    var pq=ymdUTC(y,q-3,1);
+    return {from:qf,to:t,pfrom:pq,pto:ymdUTC(new Date(pq).getUTCFullYear(),new Date(pq).getUTCMonth(),new Date(pq).getUTCDate()+days),
+      label:'Q'+(q/3+1)+' '+y+' so far',vs:'vs the same days of last quarter'};
+  }
+  if(k==='year'){
+    var pdl=Math.min(d,daysIn(y-1,m));
+    return {from:y+'-01-01',to:t,pfrom:(y-1)+'-01-01',pto:ymdUTC(y-1,m,pdl),label:y+' so far',vs:'vs the same days of '+(y-1)};
+  }
+  var f12=ymdUTC(y,m-11,1);
+  return {from:f12,to:t,pfrom:ymdUTC(y,m-23,1),pto:ymdUTC(y,m-11,0),label:'Last 12 months',vs:'vs the 12 months before'};
+}
+function inRange(month,r){ return month>=r.from.slice(0,7)&&month<=r.to.slice(0,7); }
+
+/* money and counts, written the way people read them */
+function money0(p){ var n=(Number(p)||0)/100, a=Math.abs(n);
+  var s=a>=10000? Math.round(a).toLocaleString('en-GB') : a.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (n<0?'-':'')+'£'+s; }
+function moneyShort(p){ var n=(Number(p)||0)/100, a=Math.abs(n), s;
+  if(a>=1e6) s=(a/1e6).toFixed(a>=1e7?0:1)+'m'; else if(a>=1e3) s=(a/1e3).toFixed(a>=1e4?0:1)+'k'; else s=String(Math.round(a));
+  return (n<0?'-':'')+'£'+s.replace(/\.0(?=[km])/,''); }
+function count0(n){ return (Number(n)||0).toLocaleString('en-GB'); }
+function countShort(n){ n=Number(n)||0; return n>=1e4? (n/1e3).toFixed(0)+'k' : n>=1e3? (n/1e3).toFixed(1).replace(/\.0$/,'')+'k' : String(n); }
+function pctChange(cur,prev){ cur=Number(cur)||0; prev=Number(prev)||0;
+  if(!prev) return cur? {t:'new',c:'up'} : {t:'no change',c:'flat'};
+  var p=(cur-prev)/Math.abs(prev)*100, r=Math.round(p);
+  if(r===0) return {t:'no change',c:'flat'};
+  return {t:(r>0?'▲ ':'▼ ')+Math.abs(r)+'%',c:r>0?'up':'down'}; }
+
+/* ---------------- tiny SVG chart kit ---------------- */
+function sv(tag,a){ var e=document.createElementNS(SVGNS,tag); if(a) for(var k in a){ if(a.hasOwnProperty(k)) e.setAttribute(k,a[k]); } return e; }
+function niceMax(v){ if(!(v>0)) return 1; var p=Math.pow(10,Math.floor(Math.log(v)/Math.LN10)), n=v/p;
+  return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+function colPath(x,y,w,h,r){ r=Math.min(r,h,w/2); if(h<=0) return '';
+  return 'M'+x+','+(y+h)+'V'+(y+r)+'Q'+x+','+y+' '+(x+r)+','+y+'H'+(x+w-r)+'Q'+(x+w)+','+y+' '+(x+w)+','+(y+r)+'V'+(y+h)+'Z'; }
+function monthTick(key,i){ var mm=+key.slice(5,7); return (mm===1||i===0)? MON[mm-1]+' '+key.slice(2,4) : MON[mm-1]; }
+function tipFor(host){
+  var t=host.querySelector('.ctip'); if(t) return t;
+  t=el('div',{class:'ctip',role:'status'}); host.appendChild(t); return t;
+}
+/* o = {keys, series:[{name,color,values}], stacked, isMoney, sel(i), emphasis, height} */
+function columnChart(host,o){
+  var old=host.querySelector('svg'); if(old) old.remove();
+  var tip=tipFor(host); tip.hidden=true;
+  var W=Math.max(260,host.clientWidth||600), H=o.height||220, padL=o.small?34:50, padR=6, padT=8, padB=24;
+  var n=o.keys.length, pw=W-padL-padR, ph=H-padT-padB, band=pw/n, bw=Math.min(o.small?14:24,band*0.62);
+  var tot=o.keys.map(function(k,i){ var s=0; o.series.forEach(function(se){ s+=Math.max(0,Number(se.values[i])||0); }); return s; });
+  var max=niceMax(Math.max.apply(null,tot.concat([0])));
+  var fmt=o.isMoney?moneyShort:countShort;
+  var labelStep=Math.max(1,Math.ceil((o.small?44:40)/band));
+  var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:'100%',height:H,role:'img','aria-label':o.label||'chart'});
+  /* recessive grid: hairline, solid */
+  for(var g=0;g<=4;g++){
+    var gy=padT+ph-ph*g/4;
+    svg.appendChild(sv('line',{x1:padL,x2:W-padR,y1:gy,y2:gy,stroke:BZC.grid,'stroke-width':1}));
+    if(!o.small||g===4||g===2){ var lt=sv('text',{x:padL-6,y:gy+3.5,'text-anchor':'end',class:'tick'}); lt.textContent=fmt(max*g/4); svg.appendChild(lt); }
+  }
+  var cols=[];
+  o.keys.forEach(function(k,i){
+    var cx=padL+band*i+(band-bw)/2, base=padT+ph, cum=0, grp=sv('g',{class:'col'});
+    if(o.stacked&&o.sel&&o.sel(i)) svg.insertBefore(sv('rect',{x:padL+band*i+1,y:padT,width:band-2,height:ph,fill:BZC.band,rx:3}),svg.firstChild);
+    var lastIdx=-1; o.series.forEach(function(se,si){ if((Number(se.values[i])||0)>0) lastIdx=si; });
+    var drawn=0;
+    o.series.forEach(function(se,si){
+      var v=Math.max(0,Number(se.values[i])||0); if(!v) return;
+      var h=v/max*ph, y0=base-cum-h, gap=drawn>0?2:0;
+      var color=o.emphasis? (o.sel&&o.sel(i)?BZC.accent:BZC.muted) : se.color;
+      var hh=Math.max(0,h-gap);
+      if(si===lastIdx) grp.appendChild(sv('path',{d:colPath(cx,y0,bw,hh,4),fill:color}));
+      else grp.appendChild(sv('rect',{x:cx,y:y0,width:bw,height:hh,fill:color}));
+      cum+=h; drawn++;
+    });
+    svg.appendChild(grp); cols.push(grp);
+    /* as many month labels as fit, always ending on the latest month */
+    if((n-1-i)%labelStep===0){ var xt=sv('text',{x:padL+band*i+band/2,y:H-6,'text-anchor':'middle',class:'tick'+(o.sel&&o.sel(i)?' on':'')}); xt.textContent=monthTick(k,i); svg.appendChild(xt); }
+    /* the hit area is the whole column band, not just the painted bar */
+    var hit=sv('rect',{x:padL+band*i,y:padT,width:band,height:ph+padB,fill:'transparent',tabindex:'0',class:'hit'});
+    function show(){
+      cols.forEach(function(c,j){ c.setAttribute('opacity',j===i?'1':'0.45'); });
+      tip.innerHTML='';
+      tip.appendChild(el('div',{class:'th',text:MONL[+k.slice(5,7)-1]+' '+k.slice(0,4)}));
+      o.series.forEach(function(se){
+        var v=Number(se.values[i])||0;
+        tip.appendChild(el('div',{class:'tr'},[el('span',{class:'key',style:'background:'+(o.emphasis?BZC.accent:se.color)}),
+          el('b',{text:o.isMoney?money0(v):count0(v)}),el('span',{class:'nm',text:se.name})]));
+      });
+      if(o.series.length>1) tip.appendChild(el('div',{class:'tr tot'},[el('span',{class:'key blank'}),el('b',{text:o.isMoney?money0(tot[i]):count0(tot[i])}),el('span',{class:'nm',text:'Total'})]));
+      tip.hidden=false;
+      var tw=tip.offsetWidth, left=padL+band*i+band/2-tw/2;
+      tip.style.left=Math.max(0,Math.min(left,W-tw))+'px';
+    }
+    function hide(){ cols.forEach(function(c){ c.setAttribute('opacity','1'); }); tip.hidden=true; }
+    hit.addEventListener('pointerenter',show); hit.addEventListener('focus',show);
+    hit.addEventListener('pointerleave',hide); hit.addEventListener('blur',hide);
+    svg.appendChild(hit);
+  });
+  host.insertBefore(svg,tip);
+}
+function sparkline(vals,selIdx){
+  var W=120,H=30,n=vals.length, max=Math.max.apply(null,vals.concat([1])), min=Math.min.apply(null,vals.concat([0]));
+  var span=(max-min)||1, pts=vals.map(function(v,i){ return [(i/(n-1||1))*(W-8)+4, H-4-((Number(v)||0)-min)/span*(H-10)]; });
+  var s=sv('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H,class:'spark','aria-hidden':'true'});
+  s.appendChild(sv('polyline',{points:pts.map(function(p){ return p[0].toFixed(1)+','+p[1].toFixed(1); }).join(' '),fill:'none',stroke:BZC.muted,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'}));
+  var last=pts[selIdx===undefined?n-1:selIdx];
+  if(last) s.appendChild(sv('circle',{cx:last[0],cy:last[1],r:4,fill:BZC.accent,stroke:'#fff','stroke-width':2}));
+  return s;
+}
+
+/* ---------------- loading ---------------- */
+function setBizTab(k){
+  BIZ.period=k;
+  Array.prototype.forEach.call($('biztabs').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.getAttribute('data-p')===k); });
+  loadBiz();
+}
+Array.prototype.forEach.call($('biztabs').querySelectorAll('button'),function(b){ b.onclick=function(){ setBizTab(b.getAttribute('data-p')); }; });
+$('biz_reload').onclick=function(){ loadBiz(true); };
+function loadBiz(fresh){
+  var r=bizRange(BIZ.period), tok=++BIZ.tok; BIZ.range=r;
+  $('biz_range').textContent=r.label+' · '+dmy(r.from)+' – '+dmy(r.to);
+  /* keep the previous picture while new figures load */
+  if(BIZ.stats) $('bizwrap').classList.add('loading'); else busy('m_biz','Loading figures…');
+  var need=[sb.rpc('business_stats',{p_from:r.from,p_to:r.to,p_prev_from:r.pfrom,p_prev_to:r.pto})];
+  if(!BIZ.trends||fresh) need.push(sb.rpc('business_trends',{p_months:12}));
+  return Promise.all(need).then(function(res){
+    if(tok!==BIZ.tok||section!=='business') return;
+    $('bizwrap').classList.remove('loading');
+    if(res[0].error||(res[1]&&res[1].error)){ msg('m_biz','Could not load the figures. Is the Phase 11 script run?','bad'); return; }
+    msg('m_biz','');
+    BIZ.stats=res[0].data; if(res[1]) BIZ.trends=res[1].data||[];
+    drawBiz();
+  });
+}
+var BIZ_RESIZE=null;
+window.addEventListener('resize',function(){
+  if(section!=='business'||!BIZ.stats) return;
+  clearTimeout(BIZ_RESIZE); BIZ_RESIZE=setTimeout(drawBizCharts,150);
+});
+
+/* ---------------- drawing ---------------- */
+function avg(x){ var n=Number(x.active_customers)||0; return n? Math.round((Number(x.revenue)||0)/n) : 0; }
+function drawBiz(){
+  var S=BIZ.stats, c=S.current, p=S.previous, r=BIZ.range, T=BIZ.trends||[];
+  var selIdx=-1; T.forEach(function(m,i){ if(inRange(m.month,r)) selIdx=i; });
+  function series(key){ return T.map(function(m){ return Number(m[key])||0; }); }
+
+  /* headline figures */
+  var box=$('biz_kpis'); box.innerHTML='';
+  var ch=pctChange(c.revenue,p.revenue);
+  box.appendChild(el('div',{class:'bk hero'},[
+    el('div',{class:'l',text:'Revenue'}),
+    el('div',{class:'v',text:money0(c.revenue)}),
+    el('div',{class:'d'},[el('span',{class:'chg '+ch.c,text:ch.t}),el('span',{class:'vs',text:r.vs+' ('+money0(p.revenue)+')'})]),
+    sparkline(series('revenue'),selIdx>-1?selIdx:undefined),
+    el('div',{class:'sub',text:'What customers were charged, minus refunds. Not profit: courier costs are not recorded here.'})]));
+  [['Money received',c.cash_in,p.cash_in,true,'cash_in','Top-ups that reached the bank or card account'],
+   ['Orders dispatched',c.orders_dispatched,p.orders_dispatched,false,'orders_dispatched',count0(c.units_out)+' units shipped'],
+   ['Service orders completed',c.services_done,p.services_done,false,'services_done',count0(c.services_ordered)+' ordered in this period'],
+   ['Deliveries received',c.deliveries_received,p.deliveries_received,false,'deliveries_received',count0(c.units_in)+' units counted in'],
+   ['Active customers',c.active_customers,p.active_customers,false,'active_customers',count0(c.new_customers)+' new in this period'],
+   ['Average spend per active customer',avg(c),avg(p),true,null,'Revenue divided by the customers charged']
+  ].forEach(function(k){
+    var d=pctChange(k[1],k[2]);
+    box.appendChild(el('div',{class:'bk'},[el('div',{class:'l',text:k[0]}),
+      el('div',{class:'v',text:k[3]?money0(k[1]):count0(k[1])}),
+      el('div',{class:'d'},[el('span',{class:'chg '+d.c,text:d.t}),el('span',{class:'vs',text:k[3]?money0(k[2]):count0(k[2])})]),
+      k[4]?sparkline(series(k[4]),selIdx>-1?selIdx:undefined):sparkline(T.map(function(m){ return avg(m); }),selIdx>-1?selIdx:undefined),
+      el('div',{class:'sub',text:k[5]})]));
+  });
+
+  /* where the revenue came from, this period */
+  var parts=[['Services','revenue_services',BZC.services],['Shipping','revenue_shipping',BZC.shipping],['Other charges','revenue_other',BZC.other]];
+  var bar=$('biz_split'), leg=$('biz_splitleg'); bar.innerHTML=''; leg.innerHTML='';
+  var totPos=0; parts.forEach(function(x){ totPos+=Math.max(0,Number(c[x[1]])||0); });
+  parts.forEach(function(x){
+    var v=Number(c[x[1]])||0, share=totPos>0?Math.max(0,v)/totPos*100:0;
+    if(share>0) bar.appendChild(el('span',{style:'width:'+share.toFixed(2)+'%;background:'+x[2],title:x[0]+': '+money0(v)}));
+    var d=pctChange(v,p[x[1]]);
+    leg.appendChild(el('div',{class:'row'},[el('span',{class:'sw',style:'background:'+x[2]}),el('span',{class:'nm',text:x[0]}),
+      el('b',{text:money0(v)}),el('span',{class:'pc',text:Math.round(share)+'%'}),el('span',{class:'chg '+d.c,text:d.t})]));
+  });
+  if(!totPos) bar.appendChild(el('span',{class:'none',text:'No revenue in this period yet'}));
+  $('biz_adj').textContent=Number(c.adjustments)? 'Adjustments in this period: '+money0(c.adjustments)+' (kept out of revenue).' : '';
+  $('biz_test').textContent=Number(c.test_topups)? 'Left out: '+money0(c.test_topups)+' of TEST top-ups.' : '';
+
+  /* money position today */
+  var P=S.position, pb=$('biz_pos'); pb.innerHTML='';
+  [['Customer money held',money0(P.held),'Prepaid balances not yet spent'],
+   ['Owed by customers',money0(P.owed),count0(P.customers_owing)+' customer'+(Number(P.customers_owing)===1?'':'s')+' below zero'],
+   ['Money received',money0(c.cash_in),'Bank '+money0(c.cash_bank)+' · card '+money0(c.cash_card)+' · recorded '+money0(c.cash_manual)],
+   ['Customers',count0(P.customers),count0(P.customers_storing)+' storing stock'],
+   ['Units in storage',count0(P.units_stored),count0(P.skus_stored)+' SKUs']
+  ].forEach(function(x){ pb.appendChild(el('div',{class:'pos'},[el('div',{class:'l',text:x[0]}),el('div',{class:'v',text:x[1]}),el('div',{class:'s',text:x[2]})])); });
+
+  /* top customers and services */
+  var tc=$('biz_topc'); tc.innerHTML='';
+  var topMax=0; (S.top_customers||[]).forEach(function(x){ topMax=Math.max(topMax,Number(x.revenue)||0); });
+  (S.top_customers||[]).forEach(function(x,i){
+    var name=el('button',{class:'linkbtn',type:'button',text:x.company||x.email}); name.onclick=function(){ openAccount(x.user_id); };
+    var share=Number(c.revenue)>0? Math.round((Number(x.revenue)||0)/Number(c.revenue)*100) : 0;
+    tc.appendChild(el('tr',null,[el('td',{class:'idx',text:String(i+1)}),el('td',null,[name]),el('td',{class:'money',text:money0(x.revenue)}),
+      el('td',null,[el('div',{class:'meter'},[el('span',{style:'width:'+(topMax?Math.max(2,(Number(x.revenue)||0)/topMax*100):0).toFixed(1)+'%'})]),el('span',{class:'pc',text:share+'%'})]),
+      el('td',{class:'num',text:count0(x.orders)})]));
+  });
+  $('biz_topc_empty').hidden=(S.top_customers||[]).length>0;
+  var ts=$('biz_tops'); ts.innerHTML='';
+  (S.top_services||[]).forEach(function(x){
+    ts.appendChild(el('tr',null,[el('td',{text:x.name}),el('td',{class:'num',text:count0(x.qty)}),el('td',{class:'num',text:count0(x.orders)}),el('td',{class:'money',text:money0(x.revenue)})]));
+  });
+  $('biz_tops_empty').hidden=(S.top_services||[]).length>0;
+
+  /* month by month (newest first) */
+  var mt=$('biz_months'); mt.innerHTML='';
+  T.slice().reverse().forEach(function(m,i,arr){
+    var prev=arr[i+1], d=prev?pctChange(m.revenue,prev.revenue):{t:'',c:'flat'};
+    mt.appendChild(el('tr',{class:inRange(m.month,r)?'sel':null},[el('td',{class:'nowrap',text:MONL[+m.month.slice(5,7)-1]+' '+m.month.slice(0,4)}),
+      el('td',{class:'money',text:money0(m.revenue)}),el('td',null,[el('span',{class:'chg '+d.c,text:d.t})]),
+      el('td',{class:'num',text:money0(m.revenue_services)}),el('td',{class:'num',text:money0(m.revenue_shipping)}),el('td',{class:'num',text:money0(m.revenue_other)}),
+      el('td',{class:'num',text:money0(m.cash_in)}),el('td',{class:'num',text:count0(m.orders_dispatched)}),el('td',{class:'num',text:count0(m.units_out)}),
+      el('td',{class:'num',text:count0(m.deliveries_received)}),el('td',{class:'num',text:count0(m.services_done)}),el('td',{class:'num',text:count0(m.new_customers)})]));
+  });
+  drawBizCharts();
+}
+function drawBizCharts(){
+  var T=BIZ.trends||[], r=BIZ.range; if(!T.length||!r) return;
+  var keys=T.map(function(m){ return m.month; });
+  function sel(i){ return inRange(keys[i],r); }
+  function series(key){ return T.map(function(m){ return Number(m[key])||0; }); }
+  columnChart($('ch_rev'),{keys:keys,stacked:true,isMoney:true,sel:sel,height:240,label:'Revenue by month, split into services, shipping and other charges',
+    series:[{name:'Services',color:BZC.services,values:series('revenue_services')},{name:'Shipping',color:BZC.shipping,values:series('revenue_shipping')},
+            {name:'Other charges',color:BZC.other,values:series('revenue_other')}]});
+  columnChart($('ch_cash'),{keys:keys,emphasis:true,isMoney:true,sel:sel,height:240,label:'Money received by month',
+    series:[{name:'Money received',color:BZC.accent,values:series('cash_in')}]});
+  [['ch_w1','orders_dispatched','Orders dispatched'],['ch_w2','units_out','Units shipped'],['ch_w3','deliveries_received','Deliveries received'],['ch_w4','services_done','Service orders completed']].forEach(function(x){
+    var vals=series(x[1]), t=0; vals.forEach(function(v,i){ if(sel(i)) t+=v; });
+    $(x[0]+'_v').textContent=count0(t);
+    columnChart($(x[0]),{keys:keys,emphasis:true,small:true,sel:sel,height:130,label:x[2]+' by month',series:[{name:x[2],color:BZC.accent,values:vals}]});
+  });
+}
+
+/* ---------------- Excel ---------------- */
+$('biz_xls').onclick=function(){
+  var S=BIZ.stats, T=BIZ.trends, r=BIZ.range, btn=$('biz_xls'); if(!S||!T) return;
+  btn.disabled=true;
+  needXLSXA().then(function(){
+    var c=S.current, p=S.previous, pr=function(v){ return (Number(v)||0)/100; };
+    var rows=[['Ecomflex business overview'],['Period',r.label,dmy(r.from)+' to '+dmy(r.to)],['Compared with',dmy(S.previous_from)+' to '+dmy(S.previous_to)],[],
+      ['Figure','This period','Compared period'],
+      ['Revenue (£)',pr(c.revenue),pr(p.revenue)],['  Services (£)',pr(c.revenue_services),pr(p.revenue_services)],['  Shipping (£)',pr(c.revenue_shipping),pr(p.revenue_shipping)],
+      ['  Other charges (£)',pr(c.revenue_other),pr(p.revenue_other)],['Adjustments (£)',pr(c.adjustments),pr(p.adjustments)],['Money received (£)',pr(c.cash_in),pr(p.cash_in)],
+      ['Orders dispatched',c.orders_dispatched,p.orders_dispatched],['Units shipped',c.units_out,p.units_out],['Deliveries received',c.deliveries_received,p.deliveries_received],
+      ['Units counted in',c.units_in,p.units_in],['Service orders completed',c.services_done,p.services_done],['Returns completed',c.returns_done,p.returns_done],
+      ['Forwarding completed',c.forwards_done,p.forwards_done],['FBA jobs completed',c.fba_done,p.fba_done],['Active customers',c.active_customers,p.active_customers],
+      ['New customers',c.new_customers,p.new_customers],[],
+      ['Month','Revenue (£)','Services (£)','Shipping (£)','Other (£)','Money received (£)','Orders dispatched','Units shipped','Deliveries received','Service orders completed','New customers']];
+    T.forEach(function(m){ rows.push([m.month,pr(m.revenue),pr(m.revenue_services),pr(m.revenue_shipping),pr(m.revenue_other),pr(m.cash_in),m.orders_dispatched,m.units_out,m.deliveries_received,m.services_done,m.new_customers]); });
+    var ws=window.XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[26,16,16,14,12,18,16,14,18,22,14].map(function(w){ return {wch:w}; });
+    var wb=window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb,ws,'Overview');
+    window.XLSX.writeFile(wb,'ecomflex-business-'+r.from+'-to-'+r.to+'.xlsx');
+  }).catch(function(){ msg('m_biz','The Excel file could not be made. Check the connection and try again.','bad'); }).then(function(){ btn.disabled=false; });
 };
 
 

@@ -118,7 +118,7 @@ All files sit **flat in the repository root**. There are no folders except a str
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll. **Not currently in the repo**; harmless while no file starts with `_`. |
 | `_shared.js` | Old copy of `shared.js` from the underscore mistake. Unused; can be deleted. |
 | `supabase-schema.sql` | Snapshot of the whole live database, taken 21 Sep 2026. See 6. |
-| `supabase-phase7.sql` … `-phase10.sql` | Migrations since the snapshot. |
+| `supabase-phase7.sql` … `-phase11.sql` | Migrations since the snapshot. |
 | `supabase-function-create-topup.ts`, `supabase-function-stripe-webhook.ts` | The two Supabase Edge Functions for Stripe card top-ups. Not run from GitHub; pasted into Supabase. |
 | `CLAUDE.md` | This handover. |
 
@@ -174,7 +174,8 @@ Run once each, in order, in Supabase → SQL Editor → **Create a new snippet**
 2. `supabase-phase7.sql` — fixes: self-signup customers could not enter the panel; "New code" locked customers out; reports/stock picker/balances ignored self-signup customers; undo-dispatch did not restore stock; `balance_of` was callable by anyone. Adds `customer_directory()`, first-top-up gate on requests and inbounds. **Deployed 21 Sep 2026.**
 3. `supabase-phase8.sql` — balance page totals, bank-transfer payment declarations, card payments table and functions for Stripe. **Deployed 23 Sep 2026.**
 4. `supabase-phase9.sql` — everything behind `panel2.html`: product details on stock rows, saved recipients, announcements, price list, documents, invoices, support tickets, dashboard figures. **Deployed 23 Sep 2026.**
-5. `supabase-phase10.sql` — services paid from the balance (`service_orders`, `service_order_lines`, `price_items.orderable`, the Ecomflex price list), customer statements and profiles, the customer chat with delivery/read ticks, `today_counts` with service orders and unread chat. **Not yet deployed** (see 10).
+5. `supabase-phase10.sql` — services paid from the balance (`service_orders`, `service_order_lines`, `price_items.orderable`, the Ecomflex price list), customer statements and profiles, the customer chat with delivery/read ticks, `today_counts` with service orders and unread chat. **Deployed 24 Sep 2026.**
+6. `supabase-phase11.sql` — the business overview: `biz_period` (internal), `business_stats`, `business_trends`, and date indexes on `wallet_entries.at` and `orders.responded_at`. Read-only; changes no data. **Not yet deployed** (see 10).
 
 When Supabase warns "creates a table without enabling Row Level Security", choose **Run and enable RLS**. To see what is really live, the export query used on 21 Sep (functions, policies, triggers, tables, one CSV cell) can be rerun; ask Claude for it.
 
@@ -239,6 +240,10 @@ chat_mark_delivered() / chat_mark_read(user)  ticks; staff pass the customer's i
 chat_threads()                                staff: every conversation with its last message and unread count
 customer_exists(user), company_of(user)       internal only
 list_admins / add_admin / remove_admin, onboarding, set_client_field, welcome_for, month_report, all_balances, next_ref
+business_stats(from, to, prev_from, prev_to)  staff: every business figure for a period and a comparison period (default: the same
+                                              number of days just before), today's money position, top 10 customers and services
+business_trends(months)                       staff: the same figures month by month (UK months), oldest first, up to 36
+biz_period(from, to)                          internal only: the figures for one stretch of time
 ```
 
 ### Triggers
@@ -289,9 +294,15 @@ Phase 10 added **Hizmet Satın Al** (price list as a shop: quantities, basket wi
 
 The older, simpler panel. Still live until `panel2.html` is approved; then `panel2.html` is renamed to `panel.html`. Has the phase 8 balance page and (23 Sep) the FBA label-file fix.
 
-### `admin.html` — admin console (English, v6)
+### `admin.html` — admin console (English, v7)
 
 Sections: **Today, Orders, Inbound, Services, Stock, Customers, Support, Access requests, Content, Reports, Staff**, plus links to the label reader, scanner and customer panel. Each section has an address (`admin.html#orders`, `#customers`, `#reports`…), so refresh keeps the place and Back works. On phones the menu slides in from a button at the top left.
+
+**v7 (24 Sep 2026): Business overview** (menu, Insights; `#business`). Period tabs This month / Last month / This quarter / This year / Last 12 months, each compared with the fair period (same days last month, the month before, same days of last quarter, same days last year, the 12 months before).
+- Headline figures with the change and a 12-month sparkline: **Revenue** (large), money received, orders dispatched, service orders completed, deliveries received, active customers, average spend per active customer.
+- Charts drawn in the page as SVG (no chart library): revenue by month split into services / shipping / other charges (the chosen months shaded), money received by month, work done by month (orders, units, deliveries, service orders), with hover and keyboard tooltips. Where the revenue came from (share bar), money position (money held, owed, customers, storage), top customers (click opens the account), top services, a month-by-month table, Excel download.
+- Definitions (also written on the page): **revenue** = charges minus refunds, split by `ref_table` (`service_orders` = services, `orders` = shipping, anything else = other). It is not profit: courier costs are not recorded. **Adjustments** are shown apart, not in revenue. **Money received** = top-ups; top-ups whose note starts with "TEST" are left out everywhere. **Active customers** = customers charged in the period. Days and months follow UK time. Charges on test accounts still count, so clean test data before trusting the figures.
+- Chart colours (checked for colour-blind separation on white): services `#1F94B8`, shipping `#EB6834`, other `#5B4BC4`; single-series charts use navy `#48486C` for the chosen period and grey `#CDD0D9` for the rest.
 
 **v6 (24 Sep 2026)**:
 - **Customer account screen** (`#customer/<user id>`), opened from the **Account** button in the Customers table (and from service orders and chats): header with company, manager, email, phone; key figures (balance, topped up, spent, this month, waiting orders); buttons Message, Add charge, Record top-up, More (adjust, welcome message, new code, TEST +£50); tabs **Statement** (like the old spreadsheets: date, service, qty, unit price, total, payment, description, running balance; period filter; **Download Excel** in the Turkish spreadsheet layout, ready to send to the customer), **Messages**, **Service orders**, **Details**.
@@ -327,7 +338,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v20`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v21`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 
@@ -344,7 +355,12 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - Admin v5 redesign, new hub, `404.html`, `robots.txt`, `sitemap.xml`, page tags and single `h1` on every page, scanner/label reader colours, `manifest.webmanifest`, `sw.js` v19, `CLAUDE.md`. No SQL. Mert confirmed v5 live.
 - Tested with: 48 admin click-through checks (the 27 from v4 plus section addresses, single `h1`, tab titles, Back button, folded orders, dispatch call, More menu, TEST top-up amount, phone menu, no sideways scrolling), the 52 customer checks on `panel2.html` again, a page audit (title, description, robots, canonical, one `h1` per file, no duplicate titles), the 404 page served at both `/` and `/parcel-scanner/`, and screenshots at 1440×900 and 390×844.
 
-### Phase 10 (built and tested, not uploaded)
+### Phase 11 (built and tested, not uploaded)
+
+- `supabase-phase11.sql`, `admin.html` v7 (Business overview), `sw.js` v21, `CLAUDE.md`.
+- Tested with: 26 database checks (every figure worked out by hand from a small ledger, including entries either side of UK midnight at month end, TEST top-ups left out, a cancelled and refunded order adding nothing, comparison periods, top lists, and that customers and signed-out visitors are refused), 32 click-through checks (period dates sent for each tab, charts, tooltips by mouse and keyboard, Excel, phone width, month labels not overlapping), the earlier 48 + 58 admin checks on v7, screenshots.
+
+### Phase 10 (deployed 24 Sep 2026)
 
 - `supabase-phase10.sql`, `admin.html` v6, `panel2.html` (Hizmet Satın Al, Mesajlar), `sw.js` v20, `CLAUDE.md`.
 - Tested with: 91 database checks (buying, refunds, staff charges, statement, profile, chat and ticks, including every forbidden path), 58 admin click-through checks, 44 customer click-through checks, the earlier 48 admin and 53 customer checks again, and screenshots at 1440×900 and 390×844.
@@ -405,6 +421,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - **Behaviour**: `playwright-core` driving the installed Chrome headless, against a copy of the page served locally with a fake in-browser Supabase (`window.supabase.createClient` returning a client with `from/rpc/auth/storage/functions` backed by sample data, recording every call). Click through each action and assert on the recorded calls; take full-page screenshots at 1440×900 and 390×844 and look at them.
 - **Edge Functions**: run the `.ts` files in Node with a `Deno` shim and a fake `fetch`; sign test webhook bodies with HMAC-SHA256 like Stripe.
 - **Label parsing**: reportlab test PDFs through the page's parsing functions via pdfjs-dist 3.11.174.
+- **Phase 11**: `test_phase11.mjs` (database) and `admin_v7_flows.mjs` (click-through). The fake Supabase returns 24 months of sample business figures.
 - **Phase 10**: `test_phase10.mjs` (database), `admin_v6_flows.mjs` and `flows10.mjs` (click-through) in the working scratch folder; the fake Supabase knows the new tables and functions.
 - **Page tags**: for every `.html` check one `<h1`, a unique `<title>`, description, robots and canonical. Test `404.html` with a small local server that serves the repo at both `/` and `/parcel-scanner/` and answers missing paths with `404.html` and status 404.
 
