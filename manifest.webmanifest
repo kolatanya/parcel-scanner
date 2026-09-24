@@ -1,13 +1,13 @@
 {
-  "name": "Ecomflex",
+  "name": "Ecomflex Warehouse Tools",
   "short_name": "Ecomflex",
-  "description": "Warehouse tools",
+  "description": "Ecomflex staff tools: admin console, label reader and parcel scanner",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F4EEE2",
-  "theme_color": "#F4EEE2",
+  "background_color": "#F5F6F8",
+  "theme_color": "#FFFFFF",
   "icons": [
     {
       "src": "favicon.png",

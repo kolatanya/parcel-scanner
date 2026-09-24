@@ -3,22 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<meta name="theme-color" content="#F4EEE2">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Parcel Scanner</title>
+<title>Parcel scanner — Ecomflex</title>
+<meta name="description" content="Ecomflex staff tool: scan Royal Mail and DPD parcel barcodes into a list you can copy in one go.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://panel.ecomflex.co.uk/scanner.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>
 :root{
   /* ecomFLEX brand */
-  --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
-  --ink:#33334E; --navy:#48486C; --muted:#7C7C93;
+  --cream:#F5F6F8; --panel:#FFFFFF; --edge:#E7E8EE; --edge2:#D9DBE3;
+  --ink:#23233B; --navy:#48486C; --muted:#6F7189;
   --red:#EA3D49; --blue:#45B0C8; --deep:#2E8FA8;
   --ok:#2E8FA8; --warn:#B0761A; --bad:#D62F3C;
   --stock:#FFFFFF; --stock-ink:#33334E;
   /* the viewfinder stays dark, it is live video */
   --lens:#0B0E12;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans)}
@@ -28,6 +34,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 button{font-family:inherit;font-size:1rem}
 [hidden]{display:none!important}
 
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+a.back{display:inline-flex;align-items:center;gap:7px;color:var(--muted);text-decoration:none;font-size:1rem}
+a.back img{height:19px;width:auto;display:block}
+.bar h1{margin:0;padding-left:10px;border-left:1px solid var(--edge2);font-size:.95rem;font-weight:650;color:var(--navy);line-height:1.2}
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .count{font-size:2rem;font-weight:650;letter-spacing:-.02em;line-height:1;color:var(--navy)}
 .count small{display:block;font-size:.8rem;font-weight:400;color:var(--muted)}
@@ -106,7 +116,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
 @media (min-width:820px){
   .wrap{max-width:900px;display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start;
     padding-top:22px}
-  .wrap > .top{grid-column:1/-1}
+  .wrap > .top,.wrap > .bar{grid-column:1/-1}
   .view,.status,.primary,.manual{grid-column:1}
   .list,.empty,.actions,.foot{grid-column:2;margin-top:0}
   .list{max-height:none}
@@ -117,6 +127,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
 </head>
 <body>
 <div class="wrap">
+
+  <header class="bar"><a class="back" href="index.html" aria-label="Back to the warehouse tools">‹ <img src="logo.png" alt="ecomFLEX"></a><h1>Parcel scanner</h1></header>
 
   <div class="top">
     <div class="count"><span id="n">0</span><small id="nlabel">nothing scanned yet</small></div>

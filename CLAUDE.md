@@ -4,7 +4,7 @@ This file is read automatically by Claude Code at the start of every session. It
 
 **This repository is public.** Never add passwords, secret keys, `service_role` keys, Stripe secret keys (`sk_…`, `whsec_…`), bank account numbers, or customer data to any file here.
 
-Last updated: 23 September 2026.
+Last updated: 24 September 2026.
 
 ---
 
@@ -74,30 +74,46 @@ Mert wanted everything free, on his phone, and editable without a developer. Sta
 | Supabase URL | `https://padskodcofmmrwzuszym.supabase.co` |
 | Stripe webhook address (when set up) | `https://padskodcofmmrwzuszym.supabase.co/functions/v1/stripe-webhook` |
 | Company website | `ecomflex.co.uk` (run by someone else; its PANEL button is meant to link to the customer panel) |
+| **Custom domain (being connected)** | `https://panel.ecomflex.co.uk/` (see "Custom domain" below). Once GitHub Pages has it, every `kolatanya.github.io/parcel-scanner/…` address redirects there by itself. |
 
 - `ecomflex-config.js` holds `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `STRIPE_PUBLISHABLE_KEY`. All three are public by design. The Stripe key is empty until Stripe is set up; while empty, the card top-up box stays hidden. **Never** put the `service_role` key, any `sb_secret_…` key, or Stripe's `sk_…`/`whsec_…` in this repo — those go in Supabase → Edge Functions → Secrets.
 - Admin login is `info@ecomflex.co.uk`. The password is known to the owner and is **not** recorded here.
 - Admins are listed in the `public.admins` table. Adding a staff member needs two steps: add their email in admin → Staff, **and** create their login in Supabase → Authentication → Users.
 - Supabase settings already made: **"Confirm email" is turned OFF** (Authentication → Sign In / Providers → Email), so accounts are usable immediately.
 
+### Custom domain `panel.ecomflex.co.uk`
+
+Order matters, or the live site breaks:
+1. **DNS first.** Whoever controls the DNS for `ecomflex.co.uk` adds one record: type `CNAME`, name `panel`, value `kolatanya.github.io`. Nothing else on the domain changes (the main website and email keep working).
+2. **Then GitHub:** repository → Settings → Pages → Custom domain → `panel.ecomflex.co.uk` → Save. GitHub writes a `CNAME` file into the repo itself. Wait for the DNS check to go green, then tick **Enforce HTTPS** (the certificate can take up to an hour).
+3. **Then Supabase:** Authentication → URL Configuration → Site URL `https://panel.ecomflex.co.uk`; add `https://panel.ecomflex.co.uk/**` under Redirect URLs (keep the github.io one until everyone has moved).
+4. Optional but recommended: GitHub → your profile Settings → Pages → **Add a verified domain** → `ecomflex.co.uk` (a TXT record), so nobody else's GitHub Pages site can claim a subdomain of it.
+5. Afterwards: update the welcome message template (admin → Customers → Bank details) and the website's PANEL button to the new address. People are signed out once (sign-ins are stored per address) and staff reinstall the home-screen app from the new address.
+
+**Never upload a `CNAME` file by hand before the DNS record exists**: GitHub would start redirecting to an address that does not answer yet, and every page would go down.
+
+The canonical tags, `robots.txt` and `sitemap.xml` already use `https://panel.ecomflex.co.uk/`. The `create-topup` Edge Function already allows that origin.
+
 ---
 
 ## 4. Files
 
-All files sit **flat in the repository root**. There are no folders except a stray `New folder` from an early upload mistake (an old copy of the scanner, hub and icons; unused and harmless).
+All files sit **flat in the repository root**. There are no folders except a stray `New folder` from an early upload mistake (an old copy of the scanner, hub and icons). It is publicly reachable and should be deleted on GitHub.
 
 | File | Purpose |
 |---|---|
-| `index.html` | The Ecomflex hub. A `TOOLS` array at the top of its script lists the tiles. Adding a tool = upload its file, add one object to `TOOLS`. |
+| `index.html` | "Warehouse tools", the staff home page and the site root. A `TOOLS` array at the top of its script lists the cards (`icon` is one of the SVG symbols in the page). Also links customers to the panel. |
 | `scanner.html` | Live camera barcode scanner for Royal Mail and DPD. |
 | `labels.html` | Label reader: drop Royal Mail label PDFs, get one spreadsheet row per parcel/SKU. |
 | `panel.html` | Current customer panel, Turkish. Will be replaced by `panel2.html`. |
 | `panel2.html` | **New customer panel**, Turkish, modelled on the competitor's. See 8. |
-| `admin.html` | Admin tool, English. The main staff application. |
+| `admin.html` | Admin console, English. The main staff application (v5). |
+| `404.html` | Custom "page not found" page (Turkish, short English line). GitHub Pages serves it for any missing address. |
+| `robots.txt`, `sitemap.xml` | For search engines. The sitemap lists only the public pages (`panel.html`, `signup.html`). |
 | `signup.html` | Public self-signup for new customers, Turkish. |
 | `shared.js` | `window.EFCopy(text, label, button)` — clipboard copy with a toast, beep, vibration and button flash. Used everywhere. |
 | `ecomflex-config.js` | `window.ECOMFLEX = { SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLISHABLE_KEY }`. |
-| `manifest.webmanifest`, `sw.js` | PWA manifest and service worker. |
+| `manifest.webmanifest`, `sw.js` | PWA manifest ("Ecomflex Warehouse Tools", staff app, starts at the hub) and service worker. Customer pages must **not** link this manifest. |
 | `logo.png`, `favicon.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` | Branding. `logo.png` is transparent (works on white and cream). |
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll. **Not currently in the repo**; harmless while no file starts with `_`. |
 | `_shared.js` | Old copy of `shared.js` from the underscore mistake. Unused; can be deleted. |
@@ -112,7 +128,7 @@ All files sit **flat in the repository root**. There are no folders except a str
 
 Two looks exist:
 
-**Old tools** (`admin.html`, `panel.html`, `scanner.html`, `labels.html`, `index.html`, `signup.html`): light beige.
+**Old look** (only `panel.html` and `signup.html` now): light beige.
 
 ```css
 --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
@@ -132,7 +148,17 @@ Rules for both:
 - Status colours: blue = done, amber = needs attention, red = problem, grey = cancelled/passive. Money in green/red.
 - Monospace for codes, SKUs, tracking numbers and money.
 - **Phone layout must work well.** Old tools: wider layouts only inside `@media (min-width:1100px)` and `(min-width:1560px)`. `panel2.html`: sidebar becomes a slide-in menu under 980px; tables become stacked cards under 760px.
-- A version badge (e.g. `v4`) sits in the top right of admin so Mert can see which build loaded.
+- A version badge (`v5`) shows which admin build loaded: in the user card at the bottom of the admin menu, and under the sign-in box.
+
+**Admin console, hub, scanner, label reader** (24 Sep 2026): same colours and Inter font as `panel2.html`, but denser and more like a business console: white left menu grouped as overview / operations / customers / customer panel / insights / settings / tools, page header with a small lowercase group name, one `h1` and a one-line description, a toolbar row (segmented tabs left, actions right), list panels with expandable rows, tables with small lowercase headers, 12px corners, **dark navy (`#23233B`) for action buttons**, logo red only for brand accents, badges and the active menu item. Pills in sentence case. Scanner and label reader only had their colour variables and font switched; their layouts are unchanged.
+
+### Page tags (every page)
+
+- A unique `<title>`, a `<meta name="description">`, a `<meta name="robots">` and a self-referencing `<link rel="canonical" href="https://panel.ecomflex.co.uk/…">`.
+- `index, follow` only on `panel.html` and `signup.html` (they also carry Open Graph tags for link previews). Everything else (admin, hub, scanner, label reader, `panel2.html`, 404) is `noindex`.
+- **Exactly one `<h1>` per file.** Admin keeps one `h1` element and moves it from the sign-in card into the page header on sign-in; its text and the tab title change per section (`Orders · Ecomflex Admin`). `panel2.html` keeps its `h1` on the sign-in card; its page headings are `h2` styled the same.
+- `lang="tr"` on customer pages, `lang="en-GB"` on staff pages.
+- When `panel2.html` becomes `panel.html`, give it `panel.html`'s title, description, `index, follow`, canonical and Open Graph tags.
 
 ---
 
@@ -245,9 +271,11 @@ Notifications are worked out in the browser from the customer's own records (dis
 
 The older, simpler panel. Still live until `panel2.html` is approved; then `panel2.html` is renamed to `panel.html`. Has the phase 8 balance page and (23 Sep) the FBA label-file fix.
 
-### `admin.html` — admin tool (English, v4)
+### `admin.html` — admin console (English, v5)
 
-Sections: **Today, Orders, Inbound, Stock, Services, Support, Customers, Access, Content, Reports, Staff**.
+Sections: **Today, Orders, Inbound, Services, Stock, Customers, Support, Access requests, Content, Reports, Staff**, plus links to the label reader, scanner and customer panel. Each section has an address (`admin.html#orders`, `#customers`, `#reports`…), so refresh keeps the place and Back works. On phones the menu slides in from a button at the top left.
+
+v5 (24 Sep 2026) was a redesign only: every element ID, database call and workflow is the same as v4. Changes beyond looks: Today groups waiting work into panels with "View all"; Orders lists customers with waiting orders first and folds dispatched orders behind "Show N dispatched orders"; the customer table's less common actions (adjust balance, copy welcome message, new access code, TEST +£50) sit under a **More** menu next to **Record top-up**; the audit log shows amounts in pounds.
 
 - **Today**: tiles incl. bank transfers to confirm and support tickets waiting.
 - **Stock**: per customer; quantity, damaged, location, threshold, ASIN, barcode, active.
@@ -273,21 +301,26 @@ Sections: **Today, Orders, Inbound, Stock, Services, Support, Customers, Access,
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v18`) and add any new file to its `CORE` list.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v19`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 
-## 10. Current state (23 Sep 2026)
+## 10. Current state (24 Sep 2026)
 
 ### Deployed and working
 
 - Hub, scanner, label reader, `signup.html`.
 - Phase 7 (fixes) and phase 8 (balance page, payment declarations, TEST +£50 button, admin v3). Mert tested: self-signup + code login, declaration → admin confirm → unlock, test top-up, Excel download. Bank details are entered.
+- Phase 9 (23 Sep): `supabase-phase9.sql` run; `panel2.html`, admin v4, `panel.html` FBA fix, `sw.js` v18 uploaded.
 
 ### Ready to deploy (built and tested, not uploaded)
 
-- `supabase-phase9.sql`, `panel2.html`, `admin.html` v4, `panel.html` (FBA label fix), `sw.js` v18, `CLAUDE.md`.
-- Tested with: 78 database checks (PGlite), 52 customer click-through checks and 27 admin checks (headless Chrome against an in-browser fake Supabase), screenshots at desktop and phone sizes, and an independent code review whose findings were all fixed (see 11: 14–16).
+- Admin v5 redesign, new hub, `404.html`, `robots.txt`, `sitemap.xml`, page tags and single `h1` on every page, scanner/label reader colours, `manifest.webmanifest`, `sw.js` v19, `CLAUDE.md`. No SQL.
+- Tested with: 48 admin click-through checks (the 27 from v4 plus section addresses, single `h1`, tab titles, Back button, folded orders, dispatch call, More menu, TEST top-up amount, phone menu, no sideways scrolling), the 52 customer checks on `panel2.html` again, a page audit (title, description, robots, canonical, one `h1` per file, no duplicate titles), the 404 page served at both `/` and `/parcel-scanner/`, and screenshots at 1440×900 and 390×844.
+
+### Custom domain
+
+- Waiting on the DNS record for `panel.ecomflex.co.uk` (see 3). Then GitHub Pages and Supabase settings.
 
 ### Waiting
 
@@ -320,6 +353,9 @@ Sections: **Today, Orders, Inbound, Stock, Services, Support, Customers, Access,
 14. **innerHTML with customer-typed text in admin.** admin's `msg()` used innerHTML, and messages included SKUs, company names and emails that customers type. A customer could have run a script in a staff session (and moved balances). `msg()`/`busy()` are now plain text; never build admin HTML from data — use `textContent`.
 15. **Saving a whole row from a page loaded earlier.** The stock editor sent every column on Save, so a stale page could undo dispatches (quantity) or customer edits. Save sends only the fields that changed.
 16. **"Signed in" is not "customer".** Anyone can create a Supabase login with the public key. Customer-only functions check `is_customer()`; RLS insert policies must not let customers set staff-owned columns (e.g. `inbound_items.qty_received`).
+17. **A `CNAME` file before the DNS record exists** takes the whole site down (GitHub redirects to an address that does not answer). Let GitHub write it from Settings → Pages after DNS is in place.
+18. **Relative links on the 404 page.** GitHub serves `404.html` at whatever address was missing (`/a/b/c`), so `panel.html` would resolve to `/a/b/panel.html` and 404 again. The page sets a `<base>` from a tiny script at the top of `<head>` (`/parcel-scanner/` on github.io, `/` on the custom domain). Keep that script first.
+19. **The staff app manifest on a customer page.** `panel2.html` linked `manifest.webmanifest`, so a customer who installed it would have got the staff hub. Removed; customer pages have no manifest.
 
 ---
 
@@ -330,6 +366,7 @@ Sections: **Today, Orders, Inbound, Stock, Services, Support, Customers, Access,
 - **Behaviour**: `playwright-core` driving the installed Chrome headless, against a copy of the page served locally with a fake in-browser Supabase (`window.supabase.createClient` returning a client with `from/rpc/auth/storage/functions` backed by sample data, recording every call). Click through each action and assert on the recorded calls; take full-page screenshots at 1440×900 and 390×844 and look at them.
 - **Edge Functions**: run the `.ts` files in Node with a `Deno` shim and a fake `fetch`; sign test webhook bodies with HMAC-SHA256 like Stripe.
 - **Label parsing**: reportlab test PDFs through the page's parsing functions via pdfjs-dist 3.11.174.
+- **Page tags**: for every `.html` check one `<h1`, a unique `<title>`, description, robots and canonical. Test `404.html` with a small local server that serves the repo at both `/` and `/parcel-scanner/` and answers missing paths with `404.html` and status 404.
 
 ---
 
@@ -338,10 +375,9 @@ Sections: **Today, Orders, Inbound, Stock, Services, Support, Customers, Access,
 - **Stripe live** (built; needs Mert's Stripe account).
 - **Marketplace connections** (eBay/Shopify orders straight into shipments) — needs developer accounts and approvals.
 - **Create UK shipping labels** from the panel (Royal Mail Click & Drop API) — needs an account with API access.
-- **Admin redesign** in the new panel's style.
 - **Turkish/English switch** in the customer panel.
 - **Automatic emails** via Resend (free up to 3,000/month) through a Supabase Edge Function (e.g. "your parcel has shipped", "ticket answered").
 - **Customer directory import** from a spreadsheet of ~200 customers with shelf numbers. It contains **plain-text passwords**: never import those; recommend a password manager.
-- **Custom domain** `panel.ecomflex.co.uk` (already allowed in the `create-topup` function's CORS list).
+- **Root address for customers**: `panel.ecomflex.co.uk/` currently opens the staff hub (with a link to the customer panel). It could open the customer sign-in instead, with the hub moved to its own page. Not done without asking: it changes the staff app's start page.
 - **Moving label-reader product names into Supabase.**
 - **Supabase Pro**, recommended before real money flows through the ledger.

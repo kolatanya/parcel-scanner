@@ -1,7 +1,7 @@
 /* Ecomflex offline cache.
    Pages are fetched from the network first so an update always lands,
    with the cached copy used only when the phone is offline. */
-var CACHE = 'ecomflex-v18';
+var CACHE = 'ecomflex-v19';
 var CORE = ['./', 'index.html', 'scanner.html', 'labels.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'logo.png', 'favicon.png', 'apple-touch-icon.png', 'admin.html', 'panel.html', 'signup.html', 'ecomflex-config.js', 'shared.js', 'panel2.html'];
 
 self.addEventListener('install', function(e){
@@ -21,8 +21,8 @@ self.addEventListener('fetch', function(e){
   if(new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
     fetch(req).then(function(res){
-      var copy = res.clone();
-      caches.open(CACHE).then(function(c){ c.put(req, copy); });
+      /* keep only good answers: a 404 page must never become the offline copy */
+      if(res.ok){ var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put(req, copy); }); }
       return res;
     }).catch(function(){
       return caches.match(req).then(function(hit){ return hit || caches.match('index.html'); });

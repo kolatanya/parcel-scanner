@@ -6,11 +6,13 @@
 <meta name="theme-color" content="#FFFFFF">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<title>Müşteri Paneli — ecomFLEX</title>
+<title>Müşteri Paneli (önizleme) — ecomFLEX</title>
+<meta name="description" content="ecomFLEX müşteri panelinin yeni sürümü: ürünler, stok, gönderiler, bakiye, faturalar ve destek tek yerde.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://panel.ecomflex.co.uk/panel2.html">
 <style>
 /* =====================================================================
    ecomFLEX customer panel — colours from the ecomFLEX website and logo:
@@ -88,7 +90,7 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
   background:radial-gradient(1200px 500px at 50% -10%,#FFFFFF 0%,var(--bg) 60%)}
 .authcard{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:30px 28px;box-shadow:var(--shadow)}
 .authcard .logo{height:34px;display:block;margin:0 auto 18px}
-.authcard h1{font-size:1.35rem;margin:0 0 4px;text-align:center;letter-spacing:-.01em}
+.authcard h1,.authcard h2{font-size:1.35rem;margin:0 0 4px;text-align:center;letter-spacing:-.01em}
 .authcard .sub{color:var(--muted);text-align:center;margin:0 0 22px;font-size:.9rem}
 .authcard .codein{font-family:var(--mono);font-size:1.45rem;letter-spacing:.24em;text-align:center;text-transform:uppercase;height:56px}
 .authcard .or{display:flex;align-items:center;gap:10px;color:var(--faint);font-size:.76rem;margin:18px 0}
@@ -183,12 +185,12 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .ph::after{content:"";position:absolute;right:-60px;top:-80px;width:320px;height:240px;border-radius:50%;
   background:radial-gradient(closest-side,rgba(69,176,200,.10),transparent);pointer-events:none}
 .eyebrow{font-size:.68rem;letter-spacing:.14em;color:var(--muted);text-transform:lowercase;font-weight:500}
-.ph h1{font-size:1.75rem;line-height:1.15;font-weight:650;letter-spacing:-.025em;margin:6px 0 6px;color:var(--ink)}
+.ph h1,.ph h2{font-size:1.75rem;line-height:1.15;font-weight:650;letter-spacing:-.025em;margin:6px 0 6px;color:var(--ink)}
 .ph p{margin:0;color:var(--muted);font-size:.88rem;max-width:720px}
 .ph>div:first-child{flex:1 1 380px;min-width:0}
 .ph .acts{display:flex;gap:8px;flex-wrap:wrap;position:relative;z-index:1}
 .greet{margin:4px 0 20px}
-.greet h1{font-size:2rem;letter-spacing:-.03em;font-weight:650;margin:6px 0 4px}
+.greet h1,.greet h2{font-size:2rem;letter-spacing:-.03em;font-weight:650;margin:6px 0 4px}
 .greet p{margin:0;color:var(--muted)}
 
 /* ---------- cards ---------- */
@@ -441,8 +443,8 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
 @media (max-width:760px){
   html,body{font-size:14.5px}
   .ph{padding:18px;border-radius:16px}
-  .ph h1{font-size:1.45rem}
-  .greet h1{font-size:1.55rem}
+  .ph h1,.ph h2{font-size:1.45rem}
+  .greet h1,.greet h2{font-size:1.55rem}
   .form{grid-template-columns:1fr}
   .stat .v{font-size:1.55rem}
   .filters{grid-template-columns:1fr 1fr}
@@ -558,7 +560,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
 <div class="auth" id="v_denied" hidden>
   <div class="authcard">
     <img class="logo" src="logo.png" alt="ecomFLEX">
-    <h1>Hesabınız bulunamadı</h1>
+    <h2>Hesabınız bulunamadı</h2>
     <p class="sub"><span id="dn_email"></span> adresiyle kayıtlı bir müşteri hesabı bulamadık.</p>
     <div class="note info">Yeni müşteriyseniz kayıt formunu doldurun. Kayıtlı olduğunuzu düşünüyorsanız
       <a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a> adresine yazın.</div>
@@ -570,7 +572,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
 <div class="auth" id="v_error" hidden>
   <div class="authcard">
     <img class="logo" src="logo.png" alt="ecomFLEX">
-    <h1>Bağlantı kurulamadı</h1>
+    <h2>Bağlantı kurulamadı</h2>
     <div class="note bad" id="e_text" style="margin-top:12px">Sunucuya ulaşılamıyor. Lütfen biraz sonra tekrar deneyin.</div>
     <button class="btn block" style="margin-top:14px" onclick="location.reload()">Tekrar dene</button>
   </div>
@@ -652,7 +654,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
 
       <!-- ===== dashboard ===== -->
       <section class="page" id="pg-dashboard" hidden>
-        <div class="greet"><div class="eyebrow" id="d_company">—</div><h1 id="d_hello">Merhaba</h1>
+        <div class="greet"><div class="eyebrow" id="d_company">—</div><h2 id="d_hello">Merhaba</h2>
           <p>Stoğunuzun, bakiyenizin ve açık depo işlerinizin özeti.</p></div>
         <div class="dash">
           <div class="left">
@@ -710,7 +712,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== products ===== -->
       <section class="page" id="pg-products" hidden>
         <div class="ph">
-          <div><div class="eyebrow">ana veriler</div><h1>Ürünler</h1>
+          <div><div class="eyebrow">ana veriler</div><h2>Ürünler</h2>
             <p>Depomuzda tuttuğumuz ürünlerinizin listesi. Gönderi ve gelen kargo formlarında ürünleri buradan seçersiniz.</p></div>
           <div class="acts">
             <button class="btn" id="pr_tpl" type="button"><svg class="i"><use href="#i-download"/></svg>Şablon indir</button>
@@ -731,7 +733,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== recipients ===== -->
       <section class="page" id="pg-recipients" hidden>
         <div class="ph">
-          <div><div class="eyebrow">ana veriler</div><h1>Alıcılar</h1>
+          <div><div class="eyebrow">ana veriler</div><h2>Alıcılar</h2>
             <p>Sık gönderi yaptığınız alıcıları kaydedin; yeni gönderi oluştururken tek tıkla seçin.</p></div>
           <div class="acts">
             <button class="btn" id="rc_import" type="button"><svg class="i"><use href="#i-refresh"/></svg>Geçmiş gönderilerden aktar</button>
@@ -744,7 +746,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== inventory ===== -->
       <section class="page" id="pg-inventory" hidden>
         <div class="ph">
-          <div><div class="eyebrow">depo</div><h1>Stok</h1>
+          <div><div class="eyebrow">depo</div><h2>Stok</h2>
             <p>Depomuzdaki güncel stok miktarlarınız. Miktarlar her gönderide ve teslim alınan her kargoda otomatik güncellenir.</p></div>
           <div class="acts">
             <button class="btn" id="iv_xls" type="button"><svg class="i"><use href="#i-download"/></svg>Excel indir</button>
@@ -767,7 +769,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== shipments ===== -->
       <section class="page" id="pg-shipments" hidden>
         <div class="ph">
-          <div><div class="eyebrow">operasyonlar</div><h1>Gönderiler</h1>
+          <div><div class="eyebrow">operasyonlar</div><h2>Gönderiler</h2>
             <p>Müşterilerinize gönderilecek siparişler. Gönderi yola çıktığında kargo firması ve takip numarası burada görünür.</p></div>
           <div class="acts">
             <button class="btn" id="sh_xls" type="button"><svg class="i"><use href="#i-download"/></svg>Excel indir</button>
@@ -791,7 +793,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== goods in ===== -->
       <section class="page" id="pg-goodsin" hidden>
         <div class="ph">
-          <div><div class="eyebrow">depo</div><h1>Gelen Kargo</h1>
+          <div><div class="eyebrow">depo</div><h2>Gelen Kargo</h2>
             <p>Depomuza gönderdiğiniz kargoları önceden bildirin. Teslim alındığında sayılır ve sayılan adet stoğunuza eklenir.</p></div>
           <div class="acts"><button class="btn primary" id="gi_new" type="button"><svg class="i"><use href="#i-plus"/></svg>Yeni bildirim</button></div>
         </div>
@@ -808,7 +810,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== services ===== -->
       <section class="page" id="pg-services" hidden>
         <div class="ph">
-          <div><div class="eyebrow">operasyonlar</div><h1>Hizmet Talepleri</h1>
+          <div><div class="eyebrow">operasyonlar</div><h2>Hizmet Talepleri</h2>
             <p>İade, kargo yönlendirme ve Amazon FBA hazırlık talepleriniz ile ekibimizin yanıtları.</p></div>
           <div class="acts"><button class="btn primary" id="sv_new" type="button"><svg class="i"><use href="#i-plus"/></svg><span id="sv_newt">Yeni iade bildirimi</span></button></div>
         </div>
@@ -831,7 +833,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== balance ===== -->
       <section class="page" id="pg-balance" hidden>
         <div class="ph">
-          <div><div class="eyebrow">muhasebe</div><h1>Bakiyeniz</h1><p>Tüm yükleme ve harcama kayıtlarınız.</p></div>
+          <div><div class="eyebrow">muhasebe</div><h2>Bakiyeniz</h2><p>Tüm yükleme ve harcama kayıtlarınız.</p></div>
           <div class="acts" style="align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:8px 8px 8px 14px">
             <div><div class="eyebrow">güncel bakiye</div><span class="pill green" id="bl_pill" style="height:26px;font-size:.86rem;font-family:var(--mono);margin-top:3px">£0.00</span></div>
             <button class="btn sm" id="bl_xls" type="button" style="margin-left:10px"><svg class="i"><use href="#i-download"/></svg>Excel indir</button>
@@ -883,7 +885,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== payment declarations ===== -->
       <section class="page" id="pg-declarations" hidden>
         <div class="ph">
-          <div><div class="eyebrow">muhasebe</div><h1>Ödeme Bildirimleri</h1>
+          <div><div class="eyebrow">muhasebe</div><h2>Ödeme Bildirimleri</h2>
             <p>Banka havalesiyle yaptığınız ödemeleri buradan bildirin. Ödeme hesabımıza ulaştığında onaylanır ve bakiyenize eklenir.</p></div>
           <div class="acts"><button class="btn primary" id="dc_new" type="button"><svg class="i"><use href="#i-plus"/></svg>Ödeme bildirimi oluştur</button></div>
         </div>
@@ -903,7 +905,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== invoices ===== -->
       <section class="page" id="pg-invoices" hidden>
         <div class="ph">
-          <div><div class="eyebrow">muhasebe</div><h1>Faturalar</h1><p>Şirketiniz için yüklediğimiz faturaları görüntüleyin ve indirin.</p></div>
+          <div><div class="eyebrow">muhasebe</div><h2>Faturalar</h2><p>Şirketiniz için yüklediğimiz faturaları görüntüleyin ve indirin.</p></div>
         </div>
         <div id="t_invoices"></div>
       </section>
@@ -911,7 +913,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== monthly summary ===== -->
       <section class="page" id="pg-monthly" hidden>
         <div class="ph">
-          <div><div class="eyebrow">muhasebe</div><h1>Aylık Özet</h1><p>Seçtiğiniz aydaki gönderi, depo ve hizmet hareketleriniz.</p></div>
+          <div><div class="eyebrow">muhasebe</div><h2>Aylık Özet</h2><p>Seçtiğiniz aydaki gönderi, depo ve hizmet hareketleriniz.</p></div>
           <div class="acts" style="align-items:flex-end">
             <div class="fld" style="width:190px"><label for="mo_month">Ay</label><input type="month" id="mo_month"></div>
             <button class="btn" id="mo_copy" type="button"><svg class="i"><use href="#i-copy"/></svg>Özeti kopyala</button>
@@ -924,7 +926,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== price list ===== -->
       <section class="page" id="pg-prices" hidden>
         <div class="ph">
-          <div><div class="eyebrow">araçlar</div><h1>Fiyat Listesi</h1><p>Hizmetlerimizin güncel fiyatları. Kargo ücretleri gönderi sırasında ayrıca bildirilir.</p></div>
+          <div><div class="eyebrow">araçlar</div><h2>Fiyat Listesi</h2><p>Hizmetlerimizin güncel fiyatları. Kargo ücretleri gönderi sırasında ayrıca bildirilir.</p></div>
         </div>
         <div class="filters" data-f="prices">
           <div class="fld"><label>kategori</label><select id="xf_cat"><option value="">Tümü</option></select></div>
@@ -935,7 +937,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== documents ===== -->
       <section class="page" id="pg-documents" hidden>
         <div class="ph">
-          <div><div class="eyebrow">araçlar</div><h1>Belgeler</h1><p>Sözleşmeler, ödeme yöntemleri ve paylaştığımız diğer belgeler.</p></div>
+          <div><div class="eyebrow">araçlar</div><h2>Belgeler</h2><p>Sözleşmeler, ödeme yöntemleri ve paylaştığımız diğer belgeler.</p></div>
         </div>
         <div class="docs" id="docs"></div>
       </section>
@@ -943,7 +945,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== warehouse address ===== -->
       <section class="page" id="pg-address" hidden>
         <div class="ph">
-          <div><div class="eyebrow">araçlar</div><h1>Depo Adresim</h1><p>Ürünlerinizi ve iadelerinizi bu adrese gönderin. Birim numaranızı yazmayı unutmayın.</p></div>
+          <div><div class="eyebrow">araçlar</div><h2>Depo Adresim</h2><p>Ürünlerinizi ve iadelerinizi bu adrese gönderin. Birim numaranızı yazmayı unutmayın.</p></div>
         </div>
         <div class="row2" style="align-items:start">
           <div class="card"><h3>Gönderim adresi</h3><p class="csub">Tedarikçileriniz ve iadeler için.</p><div id="ad_box" style="margin-top:14px"></div></div>
@@ -961,7 +963,7 @@ textarea.paste{width:100%;min-height:160px;border:1px solid var(--line2);border-
       <!-- ===== support ===== -->
       <section class="page" id="pg-support" hidden>
         <div class="ph">
-          <div><div class="eyebrow">destek</div><h1>Destek Talepleri</h1><p>Sorularınızı ekibimize yazın; yanıtlarımızı burada görün.</p></div>
+          <div><div class="eyebrow">destek</div><h2>Destek Talepleri</h2><p>Sorularınızı ekibimize yazın; yanıtlarımızı burada görün.</p></div>
           <div class="acts"><button class="btn primary" id="tk_new" type="button"><svg class="i"><use href="#i-plus"/></svg>Yeni talep</button></div>
         </div>
         <div class="filters" data-f="support">

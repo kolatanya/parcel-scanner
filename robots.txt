@@ -1,0 +1,9 @@
+# ecomFLEX panel: panel.ecomflex.co.uk
+# Staff pages carry their own "noindex" tag, so they are not listed here.
+User-agent: *
+Allow: /
+Disallow: /*.sql$
+Disallow: /*.ts$
+Disallow: /*.md$
+
+Sitemap: https://panel.ecomflex.co.uk/sitemap.xml

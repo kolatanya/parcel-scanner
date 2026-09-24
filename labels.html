@@ -3,22 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F4EEE2">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Label reader — Ecomflex</title>
+<meta name="description" content="Ecomflex staff tool: drop in shipping label PDFs and get one ready-to-paste line per parcel.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://panel.ecomflex.co.uk/labels.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>
 :root{
   /* ecomFLEX brand */
-  --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
-  --ink:#33334E; --navy:#48486C; --muted:#7C7C93;
+  --cream:#F5F6F8; --panel:#FFFFFF; --edge:#E7E8EE; --edge2:#D9DBE3;
+  --ink:#23233B; --navy:#48486C; --muted:#6F7189;
   --red:#EA3D49; --blue:#45B0C8; --deep:#2E8FA8;
   --ok:#2E8FA8; --warn:#B0761A; --bad:#D62F3C;
   --stock:#FFFFFF; --stock-ink:#33334E;
   /* the viewfinder stays dark, it is live video */
   --lens:#0B0E12;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans)}
@@ -72,7 +78,7 @@ h1{margin:0;font-size:1.35rem;font-weight:650;letter-spacing:-.02em;color:var(--
 .edit{padding:0 12px 12px;border-top:1px solid var(--edge)}
 .edit .f{margin-top:9px}
 .edit label{display:block;font-size:.68rem;color:var(--muted);margin-bottom:2px}
-.edit input{width:100%;padding:9px;border-radius:6px;border:1px solid var(--edge2);background:#FFFDF8;color:var(--stock-ink);font-family:var(--mono);font-size:.86rem}
+.edit input{width:100%;padding:9px;border-radius:6px;border:1px solid var(--edge2);background:#FFFFFF;color:var(--stock-ink);font-family:var(--mono);font-size:.86rem}
 .edit input.miss{border-color:#C9932A;background:#FDF6E1}
 .edit .drop-row{margin-top:11px;width:100%;padding:9px;border-radius:6px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer;font-size:.85rem}
 
