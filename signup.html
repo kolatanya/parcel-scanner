@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F4EEE2">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <title>Yeni Müşteri Kaydı — ecomFLEX</title>
 <meta name="description" content="ecomFLEX’e yeni müşteri olarak kaydolun: İngiltere’deki HMRC onaylı fulfilment merkezimizde depolama, paketleme ve gönderim.">
 <meta name="robots" content="index, follow">
@@ -20,145 +23,273 @@
 <meta name="twitter:card" content="summary">
 <style>
 :root{
-  --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
-  --ink:#33334E; --navy:#48486C; --muted:#7C7C93;
-  --red:#EA3D49; --blue:#45B0C8; --deep:#2E8FA8;
-  --ok:#2E8FA8; --warn:#B0761A; --bad:#D62F3C;
+  --bg:#F5F6F8; --surface:#FFFFFF; --soft:#FAFAFB; --soft2:#F3F4F7;
+  --line:#E7E8EE; --line2:#D9DBE3;
+  --ink:#23233B; --ink2:#34344F; --navy:#48486C; --muted:#6F7189; --faint:#A2A4B5;
+  --red:#EA3D49; --red2:#D32F3B; --redsoft:#FDEEEF; --redline:#F6CBD0;
+  --blue:#45B0C8; --deep:#2E8FA8; --bluesoft:#EBF6F9; --blueline:#C7E5EE; --bluetext:#1B6E83;
+  --amber:#9A6412; --ambersoft:#FDF5E4; --amberline:#F0DCAE;
+  --green:#1F7A52; --greensoft:#E9F5EE; --greenline:#C0E2CF;
+  --radius:12px; --radius-sm:8px;
+  --shadow:0 1px 2px rgba(24,24,48,.04);
+  --shadow-md:0 1px 2px rgba(24,24,48,.04),0 8px 28px rgba(24,24,48,.06);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans)}
-body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
-.wrap{max-width:660px;margin:0 auto;padding:26px 16px 50px}
-button{font-family:inherit;font-size:1rem}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+body{padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
 [hidden]{display:none!important}
+a{color:var(--deep)}
+::placeholder{color:var(--faint);opacity:1}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
-header{padding-bottom:18px;border-bottom:2px solid var(--edge2);margin-bottom:20px}
-header img{height:38px;width:auto;display:block}
-header h1{margin:14px 0 0;font-size:1.35rem;font-weight:650;letter-spacing:-.015em;color:var(--navy)}
-.intro{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:18px;margin-bottom:18px}
-.intro p{margin:0 0 9px;font-size:.92rem}
-.intro p:last-child{margin-bottom:0}
-.intro b{color:var(--red)}
-.hmrc{display:inline-block;background:#FDF6E1;border:1px solid #E4D3A0;color:#7A5210;
-  border-radius:7px;padding:5px 10px;font-size:.85rem;font-weight:600;margin-top:4px}
+/* top bar */
+.top{background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.top .in{max-width:880px;margin:0 auto;height:64px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top img{height:28px;width:auto;display:block}
+.top .have{font-size:.84rem;color:var(--muted);white-space:nowrap}
+.top .have a{color:var(--ink);font-weight:600;text-decoration:none;margin-left:4px}
+.top .have a:hover{text-decoration:underline}
 
-.card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:18px;margin-bottom:14px}
-h2{margin:0 0 4px;font-size:1.05rem;font-weight:650;color:var(--navy)}
-.sub{margin:0 0 14px;font-size:.84rem;color:var(--muted)}
-.f{margin-bottom:13px}
-.f label.top{display:block;font-size:.82rem;color:var(--ink);margin-bottom:5px;font-weight:600}
-.f .req{color:var(--red)}
+.wrap{max-width:880px;margin:0 auto;padding:36px 16px 56px}
+
+/* page header */
+.head{margin:0 0 26px}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:lowercase;color:var(--red);margin:0 0 6px}
+.head h1{margin:0;font-size:1.9rem;font-weight:700;letter-spacing:-.025em;line-height:1.2;color:var(--ink)}
+.head .lead{margin:10px 0 0;max-width:640px;color:var(--muted);font-size:.95rem}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:0;list-style:none}
+.facts li{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:999px;background:var(--surface);
+  border:1px solid var(--line);font-size:.8rem;font-weight:500;color:var(--ink2);box-shadow:var(--shadow)}
+.facts svg.i{width:15px;height:15px;color:var(--deep)}
+
+/* sections */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin:0 0 14px;box-shadow:var(--shadow)}
+.sec{display:grid;grid-template-columns:34px 1fr;gap:0 16px}
+.num{width:30px;height:30px;border-radius:50%;background:var(--soft2);border:1px solid var(--line);display:grid;place-items:center;
+  font-size:.8rem;font-weight:700;color:var(--navy);margin-top:1px}
+.sec h2{margin:0;font-size:1.02rem;font-weight:650;letter-spacing:-.01em;color:var(--ink)}
+.sec .sub{margin:3px 0 18px;font-size:.84rem;color:var(--muted)}
+.sec .body{grid-column:2}
+.req{color:var(--red)}
+.grid{display:grid;gap:0 16px}
+.f{margin-bottom:16px;min-width:0}
+.f:last-child{margin-bottom:0}
+.f label.lab{display:block;font-size:.78rem;font-weight:600;color:var(--ink2);margin-bottom:6px}
 .f input[type=text],.f input[type=email],.f input[type=tel],.f textarea{
-  width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;
-  color:var(--ink);font-family:inherit;font-size:1rem}
-.f textarea{min-height:92px;resize:vertical}
-.f .err{font-size:.78rem;color:var(--bad);margin-top:4px;display:none}
-.f.bad input,.f.bad textarea{border-color:var(--bad);background:#FDF1F0}
-.f.bad .err{display:block}
-.opts{display:grid;gap:7px}
-.opt{display:flex;align-items:flex-start;gap:9px;font-size:.92rem;padding:8px 10px;border-radius:8px;
-  border:1px solid var(--edge);background:#FFFDF8;cursor:pointer}
-.opt input{width:18px;height:18px;margin-top:1px;accent-color:var(--red);flex:none}
-.opt.on{border-color:var(--deep);background:#EFF7F9}
-.other{margin-top:7px}
-.other input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.95rem;color:var(--ink)}
+  width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);
+  color:var(--ink);font-size:.92rem;transition:border-color .15s,box-shadow .15s}
+.f textarea{height:auto;min-height:100px;padding:11px 13px;resize:vertical;line-height:1.5}
+.f input:hover,.f textarea:hover{border-color:#C9CCD6}
+.f input:focus,.f textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--bluesoft);outline:none}
+.f .err{display:none;align-items:center;gap:6px;font-size:.78rem;color:#B4232F;margin-top:6px}
+.f.bad input,.f.bad textarea{border-color:var(--red);box-shadow:0 0 0 3px var(--redsoft)}
+.f.bad .err{display:flex}
+.f.only{margin:10px 0 0}
 
-.btn{display:block;width:100%;padding:17px;border-radius:10px;border:0;background:var(--red);
-  color:#fff;font-size:1.05rem;font-weight:650;cursor:pointer}
-.btn:disabled{opacity:.5}
-.btn.second{background:var(--panel);color:var(--navy);border:1px solid var(--edge2);font-weight:500;font-size:.95rem}
-.msg{margin-top:12px;min-height:22px;font-size:.88rem;color:var(--muted)}
-.msg.bad{color:var(--bad)} .msg.good{color:var(--ok)}
-.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--edge2);border-top-color:var(--red);
-  border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+/* tick boxes */
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:11px;min-height:44px;padding:10px 13px;border-radius:10px;border:1px solid var(--line2);
+  background:var(--surface);cursor:pointer;font-size:.88rem;font-weight:500;color:var(--ink2);transition:border-color .15s,background .15s}
+.opt:hover{border-color:#C9CCD6;background:var(--soft)}
+.opt input{width:17px;height:17px;margin:0;flex:none;accent-color:var(--ink);cursor:pointer}
+.opt.on{border-color:var(--ink);background:var(--soft2);color:var(--ink)}
+.other{margin-top:10px}
+.other input{width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);font-size:.9rem}
+.other input:hover{border-color:#C9CCD6}
+.other input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--bluesoft);outline:none}
+
+/* send */
+.send{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.send p{margin:0;font-size:.84rem;color:var(--muted);max-width:440px}
+.send p b{color:var(--ink);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 24px;border-radius:10px;
+  border:1px solid var(--line2);background:var(--surface);color:var(--ink);font-weight:600;font-size:.92rem;cursor:pointer;
+  white-space:nowrap;text-decoration:none;box-shadow:var(--shadow);transition:background .15s,border-color .15s}
+.btn:hover{background:var(--soft2);border-color:#C9CCD6}
+.btn.brand{background:var(--red);border-color:var(--red);color:#fff}
+.btn.brand:hover{background:var(--red2);border-color:var(--red2)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+.btn svg.i{width:17px;height:17px}
+.msg{margin:14px 0 0;font-size:.86rem;color:var(--muted)}
+.msg:empty{display:none}
+.msg.bad,.msg.good{padding:11px 14px;border-radius:var(--radius-sm);border:1px solid}
+.msg.bad{background:var(--redsoft);border-color:var(--redline);color:#8E2A2F}
+.msg.good{background:var(--greensoft);border-color:var(--greenline);color:#1B5E42}
+.msg a{color:inherit;font-weight:600}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--red);border-radius:50%;
+  animation:sp .7s linear infinite;vertical-align:-2px;margin-right:8px}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* the code they get at the end */
-.codebox{text-align:center;padding:26px 18px}
-.codebox .big{font-family:var(--mono);font-size:2.2rem;font-weight:700;letter-spacing:.18em;
-  color:var(--navy);background:#fff;border:2px dashed var(--deep);border-radius:12px;padding:18px 10px;margin:14px 0}
-.codebox .warn{background:#FDF6E1;border:1px solid #E4D3A0;color:#7A5210;border-radius:9px;
-  padding:13px;font-size:.88rem;text-align:left;margin-bottom:14px}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);background:var(--navy);
-  color:#fff;padding:11px 18px;border-radius:24px;font-size:.88rem;font-weight:600;opacity:0;
+.done{max-width:470px;margin:20px auto 0;text-align:center;padding:36px 32px 30px;border-radius:18px;box-shadow:var(--shadow-md)}
+.done .ok{width:52px;height:52px;border-radius:50%;background:var(--greensoft);border:1px solid var(--greenline);color:var(--green);
+  display:grid;place-items:center;margin:0 auto 18px}
+.done .ok svg.i{width:24px;height:24px;stroke-width:2.2}
+.done h2{margin:0 0 4px;font-size:1.35rem;font-weight:700;letter-spacing:-.02em}
+.done .sub{margin:0;color:var(--muted);font-size:.9rem}
+.done .big{font-family:var(--mono);font-size:2.05rem;font-weight:700;letter-spacing:.2em;color:var(--ink);background:var(--soft);
+  border:1px solid var(--line2);border-radius:12px;padding:18px 10px 18px 22px;margin:20px 0 16px;user-select:all}
+.done .warn{background:var(--ambersoft);border:1px solid var(--amberline);color:#7A5210;border-radius:10px;padding:13px 15px;
+  font-size:.84rem;text-align:left;margin:0 0 18px;line-height:1.55}
+.done .warn a{color:inherit;font-weight:600}
+.done .acts{display:grid;gap:9px}
+.done .next{display:flex;gap:10px;align-items:flex-start;text-align:left;margin:20px 0 0;padding:16px 0 0;border-top:1px solid var(--line);
+  font-size:.82rem;color:var(--muted)}
+.done .next svg.i{width:16px;height:16px;margin-top:2px;color:var(--faint)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);background:var(--ink);
+  color:#fff;padding:11px 18px;border-radius:10px;font-size:.86rem;font-weight:600;opacity:0;box-shadow:0 14px 44px rgba(24,24,48,.18);
   pointer-events:none;transition:opacity .18s,transform .18s;z-index:99}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-.foot{margin-top:20px;font-size:.78rem;color:#8E8EA3;text-align:center}
-.foot a{color:#8E8EA3}
-input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
-@media (min-width:760px){ .wrap{max-width:760px} .opts.two{grid-template-columns:1fr 1fr} }
+.foot{margin:28px 0 0;font-size:.76rem;color:var(--faint);text-align:center}
+.foot a{color:var(--muted)}
+
+@media (min-width:700px){
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid .wide{grid-column:1/-1}
+  .opts.two{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  .wrap{padding:26px 16px 44px}
+  .head h1{font-size:1.55rem}
+  .card{padding:20px 18px}
+  .sec{grid-template-columns:1fr}
+  .sec .body{grid-column:1}
+  .num{margin:0 0 10px}
+  .send .btn{width:100%}
+  .top .have span{display:none}
+  .done{padding:30px 20px 24px}
+  .done .big{font-size:1.65rem;letter-spacing:.14em}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+</svg>
 
-  <header><img src="logo.png" alt="ecomFLEX"><h1>Yeni müşteri kaydı</h1></header>
+<header class="top"><div class="in">
+  <a href="https://www.ecomflex.co.uk" aria-label="ecomFLEX"><img src="logo.png" alt="ecomFLEX"></a>
+  <div class="have"><span>Zaten müşterimiz misiniz?</span><a href="panel.html">Giriş yapın</a></div>
+</div></header>
+
+<main class="wrap">
 
   <div id="form">
-    <div class="intro">
-      <p><b>ecomFLEX</b>'e gösterdiğiniz ilgi için çok teşekkür ederiz.</p>
-      <p>Size daha iyi hizmet verebilmemiz için lütfen aşağıdaki bilgileri doldurabilir misiniz?</p>
-      <p>İyi günler dileriz.</p>
-      <span class="hmrc">ecomFLEX, HMRC onaylı bir fulfilment merkezidir.</span>
+    <div class="head">
+      <p class="eyebrow">yeni müşteri</p>
+      <h1>Yeni müşteri kaydı</h1>
+      <p class="lead">ecomFLEX’e gösterdiğiniz ilgi için çok teşekkür ederiz. Size daha iyi hizmet verebilmemiz için lütfen aşağıdaki bilgileri doldurun. İyi günler dileriz.</p>
+      <ul class="facts">
+        <li><svg class="i"><use href="#i-shield"/></svg>HMRC onaylı fulfilment merkezi</li>
+        <li><svg class="i"><use href="#i-bolt"/></svg>Hesabınız anında açılır</li>
+        <li><svg class="i"><use href="#i-clock"/></svg>Yaklaşık 3 dakika</li>
+      </ul>
     </div>
+
+    <section class="card sec">
+      <div class="num">1</div>
+      <div>
+        <h2>İletişim bilgileriniz</h2>
+        <p class="sub">Panel hesabınız bu bilgilerle oluşturulur.</p>
+      </div>
+      <div class="body grid two">
+        <div class="f" id="w_email"><label class="lab" for="i_email">E-posta <span class="req">*</span></label>
+          <input id="i_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false">
+          <div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen geçerli bir e-posta adresi yazın.</div></div>
+        <div class="f" id="w_phone"><label class="lab" for="i_phone">Telefon numaranız <span class="req">*</span></label>
+          <input id="i_phone" type="tel" autocomplete="tel">
+          <div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen geçerli bir telefon numarası yazın.</div></div>
+        <div class="f" id="w_name"><label class="lab" for="i_name">Adınız soyadınız <span class="req">*</span></label>
+          <input id="i_name" type="text" autocomplete="name">
+          <div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen ad ve soyadınızı yazın.</div></div>
+        <div class="f" id="w_company"><label class="lab" for="i_company">Şirket adınız <span class="req">*</span></label>
+          <input id="i_company" type="text" autocomplete="organization">
+          <div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen şirket adınızı yazın.</div></div>
+        <div class="f wide" id="w_addr"><label class="lab" for="i_addr">Şirket adresiniz <span class="req">*</span></label>
+          <textarea id="i_addr" autocomplete="street-address"></textarea>
+          <div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen şirket adresinizi yazın.</div></div>
+      </div>
+    </section>
+
+    <section class="card sec">
+      <div class="num">2</div>
+      <div>
+        <h2>Çalışma yönteminiz <span class="req">*</span></h2>
+        <p class="sub">Birden fazla seçebilirsiniz.</p>
+      </div>
+      <div class="body">
+        <div class="opts two" id="g_work"></div>
+        <div class="other"><input id="o_work" placeholder="Diğer (yazabilirsiniz)" aria-label="Diğer çalışma yöntemi"></div>
+        <div class="f only" id="w_work"><div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen en az bir seçenek işaretleyin.</div></div>
+      </div>
+    </section>
+
+    <section class="card sec">
+      <div class="num">3</div>
+      <div>
+        <h2>İlgilendiğiniz hizmetlerimiz <span class="req">*</span></h2>
+        <p class="sub">Birden fazla seçebilirsiniz.</p>
+      </div>
+      <div class="body">
+        <div class="opts two" id="g_serv"></div>
+        <div class="other"><input id="o_serv" placeholder="Diğer (yazabilirsiniz)" aria-label="Diğer hizmet"></div>
+        <div class="f only" id="w_serv"><div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen en az bir seçenek işaretleyin.</div></div>
+      </div>
+    </section>
+
+    <section class="card sec">
+      <div class="num">4</div>
+      <div>
+        <h2>Talebiniz ile ilgili detaylı bilgi <span class="req">*</span></h2>
+        <p class="sub">Aylık yaklaşık kaç koli, hangi pazaryerleri ve varsa özel istekleriniz.</p>
+      </div>
+      <div class="body">
+        <div class="f" id="w_details">
+          <textarea id="i_details" placeholder="Aylık kaç koli, hangi pazaryerleri, özel isteğiniz…" aria-label="Talebiniz ile ilgili detaylı bilgi"></textarea>
+          <div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen kısaca yazın.</div></div>
+      </div>
+    </section>
+
+    <section class="card sec">
+      <div class="num">5</div>
+      <div>
+        <h2>ecomFLEX’i nereden duydunuz? <span class="req">*</span></h2>
+        <p class="sub">Birden fazla seçebilirsiniz.</p>
+      </div>
+      <div class="body">
+        <div class="opts two" id="g_heard"></div>
+        <div class="other"><input id="o_heard" placeholder="Diğer (yazabilirsiniz)" aria-label="Diğer"></div>
+        <div class="f only" id="w_heard"><div class="err"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>Lütfen en az bir seçenek işaretleyin.</div></div>
+      </div>
+    </section>
 
     <div class="card">
-      <h2>İletişim bilgileriniz</h2>
-      <p class="sub">Panel hesabınız bu bilgilerle oluşturulur.</p>
-      <div class="f" id="w_email"><label class="top">E-posta <span class="req">*</span></label>
-        <input id="i_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false">
-        <div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
-      <div class="f" id="w_name"><label class="top">Adınız Soyadınız <span class="req">*</span></label>
-        <input id="i_name" type="text" autocomplete="name"><div class="err">Lütfen ad ve soyadınızı yazın.</div></div>
-      <div class="f" id="w_company"><label class="top">Şirket Adınız <span class="req">*</span></label>
-        <input id="i_company" type="text" autocomplete="organization"><div class="err">Lütfen şirket adınızı yazın.</div></div>
-      <div class="f" id="w_addr"><label class="top">Şirket Adresiniz <span class="req">*</span></label>
-        <textarea id="i_addr" autocomplete="street-address"></textarea><div class="err">Lütfen şirket adresinizi yazın.</div></div>
-      <div class="f" id="w_phone"><label class="top">Telefon Numaranız <span class="req">*</span></label>
-        <input id="i_phone" type="tel" autocomplete="tel"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+      <div class="send">
+        <p><b>Hesabınız anında oluşturulur.</b> Size özel 8 haneli bir giriş kodu verilir; panele bu kodla girersiniz.</p>
+        <button class="btn brand" id="b_send" type="button">Kaydı tamamla<svg class="i"><use href="#i-arrow"/></svg></button>
+      </div>
+      <div class="msg" id="m"></div>
     </div>
-
-    <div class="card">
-      <h2>Çalışma Yönteminiz <span class="req">*</span></h2>
-      <p class="sub">Birden fazla seçebilirsiniz.</p>
-      <div class="opts two" id="g_work"></div>
-      <div class="other"><input id="o_work" placeholder="Diğer (yazabilirsiniz)"></div>
-      <div class="f" id="w_work"><div class="err">Lütfen en az bir seçenek işaretleyin.</div></div>
-    </div>
-
-    <div class="card">
-      <h2>İlgilendiğiniz Hizmetlerimiz <span class="req">*</span></h2>
-      <p class="sub">Birden fazla seçebilirsiniz.</p>
-      <div class="opts" id="g_serv"></div>
-      <div class="other"><input id="o_serv" placeholder="Diğer (yazabilirsiniz)"></div>
-      <div class="f" id="w_serv"><div class="err">Lütfen en az bir seçenek işaretleyin.</div></div>
-    </div>
-
-    <div class="card">
-      <h2>Talebiniz İle İlgili Detaylı Bilgi <span class="req">*</span></h2>
-      <div class="f" id="w_details">
-        <textarea id="i_details" placeholder="Aylık kaç koli, hangi pazaryerleri, özel isteğiniz…"></textarea>
-        <div class="err">Lütfen kısaca yazın.</div></div>
-    </div>
-
-    <div class="card">
-      <h2>ecomFLEX'i Nereden Duydunuz? <span class="req">*</span></h2>
-      <div class="opts two" id="g_heard"></div>
-      <div class="other"><input id="o_heard" placeholder="Diğer (yazabilirsiniz)"></div>
-      <div class="f" id="w_heard"><div class="err">Lütfen en az bir seçenek işaretleyin.</div></div>
-    </div>
-
-    <button class="btn" id="b_send">Kaydı Tamamla</button>
-    <div class="msg" id="m"></div>
-    <p class="foot">Hesabınız anında oluşturulur. Size özel bir giriş kodu verilir.</p>
   </div>
 
   <!-- success -->
-  <div class="card codebox" id="done" hidden>
-    <h2 style="font-size:1.2rem">Kaydınız tamamlandı</h2>
+  <div class="card done" id="done" hidden>
+    <div class="ok"><svg class="i"><use href="#i-check"/></svg></div>
+    <h2>Kaydınız tamamlandı</h2>
     <p class="sub">Panele girmek için kullanacağınız kod:</p>
     <div class="big" id="thecode">--------</div>
     <div class="warn">
@@ -166,15 +297,16 @@ input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px soli
       Kimseyle paylaşmayın — kodu bilen herkes hesabınıza girebilir.
       Kodunuzu kaybederseniz <a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a> adresinden bize yazın.
     </div>
-    <button class="btn" id="b_copy">Kodu Kopyala</button>
-    <button class="btn second" id="b_go" style="margin-top:9px">Panele Git</button>
-    <p class="sub" style="margin-top:14px;text-align:left">
-      Sıradaki adım: panele girip hesabınıza ilk yüklemenizi yapın.
-      İlk yükleme yapılana kadar talep oluşturamazsınız.</p>
+    <div class="acts">
+      <button class="btn brand block" id="b_copy" type="button"><svg class="i"><use href="#i-copy"/></svg>Kodu kopyala</button>
+      <button class="btn block" id="b_go" type="button">Panele git<svg class="i"><use href="#i-arrow"/></svg></button>
+    </div>
+    <p class="next"><svg class="i"><use href="#i-info"/></svg><span>Sıradaki adım: panele girip hesabınıza ilk yüklemenizi yapın.
+      İlk yükleme yapılana kadar talep oluşturamazsınız.</span></p>
   </div>
 
   <p class="foot">ecomFLEX · <a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a></p>
-</div>
+</main>
 
 <script src="ecomflex-config.js"></script>
 <script>

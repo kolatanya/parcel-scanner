@@ -3957,10 +3957,13 @@ function columnChart(host,o){
   var labelStep=Math.max(1,Math.ceil((o.small?44:40)/band));
   var svg=sv('svg',{viewBox:'0 0 '+W+' '+H,width:'100%',height:H,role:'img','aria-label':o.label||'chart'});
   /* recessive grid: hairline, solid */
+  var empty=!(Math.max.apply(null,tot.concat([0]))>0), prevLbl=null;
   for(var g=0;g<=4;g++){
     var gy=padT+ph-ph*g/4;
     svg.appendChild(sv('line',{x1:padL,x2:W-padR,y1:gy,y2:gy,stroke:BZC.grid,'stroke-width':1}));
-    if(!o.small||g===4||g===2){ var lt=sv('text',{x:padL-6,y:gy+3.5,'text-anchor':'end',class:'tick'}); lt.textContent=fmt(max*g/4); svg.appendChild(lt); }
+    /* no data: label only the baseline; never print the same value twice */
+    var lbl=fmt(max*g/4);
+    if((!o.small||g===4||g===2)&&!(empty&&g>0)&&lbl!==prevLbl){ var lt=sv('text',{x:padL-6,y:gy+3.5,'text-anchor':'end',class:'tick'}); lt.textContent=lbl; svg.appendChild(lt); prevLbl=lbl; }
   }
   var cols=[];
   o.keys.forEach(function(k,i){

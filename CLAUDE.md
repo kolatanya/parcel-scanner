@@ -128,7 +128,7 @@ All files sit **flat in the repository root**. There are no folders except a str
 
 Two looks exist:
 
-**Old look** (only `panel.html` and `signup.html` now): light beige.
+**Old look** (only `panel.html` now): light beige. `signup.html` moved to the admin look on 1 Oct 2026 (Inter, light grey page, white cards, numbered sections, red "Kaydı tamamla"); Mert asked for the same style and colours as the admin, not a copy of its layout.
 
 ```css
 --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
@@ -338,7 +338,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v21`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v22`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 
