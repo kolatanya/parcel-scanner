@@ -51,6 +51,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 .top{background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
 .top .in{max-width:880px;margin:0 auto;height:64px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .top img{height:28px;width:auto;display:block}
+.top .right{display:flex;align-items:center;gap:14px}
 .top .have{font-size:.84rem;color:var(--muted);white-space:nowrap}
 .top .have a{color:var(--ink);font-weight:600;text-decoration:none;margin-left:4px}
 .top .have a:hover{text-decoration:underline}
@@ -168,6 +169,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
   .done .big{font-size:1.65rem;letter-spacing:.14em}
 }
 </style>
+<script src="i18n.js"></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -183,7 +185,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 
 <header class="top"><div class="in">
   <a href="https://www.ecomflex.co.uk" aria-label="ecomFLEX"><img src="logo.png" alt="ecomFLEX"></a>
-  <div class="have"><span>Zaten müşterimiz misiniz?</span><a href="panel.html">Giriş yapın</a></div>
+  <div class="right"><div class="have"><span>Zaten müşterimiz misiniz?</span><a href="panel.html">Giriş yapın</a></div><div class="langsw" data-langsw></div></div>
 </div></header>
 
 <main class="wrap">
@@ -291,7 +293,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
     <div class="ok"><svg class="i"><use href="#i-check"/></svg></div>
     <h2>Kaydınız tamamlandı</h2>
     <p class="sub">Panele girmek için kullanacağınız kod:</p>
-    <div class="big" id="thecode">--------</div>
+    <div class="big" id="thecode" data-noi18n>--------</div>
     <div class="warn">
       <b>Bu kodu saklayın.</b> Panele girmek için tek ihtiyacınız olan şey budur.
       Kimseyle paylaşmayın — kodu bilen herkes hesabınıza girebilir.

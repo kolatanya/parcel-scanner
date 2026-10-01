@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4EEE2">
+<link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Eski Müşteri Paneli — ecomFLEX</title>
+<meta name="description" content="ecomFLEX müşteri paneli: stoklarınızı, gönderilerinizi, bakiyenizi ve faturalarınızı tek yerden yönetin. Giriş için müşteri kodunuzu kullanın.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://panel.ecomflex.co.uk/panel.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ecomFLEX">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:title" content="ecomFLEX Müşteri Paneli">
+<meta property="og:description" content="ecomFLEX müşteri paneli: stoklarınızı, gönderilerinizi, bakiyenizi ve faturalarınızı tek yerden yönetin. Giriş için müşteri kodunuzu kullanın.">
+<meta property="og:url" content="https://panel.ecomflex.co.uk/panel.html">
+<meta property="og:image" content="https://panel.ecomflex.co.uk/icon-512.png">
+<meta name="twitter:card" content="summary">
+<style>
+:root{
+  --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
+  --ink:#33334E; --navy:#48486C; --muted:#7C7C93;
+  --red:#EA3D49; --blue:#45B0C8; --deep:#2E8FA8;
+  --ok:#2E8FA8; --warn:#B0761A; --bad:#D62F3C;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans)}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:480px;margin:0 auto;padding:26px 16px 44px}
+button{font-family:inherit;font-size:1rem}
+[hidden]{display:none!important}
+
+header{padding-bottom:18px;border-bottom:2px solid var(--edge2);margin-bottom:22px}
+header img{height:38px;width:auto;display:block}
+header h1{margin:12px 0 0;font-size:1.15rem;font-weight:650;letter-spacing:-.01em;color:var(--navy)}
+
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:20px;
+  box-shadow:0 1px 0 rgba(72,72,108,.05)}
+h2{margin:0 0 6px;font-size:1.15rem;font-weight:650;color:var(--navy)}
+p.lead{margin:0 0 16px;color:var(--muted);font-size:.88rem}
+
+.choice{display:grid;gap:10px}
+.btn{display:block;width:100%;padding:16px;border-radius:9px;border:0;cursor:pointer;
+  font-size:1rem;font-weight:600;text-align:center}
+.btn.primary{background:var(--red);color:#fff}
+.btn.second{background:var(--panel);color:var(--navy);border:1px solid var(--edge2)}
+.btn.blue{background:var(--deep);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;
+  font-size:.85rem;padding:0;margin-top:14px;display:block;width:100%;text-align:center}
+
+.f{margin-bottom:12px}
+.f label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px}
+.f input,.f textarea{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge2);
+  background:#FFFDF8;color:var(--ink);font-family:inherit;font-size:1rem}
+.f textarea{min-height:74px;resize:vertical}
+.f input:focus-visible,.f textarea:focus-visible,.btn:focus-visible,.linkbtn:focus-visible{
+  outline:2px solid var(--red);outline-offset:2px}
+.f .err{font-size:.76rem;color:var(--bad);margin-top:4px;display:none}
+.f.bad input,.f.bad textarea{border-color:var(--bad);background:#FDF1F0}
+.f.bad .err{display:block}
+.remember{display:flex;align-items:center;gap:9px;font-size:.85rem;color:var(--muted);margin:4px 0 14px}
+.remember input{width:18px;height:18px;accent-color:var(--red)}
+
+.note{margin-top:14px;padding:13px;border-radius:9px;font-size:.86rem;line-height:1.5}
+.note.info{background:#EFF7F9;border:1px solid #CDE4EA;color:#1F5F70}
+.note.good{background:#E9F4EC;border:1px solid #B7D8C4;color:#1E6B4A}
+.note.warn{background:#FDF6E1;border:1px solid #E4D3A0;color:#7A5210}
+.note.bad{background:#FDEFEE;border:1px solid #F2C4C0;color:#8E2A2F}
+
+.msg{margin-top:14px;min-height:22px;font-size:.87rem;color:var(--muted)}
+.msg.bad{color:var(--bad)} .msg.good{color:var(--ok)}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--edge2);
+  border-top-color:var(--red);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.foot{margin-top:22px;font-size:.75rem;color:#8E8EA3;line-height:1.6;text-align:center}
+
+/* ---------- panel shell ---------- */
+.shell{display:block}
+.nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.nav .grp{display:none}
+.navitem{flex:none;padding:11px 15px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);
+  color:var(--muted);cursor:pointer;font-size:.88rem;white-space:nowrap}
+.navitem.on{background:#EFF7F9;border-color:#CDE4EA;color:var(--deep);font-weight:650}
+.me{background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:14px;margin-bottom:14px}
+.me .nm{font-weight:650;color:var(--navy)}
+.me .sm{font-size:.82rem;color:var(--muted);margin-top:2px;word-break:break-word}
+.me button{margin-top:11px;width:100%;padding:11px;border-radius:8px;border:1px solid var(--edge2);
+  background:var(--panel);color:var(--navy);cursor:pointer;font-size:.86rem}
+
+.grid2{display:block}
+.hint{font-size:.76rem;color:var(--muted);margin-top:4px}
+
+/* ---------- enquiry list ---------- */
+.oli{background:var(--panel);border:1px solid var(--edge);border-radius:11px;overflow:hidden;margin-bottom:9px}
+.oli.pending{border-left:4px solid var(--warn)}
+.oli.answered{border-left:4px solid var(--ok)}
+.ohead{padding:13px 15px;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.ohead .t{flex:1;min-width:0}
+.ohead .p{font-weight:650;color:var(--navy)}
+.ohead .s{font-size:.81rem;color:var(--muted);margin-top:2px}
+.badge{flex:none;font-size:.68rem;padding:3px 9px;border-radius:20px;letter-spacing:.03em}
+.badge.pending{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
+.badge.answered{background:#E9F4EC;color:#1E6B4A;border:1px solid #B7D8C4}
+.obody{padding:0 15px 15px;border-top:1px solid #F0EADD}
+.kv{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed #EFE9DC;font-size:.88rem}
+.kv:last-child{border-bottom:0}
+.kv .k{flex:none;width:118px;color:var(--muted);font-size:.78rem;padding-top:2px}
+.kv .v{flex:1;min-width:0;word-break:break-word}
+.reply{margin-top:12px;background:#EFF7F9;border:1px solid #CDE4EA;border-radius:9px;padding:13px}
+.reply h4{margin:0 0 8px;font-size:.86rem;color:#1F5F70}
+.trk{display:flex;gap:8px;align-items:center;margin-top:9px}
+.trk code{flex:1;font-family:var(--mono);font-size:.95rem;background:#fff;border:1px solid #CDE4EA;
+  border-radius:7px;padding:10px;word-break:break-all;color:var(--ink)}
+.trk button{flex:none;padding:10px 14px;border-radius:7px;border:1px solid #CDE4EA;background:#fff;
+  color:var(--deep);cursor:pointer;font-size:.85rem;font-weight:600}
+
+@media (min-width:860px){
+  .wrap{max-width:1040px;padding:32px 22px 56px}
+  #v_panel{background:none;border:0;padding:0;box-shadow:none}
+  .shell{display:grid;grid-template-columns:250px 1fr;gap:24px;align-items:start}
+  .nav{display:flex;flex-direction:column;gap:4px;overflow:visible;margin-bottom:0}
+  .nav .grp{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--muted);padding:14px 6px 6px}
+  .navitem{width:100%;text-align:left}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+  .grid2 .full{grid-column:1/-1}
+  .kv .k{width:150px}
+}
+@media (min-width:640px){
+  .wrap{max-width:620px}
+}
+
+
+/* ---------- stock table ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem;background:var(--panel);border:1px solid var(--edge);border-radius:10px;overflow:hidden}
+.tbl th,.tbl td{padding:10px 11px;text-align:left;border-bottom:1px solid #F0EADD;vertical-align:middle}
+.tbl th{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;background:#FAF6ED}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .sku{font-family:var(--mono);font-weight:600;color:var(--navy)}
+.tbl .qty{font-weight:650;font-variant-numeric:tabular-nums}
+.tbl .low{color:#8E2A2F}
+.tbl input{width:74px;padding:7px;border-radius:6px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.86rem;color:var(--ink)}
+.lowbadge{display:inline-block;font-size:.66rem;padding:2px 7px;border-radius:12px;background:#FDEFEE;color:#8E2A2F;border:1px solid #F2C4C0;margin-left:6px;vertical-align:middle}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* ---------- inbound item rows ---------- */
+.items{margin:6px 0 10px}
+.item{display:grid;grid-template-columns:1fr 1fr 70px 34px;gap:6px;margin-bottom:6px;align-items:center}
+.item input{width:100%;padding:10px;border-radius:7px;border:1px solid var(--edge2);background:#FFFDF8;font-family:inherit;font-size:.9rem;color:var(--ink)}
+.item .rm{width:34px;height:38px;border-radius:7px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer;font-size:1.05rem}
+.addrow{width:100%;padding:10px;border-radius:7px;border:1px dashed var(--edge2);background:transparent;color:var(--deep);cursor:pointer;font-size:.86rem}
+.ihead{font-size:.74rem;color:var(--muted);display:grid;grid-template-columns:1fr 1fr 70px 34px;gap:6px;margin-bottom:4px}
+.ihead span:nth-child(4){visibility:hidden}
+.oli.expected{border-left:4px solid var(--warn)}
+.oli.received{border-left:4px solid var(--ok)}
+.badge.expected{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
+.badge.received{background:#E9F4EC;color:#1E6B4A;border:1px solid #B7D8C4}
+.diff{color:#8E2A2F;font-weight:600}
+select.sel{width:100%;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;color:var(--ink);font-family:inherit;font-size:1rem}
+.avail{font-size:.78rem;color:var(--deep);margin-top:4px}
+.avail.none{color:#8E2A2F}
+@media (max-width:480px){ .item{grid-template-columns:1fr 60px 34px} .item .pn{display:none} .ihead{grid-template-columns:1fr 60px 34px} .ihead span:nth-child(2){display:none} }
+
+.boxtbl{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:8px;background:#fff;border:1px solid #CDE4EA;border-radius:8px;overflow:hidden}
+.boxtbl th,.boxtbl td{padding:7px 9px;text-align:left;border-bottom:1px solid #EAF3F6}
+.boxtbl th{font-size:.7rem;color:var(--muted);text-transform:uppercase;background:#F4FAFB}
+.boxtbl tr:last-child td{border-bottom:0}
+.boxtbl td{font-variant-numeric:tabular-nums}
+
+/* ---------- wide screens: use the whole monitor ---------- */
+@media (min-width:1100px){
+  .wrap{max-width:1360px;padding:34px 30px 60px}
+  .shell{grid-template-columns:290px 1fr;gap:30px}
+  .navitem{padding:12px 16px;font-size:.92rem}
+  #pg_mine #olist,#retlist,#fwdlist,#fbalist,#inlist{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+  #pg_mine #olist .oli,#retlist .oli,#fwdlist .oli,#fbalist .oli,#inlist .oli{margin-bottom:0}
+  .grid2{grid-template-columns:1fr 1fr 1fr;gap:0 18px}
+  .grid2 .full{grid-column:1/-1}
+  .grid2 .f textarea{min-height:64px}
+  #pg_new .grid2 .f:nth-child(1),#pg_new .grid2 .f:nth-child(2){grid-column:span 1}
+  .kv .k{width:170px}
+}
+@media (min-width:1560px){
+  .wrap{max-width:1600px}
+  #pg_mine #olist,#retlist,#fwdlist,#fbalist,#inlist{grid-template-columns:1fr 1fr 1fr}
+}
+/* the signed-out screens stay a readable column even on a big monitor */
+#v_load,#v_choice,#v_signup,#v_pending,#v_rejected,#v_approved,#v_login,#v_error{
+  max-width:520px;margin-left:auto;margin-right:auto}
+
+
+/* ---------- FBA rows ---------- */
+.frow{display:grid;grid-template-columns:1fr 78px 1fr 34px;gap:6px;margin-bottom:6px;align-items:start}
+.fhead{display:grid;grid-template-columns:1fr 78px 1fr 34px;gap:6px;font-size:.72rem;color:var(--muted);margin-bottom:4px}
+.fhead span:last-child{visibility:hidden}
+.frow input[type=text],.frow input[type=number]{width:100%;padding:10px;border-radius:7px;border:1px solid var(--edge2);background:#FFFDF8;font-family:var(--mono);font-size:.88rem;color:var(--ink)}
+.frow .rm{width:34px;height:40px;border-radius:7px;border:1px solid var(--edge2);background:#FFF6F4;color:#A03A33;cursor:pointer}
+.pick{display:block;margin-top:4px;font-size:.72rem;color:var(--deep);cursor:pointer;text-decoration:underline}
+.pick input{display:none}
+.fname{font-size:.7rem;color:var(--muted);margin-top:3px;word-break:break-all}
+@media (max-width:560px){ .frow,.fhead{grid-template-columns:1fr 64px 34px} .frow .nf,.fhead span:nth-child(3){grid-column:1/-1} }
+
+/* ---------- box list shown back to the customer ---------- */
+.boxcard{border:1px solid var(--edge);border-radius:10px;margin-bottom:9px;background:#fff;overflow:hidden}
+.boxcard h5{margin:0;padding:11px 13px;font-size:.9rem;color:var(--navy);background:#FAF6ED;border-bottom:1px solid var(--edge)}
+.boxcard .in{padding:11px 13px}
+.boxitems{font-size:.85rem;margin-bottom:8px}
+.boxitems div{padding:3px 0;border-bottom:1px dashed #EFE9DC}
+.boxitems div:last-child{border-bottom:0}
+.dims{font-size:.8rem;color:var(--muted);margin-bottom:9px}
+.lbl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lbl .has{font-size:.78rem;color:#1E6B4A;background:#E9F4EC;border:1px solid #B7D8C4;border-radius:7px;padding:6px 10px;word-break:break-all}
+.lbl label{font-size:.82rem;padding:9px 13px;border-radius:7px;border:1px solid var(--edge2);background:#FFFDF8;color:var(--navy);cursor:pointer}
+.lbl label input{display:none}
+.refpill{font-family:var(--mono);font-size:.78rem;background:#EFF7F9;border:1px solid #CDE4EA;color:var(--deep);border-radius:20px;padding:3px 10px;display:inline-block}
+.oli.boxed{border-left:4px solid var(--deep)}
+.oli.labelled{border-left:4px solid var(--warn)}
+.badge.boxed{background:#EFF7F9;color:#1F5F70;border:1px solid #CDE4EA}
+.badge.labelled{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
+
+
+.balcard{background:linear-gradient(135deg,#2E8FA8,#48486C);border-radius:14px;padding:22px;color:#fff}
+.balcard .bal{font-size:2.4rem;font-weight:700;letter-spacing:-.02em;line-height:1}
+.balcard .ballbl{font-size:.82rem;opacity:.85;margin-top:5px}
+.bank{background:#FFFDF8;border:1px solid var(--edge2);border-radius:9px;padding:13px;font-family:var(--mono);
+  font-size:.86rem;white-space:pre-wrap;word-break:break-word;margin:0 0 10px;color:var(--ink)}
+.locked{background:#FDF6E1;border:1px solid #E4D3A0;border-radius:11px;padding:15px;margin-bottom:16px}
+.locked h4{margin:0 0 5px;font-size:.95rem;color:#7A5210}
+.locked p{margin:0 0 10px;font-size:.86rem;color:#7A5210;line-height:1.5}
+.locked button{width:100%;padding:12px;border-radius:8px;border:0;background:var(--red);color:#fff;font-weight:650;cursor:pointer}
+.wh{background:#EFF7F9;border:1px solid #CDE4EA;border-radius:10px;padding:13px;margin-bottom:14px}
+.wh h4{margin:0 0 5px;font-size:.82rem;color:#1F5F70;text-transform:uppercase;letter-spacing:.05em}
+.wh pre{margin:0;font-family:var(--mono);font-size:.85rem;white-space:pre-wrap;color:var(--ink)}
+.wh button{margin-top:9px;padding:9px 13px;border-radius:7px;border:1px solid #CDE4EA;background:#fff;color:var(--deep);cursor:pointer;font-size:.82rem;font-weight:600}
+.tbl .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.tbl .amt.neg{color:#8E2A2F} .tbl .amt.pos{color:#1E6B4A}
+.me .mycode{font-family:var(--mono);font-size:.78rem;color:var(--deep);background:#EFF7F9;border:1px solid #CDE4EA;
+  border-radius:20px;padding:2px 9px;display:inline-block;margin-top:7px}
+
+/* ---------- balance page ---------- */
+.eyebrow{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.wtop{display:flex;flex-direction:column;gap:14px}
+.wtop h2{margin:2px 0 4px}
+.wtopr{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FAF6ED;border:1px solid var(--edge);border-radius:12px;padding:10px 12px}
+.balpill{display:inline-block;margin-top:3px;font-family:var(--mono);font-weight:700;font-size:1.05rem;color:#1E6B4A;
+  background:#E9F4EC;border:1px solid #B7D8C4;border-radius:20px;padding:3px 12px;font-variant-numeric:tabular-nums}
+.balpill.neg{color:#8E2A2F;background:#FDEFEE;border-color:#F2C4C0}
+.btn.sm{display:inline-block;width:auto;padding:9px 15px;font-size:.84rem;border-radius:20px}
+.wstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.ws{background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:11px 13px;min-width:0}
+.ws .l{font-size:.72rem;color:var(--muted)}
+.ws .v{font-family:var(--mono);font-weight:700;font-size:1.12rem;color:var(--navy);margin-top:3px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ws.balw{grid-column:1/-1}
+.wsec{margin-top:12px}
+.wsh{display:flex;gap:12px;align-items:flex-start;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--edge)}
+.wsh .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--cream);border:1px solid var(--edge);
+  display:grid;place-items:center;font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+.wsh h3{margin:3px 0 2px;font-size:1rem;color:var(--navy)}
+.wsh p{margin:0;font-size:.8rem;color:var(--muted)}
+.wgrid{display:grid;grid-template-columns:1fr;gap:10px}
+.wbox{background:#FAF6ED;border:1px solid var(--edge);border-radius:10px;padding:11px 13px}
+.wbox .l{font-size:.72rem;color:var(--muted);margin-bottom:3px}
+.wbox .v{font-weight:650;color:var(--ink);overflow-wrap:anywhere}
+#stripebox{margin-top:12px}
+#stripebox:empty{display:none}
+.wsub{margin:18px 0 4px;font-size:.92rem;color:var(--navy)}
+#decllist{margin-top:10px}
+.decl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:10px 0;border-bottom:1px dashed #EFE9DC;font-size:.86rem}
+.decl:last-child{border-bottom:0}
+.decl .a{flex:none;font-family:var(--mono);font-weight:700;color:var(--navy);min-width:80px;font-variant-numeric:tabular-nums}
+.decl .d{order:5;flex:1 1 100%;min-width:0;color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.decl .st{flex:none;margin-left:auto;font-size:.72rem;border-radius:20px;padding:2px 9px;white-space:nowrap}
+.st.pending{background:#FDF6E1;color:#7A5210;border:1px solid #E4D3A0}
+.st.confirmed{background:#E9F4EC;color:#1E6B4A;border:1px solid #B7D8C4}
+.st.rejected{background:#FDEFEE;color:#8E2A2F;border:1px solid #F2C4C0}
+.st.cancelled{background:#F2F0EC;color:var(--muted);border:1px solid var(--edge)}
+.decl button{flex:none;font-size:.74rem;padding:4px 9px;border-radius:6px;border:1px solid var(--edge2);background:#fff;color:var(--muted);cursor:pointer}
+@media (min-width:640px){
+  .wtop{flex-direction:row;justify-content:space-between;align-items:center}
+  .wstats{grid-template-columns:repeat(3,1fr)}
+  .ws.balw{grid-column:auto}
+  .wgrid{grid-template-columns:1fr 1fr}
+}
+@media (min-width:1100px){
+  .wstats{grid-template-columns:repeat(5,1fr)}
+  .wcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <img src="logo.png" alt="ecomFLEX">
+    <h1>Müşteri Paneli</h1>
+  </header>
+
+  <!-- loading -->
+  <div class="card" id="v_load">
+    <p class="lead"><span class="spin"></span>Yükleniyor…</p>
+  </div>
+
+  <!-- choose -->
+  <div class="card" id="v_choice" hidden>
+    <h2>Panele hoş geldiniz</h2>
+    <p class="lead">Hesabınız varsa giriş kodunuzla girin. Yoksa kayıt formunu doldurun.</p>
+    <div class="choice">
+      <button class="btn primary" id="b_login">Giriş Yap</button>
+      <button class="btn second" id="b_signup">Yeni Müşteri Kaydı</button>
+    </div>
+  </div>
+
+  <!-- signup request -->
+  <div class="card" id="v_signup" hidden>
+    <h2>Kayıt talebi</h2>
+    <p class="lead">Bilgilerinizi bırakın; ekibimiz talebinizi inceleyip size dönüş yapacak.</p>
+    <div class="f" id="w_name"><label>Ad Soyad</label><input id="i_name" autocomplete="name"><div class="err">Lütfen ad ve soyadınızı yazın.</div></div>
+    <div class="f" id="w_phone"><label>Telefon numarası</label><input id="i_phone" type="tel" autocomplete="tel"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+    <div class="f" id="w_email"><label>E-posta adresi</label><input id="i_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"><div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
+    <div class="f" id="w_biz"><label>İşletme adı</label><input id="i_biz" autocomplete="organization"><div class="err">Lütfen işletme adınızı yazın.</div></div>
+    <div class="f" id="w_addr"><label>İşletme adresi</label><textarea id="i_addr" autocomplete="street-address"></textarea><div class="err">Lütfen işletme adresinizi yazın.</div></div>
+    <button class="btn primary" id="b_send">Talebi Gönder</button>
+    <button class="linkbtn" id="b_back1">Geri</button>
+    <div class="msg" id="m_signup"></div>
+  </div>
+
+  <!-- pending -->
+  <div class="card" id="v_pending" hidden>
+    <h2>Talebiniz alındı</h2>
+    <div class="note info">
+      Ekibimiz talebiniz üzerinde çalışıyor. Onaylandığında size e-posta ile bilgi verilecek.
+      Onay e-postasını aldıktan sonra bu sayfaya geri dönün ve şifrenizi oluşturun.
+    </div>
+    <div class="msg" id="m_pending"></div>
+    <button class="btn second" id="b_recheck" style="margin-top:14px">Durumu Yenile</button>
+    <button class="linkbtn" id="b_other1">Başka bir hesapla giriş yap</button>
+  </div>
+
+  <!-- rejected -->
+  <div class="card" id="v_rejected" hidden>
+    <h2>Talebiniz onaylanmadı</h2>
+    <div class="note bad">
+      Bu talep şu anda onaylanmadı. Sorularınız için
+      <a href="mailto:info@ecomflex.co.uk">info@ecomflex.co.uk</a> adresinden bize yazabilirsiniz.
+    </div>
+    <button class="linkbtn" id="b_other2">Başka bir hesapla giriş yap</button>
+  </div>
+
+  <!-- approved: set a password -->
+  <div class="card" id="v_approved" hidden>
+    <h2>Talebiniz onaylandı</h2>
+    <div class="note good">Ekibimiz talebinizi onayladı. Bilgilerinizi doğrulayıp bir şifre belirleyin.</div>
+    <div style="height:16px"></div>
+    <div class="f" id="w2_name"><label>Ad Soyad</label><input id="a_name" autocomplete="name"><div class="err">Lütfen ad ve soyadınızı yazın.</div></div>
+    <div class="f" id="w2_phone"><label>Telefon numarası</label><input id="a_phone" type="tel" autocomplete="tel"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+    <div class="f" id="w2_email"><label>E-posta adresi</label><input id="a_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"><div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
+    <div class="f" id="w2_biz"><label>İşletme adı</label><input id="a_biz" autocomplete="organization"><div class="err">Lütfen işletme adınızı yazın.</div></div>
+    <div class="f" id="w2_addr"><label>İşletme adresi</label><textarea id="a_addr" autocomplete="street-address"></textarea><div class="err">Lütfen işletme adresinizi yazın.</div></div>
+    <div class="f" id="w2_pw"><label>Şifreniz (en az 8 karakter)</label><input id="a_pw" type="password" autocomplete="new-password"><div class="err">Şifre en az 8 karakter olmalıdır.</div></div>
+    <div class="f" id="w2_pw2"><label>Şifreyi tekrar yazın</label><input id="a_pw2" type="password" autocomplete="new-password"><div class="err">Şifreler aynı değil.</div></div>
+    <label class="remember"><input type="checkbox" id="a_remember" checked> Bu cihazı 30 gün hatırla</label>
+    <button class="btn primary" id="b_create">Şifreyi Kaydet ve Panele Gir</button>
+    <div class="msg" id="m_approved"></div>
+  </div>
+
+  <!-- login -->
+  <div class="card" id="v_login" hidden>
+    <h2>Giriş yap</h2>
+    <p class="lead">Kaydınız sırasında size verilen 8 haneli kodu yazın.</p>
+    <div class="f" id="w_code"><label>Giriş kodunuz</label>
+      <input id="l_code" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8"
+             placeholder="ABCD2345" style="font-family:var(--mono);font-size:1.4rem;letter-spacing:.2em;text-align:center">
+      <div class="err">Lütfen 8 haneli kodunuzu yazın.</div></div>
+    <button class="btn primary" id="b_codelogin">Kod ile Giriş Yap</button>
+    <button class="linkbtn" id="b_showpw">Kod yerine e-posta ve şifre ile gir</button>
+    <div id="pwbox" hidden style="margin-top:12px;border-top:1px solid var(--edge);padding-top:12px">
+    <div class="f" id="w_lemail"><label>E-posta adresi</label><input id="l_email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"><div class="err">Lütfen geçerli bir e-posta adresi yazın.</div></div>
+    <div class="f" id="w_lpw"><label>Şifre</label><input id="l_pw" type="password" autocomplete="current-password"><div class="err">Lütfen şifrenizi yazın.</div></div>
+    <label class="remember"><input type="checkbox" id="l_remember" checked> Bu cihazı 30 gün hatırla</label>
+    <button class="btn second" id="b_dologin">E-posta ile Giriş Yap</button>
+    </div>
+    <button class="linkbtn" id="b_back2">Geri</button>
+    <div class="msg" id="m_login"></div>
+  </div>
+
+  <!-- the panel itself -->
+  <div class="card" id="v_panel" hidden>
+    <div class="shell">
+      <aside>
+        <div class="me">
+          <div class="nm" id="p_hello">Panel</div>
+          <div class="sm" id="p_sub"></div>
+          <button id="b_logout">Çıkış Yap</button>
+        </div>
+        <nav class="nav" id="nav">
+          <div class="grp">Sipariş Talepleri</div>
+          <button class="navitem on" data-p="new">Geçici 1</button>
+          <button class="navitem" data-p="bulk">Toplu Sipariş</button>
+          <button class="navitem" data-p="mine">Taleplerim</button>
+          <div class="grp">Depo</div>
+          <button class="navitem" data-p="stock">Stok</button>
+          <button class="navitem" data-p="inbound">Gelen Kargo Bildirimi</button>
+          <div class="grp">Hizmetler</div>
+          <button class="navitem" data-p="ret">İade Bildirimi</button>
+          <button class="navitem" data-p="fwd">Kargo Yönlendirme</button>
+          <button class="navitem" data-p="fba">FBA Hazırlık</button>
+          <div class="grp">Hesap</div>
+          <button class="navitem" data-p="wallet">Bakiye</button>
+          <div class="grp">Rapor</div>
+          <button class="navitem" data-p="report">Aylık Özet</button>
+        </nav>
+      </aside>
+
+      <main>
+        <div class="locked" id="lockbar" hidden>
+          <h4>Hesabınız henüz aktif değil</h4>
+          <p>Talep oluşturabilmek için önce hesabınıza bakiye yüklemeniz gerekiyor.
+             Yüklemeniz ulaştığında tüm özellikler açılır.</p>
+          <button id="b_tolock">Bakiye Yükle</button>
+        </div>
+        <div class="wh" id="whbox" hidden>
+          <h4>Depo adresiniz</h4>
+          <pre id="whtext"></pre>
+          <button id="b_whcopy">Adresi kopyala</button>
+        </div>
+
+        <section id="pg_wallet" hidden>
+          <div class="card wtop">
+            <div>
+              <div class="eyebrow">Muhasebe</div>
+              <h2>Bakiyeniz</h2>
+              <p class="lead" style="margin:0">Tüm yükleme ve harcama kayıtlarınız.</p>
+            </div>
+            <div class="wtopr">
+              <div><div class="eyebrow">Güncel bakiye</div><span class="balpill" id="bal_amount">£0.00</span></div>
+              <button class="btn second sm" id="b_walxls">Excel indir</button>
+            </div>
+          </div>
+
+          <div class="wstats">
+            <div class="ws"><div class="l">Bugünkü harcama</div><div class="v" id="ws_today">—</div></div>
+            <div class="ws"><div class="l">Bu ayki harcama</div><div class="v" id="ws_month">—</div></div>
+            <div class="ws"><div class="l">Toplam yüklenen</div><div class="v" id="ws_in">—</div></div>
+            <div class="ws"><div class="l">Toplam harcanan</div><div class="v" id="ws_out">—</div></div>
+            <div class="ws balw"><div class="l">Güncel bakiye</div><div class="v" id="ws_bal">—</div></div>
+          </div>
+
+          <div class="card wsec">
+            <div class="wsh"><span class="num">01</span><div><h3>Hesap özeti</h3><p>Güncel bakiye ve hesap bilgileri.</p></div></div>
+            <div class="wgrid">
+              <div class="wbox"><div class="l">Şirket adı</div><div class="v" id="ws_company">—</div></div>
+              <div class="wbox"><div class="l">Hesap para birimi</div><div class="v">GBP (£)</div></div>
+            </div>
+          </div>
+
+          <div class="wcols">
+            <div class="card wsec" id="cardsec" hidden>
+              <div class="wsh"><span class="num">02</span><div><h3>Kartla bakiye yükle</h3><p>Ödemeler Stripe ile güvenle alınır. Kart bilgileriniz bize ulaşmaz.</p></div></div>
+              <div class="f" id="w_camt"><label>Yüklenecek tutar (£)</label>
+                <input id="c_amt" type="text" inputmode="decimal" value="50.00" autocomplete="off">
+                <div class="err">Tutar £50 ile £5.000 arasında olmalıdır.</div></div>
+              <p class="hint">En az yükleme tutarı £50. Ödediğiniz tutarın tamamı bakiyenize eklenir.</p>
+              <button class="btn primary" id="b_cardgo" style="margin-top:12px">Ödemeye geç</button>
+              <div id="stripebox"></div>
+              <button class="btn second" id="b_cardstop" style="margin-top:10px" hidden>Vazgeç</button>
+              <div class="msg" id="m_card"></div>
+            </div>
+
+            <div class="card wsec">
+              <div class="wsh"><span class="num" id="bank_num">03</span><div><h3>Havale ile bakiye yükle</h3><p>Aşağıdaki hesaba havale yapın, sonra ödemenizi bildirin.</p></div></div>
+              <pre class="bank" id="bankbox">—</pre>
+              <button class="btn second" id="b_bankcopy">Hesap bilgilerini kopyala</button>
+              <p class="hint" style="margin-top:10px">Açıklama kısmına şirket adınızı yazın, böylece ödemenizi hızlıca eşleştirebiliriz.</p>
+              <h4 class="wsub">Ödeme bildirimi</h4>
+              <p class="hint" style="margin-top:0">Havaleyi yaptıktan sonra buradan bildirin. Ödeme hesabımıza ulaştığında onaylarız ve bakiyeniz güncellenir.</p>
+              <div class="f" id="w_damt"><label>Gönderilen tutar (£)</label>
+                <input id="d_amt" type="text" inputmode="decimal" autocomplete="off"><div class="err">Lütfen gönderdiğiniz tutarı yazın.</div></div>
+              <div class="f"><label>Gönderim tarihi</label><input id="d_date" type="date"></div>
+              <div class="f"><label>Açıklama / referans (isteğe bağlı)</label><input id="d_ref" maxlength="120" autocomplete="off"></div>
+              <button class="btn blue" id="b_declare" style="margin-top:12px">Ödemeyi bildir</button>
+              <div class="msg" id="m_declare"></div>
+              <div id="decllist"></div>
+            </div>
+          </div>
+
+          <h2 style="font-size:1rem;margin-top:18px">Hesap hareketleri</h2>
+          <div class="msg" id="m_wallet"></div>
+          <div class="tblwrap"><table class="tbl" id="waltbl" hidden>
+            <thead><tr><th>Tarih</th><th>Açıklama</th><th style="text-align:right">Tutar</th></tr></thead>
+            <tbody id="walbody"></tbody></table></div>
+          <div class="note info" id="wal_empty" hidden>Henüz hareket yok.</div>
+          <p class="hint" id="wal_more" hidden>Son 200 hareket gösteriliyor. Tamamı için “Excel indir” düğmesini kullanın.</p>
+          <button class="btn second" id="b_walreload" style="margin-top:12px">Yenile</button>
+        </section>
+
+        <!-- new enquiry -->
+        <section id="pg_new">
+          <h2>Geçici 1 — Yeni sipariş talebi</h2>
+          <p class="lead">Gönderilecek ürün ve alıcı bilgilerini girin. Ekibimiz kargo bilgisiyle size dönüş yapacak.</p>
+          <div class="grid2">
+            <div class="f" id="w_rname"><label>Alıcı adı</label><input id="o_rname" autocomplete="off"><div class="err">Lütfen alıcının adını yazın.</div></div>
+            <div class="f" id="w_rphone"><label>Alıcı telefon numarası</label><input id="o_rphone" type="tel" autocomplete="off"><div class="err">Lütfen geçerli bir telefon numarası yazın.</div></div>
+            <div class="f full" id="w_raddr"><label>Alıcı adresi</label><textarea id="o_raddr" autocomplete="off"></textarea><div class="err">Lütfen alıcının açık adresini yazın.</div></div>
+            <div class="f" id="w_rcountry"><label>Ülke</label><input id="o_rcountry" list="ulkeler" value="Birleşik Krallık"><div class="err">Lütfen ülkeyi yazın.</div>
+              <div class="hint">Birleşik Krallık veya Avrupa’daki başka bir ülke olabilir.</div></div>
+            <div class="f" id="w_qty"><label>Adet</label><input id="o_qty" type="number" min="1" step="1" value="1" inputmode="numeric"><div class="err">Adet en az 1 olmalıdır.</div></div>
+            <div class="f full" id="w_pick" hidden><label>Ürün (stoktan seçin)</label>
+              <select class="sel" id="o_pick"></select>
+              <div class="avail" id="o_avail"></div></div>
+            <div class="f full" id="w_prod"><label>Ürün adı</label><input id="o_prod" autocomplete="off"><div class="err">Lütfen ürün adını yazın.</div></div>
+            <div class="f"><label>Sipariş numarası (isteğe bağlı)</label>
+              <input id="o_ref" spellcheck="false" placeholder="203-1234567-1234567">
+              <div class="hint">Amazon / eBay sipariş numarası. Yazarsanız kargo takip numarası otomatik eşleşir.</div></div>
+            <div class="f"><label>Pazar yeri (isteğe bağlı)</label>
+              <select class="sel" id="o_market"><option value="">Seçin…</option><option>Amazon</option><option>eBay</option><option>Etsy</option><option>Shopify</option><option>Trendyol</option><option>Diğer</option></select></div>
+            <div class="f full"><label>Ek not (isteğe bağlı)</label><textarea id="o_note" placeholder="Belirtmek istediğiniz bir şey varsa buraya yazın."></textarea></div>
+          </div>
+          <datalist id="ulkeler">
+            <option value="Birleşik Krallık"><option value="Almanya"><option value="Fransa">
+            <option value="Hollanda"><option value="Belçika"><option value="İtalya">
+            <option value="İspanya"><option value="İrlanda"><option value="Polonya">
+            <option value="Avusturya"><option value="İsveç"><option value="Danimarka">
+            <option value="Portekiz"><option value="Çekya"><option value="Romanya">
+          </datalist>
+          <button class="btn primary" id="b_order">Talebi Gönder</button>
+          <div class="msg" id="m_order"></div>
+        </section>
+
+        <!-- bulk orders -->
+        <section id="pg_bulk" hidden>
+          <h2>Toplu Sipariş</h2>
+          <p class="lead">Çok sayıda siparişi tek tek yazmak yerine Excel veya Google Sheets’ten kopyalayıp buraya yapıştırın. Her satır bir sipariş olur.</p>
+          <div class="note info" style="margin-bottom:14px">
+            <strong>Sütun sırası</strong><br>
+            Alıcı adı · Telefon · Adres · Ülke · SKU · Adet · Sipariş no · Not<br>
+            <span style="font-size:.8rem">Son iki sütun isteğe bağlıdır. Sütunlar arası TAB ile ayrılmalıdır — tablodan kopyalayınca zaten öyle olur.</span>
+          </div>
+          <button class="btn second" id="b_sample" style="margin-bottom:10px">Örnek satır ekle</button>
+          <textarea id="bulk" style="width:100%;min-height:170px;padding:12px;border-radius:8px;border:1px solid var(--edge2);background:#FFFDF8;font-family:var(--mono);font-size:.84rem;color:var(--ink)" placeholder="Ali Yılmaz&#9;07700900123&#9;12 High Street, London&#9;Birleşik Krallık&#9;004-LGG-G&#9;2&#9;203-1234567-1234567"></textarea>
+          <button class="btn primary" id="b_check" style="margin-top:10px">Kontrol Et</button>
+          <div class="msg" id="m_bulk"></div>
+          <div id="bulkprev"></div>
+          <button class="btn primary" id="b_bulksend" hidden style="margin-top:10px">Geçerli satırları gönder</button>
+        </section>
+
+        <!-- monthly summary -->
+        <section id="pg_report" hidden>
+          <h2>Aylık Özet</h2>
+          <p class="lead">Seçtiğiniz aydaki hareketleriniz.</p>
+          <div class="f" style="max-width:220px"><label>Ay</label><input type="month" id="rep_month"></div>
+          <div class="msg" id="m_report"></div>
+          <div class="tblwrap"><table class="tbl" id="reptbl" hidden><tbody id="repbody"></tbody></table></div>
+          <button class="btn second" id="b_repcopy" style="margin-top:12px">Özeti kopyala</button>
+        </section>
+
+        <!-- stock -->
+        <section id="pg_stock" hidden>
+          <h2>Stok</h2>
+          <p class="lead">Depomuzda sizin adınıza tuttuğumuz ürünler. Miktarlar her sevkiyatta ve teslim alındığında güncellenir.</p>
+          <div class="msg" id="m_stock"></div>
+          <div class="tblwrap"><table class="tbl" id="stocktbl" hidden>
+            <thead><tr><th>SKU</th><th>Ürün</th><th>Adet</th><th>Uyarı eşiği</th></tr></thead>
+            <tbody id="stockbody"></tbody>
+          </table></div>
+          <div class="note info" id="stock_empty" hidden>Henüz depoda ürününüz yok. Bir gelen kargo bildirimi oluşturun; teslim alındığında burada görünür.</div>
+          <p class="hint" style="margin-top:10px">Uyarı eşiği: adet bu sayıya düşünce ürün kırmızı işaretlenir. 0 = uyarı yok.</p>
+          <button class="btn second" id="b_stockreload" style="margin-top:12px">Yenile</button>
+        </section>
+
+        <!-- inbound notices -->
+        <section id="pg_inbound" hidden>
+          <h2>Gelen Kargo Bildirimi</h2>
+          <p class="lead">Depomuza ürün göndermeden önce bildirin. Teslim alındığında sayım yapılır ve stoğunuza eklenir.</p>
+
+          <div class="card" style="margin-bottom:16px">
+            <h2 style="font-size:1rem">Yeni bildirim</h2>
+            <div class="grid2">
+              <div class="f"><label>Kargo firması</label><input id="i_courier" list="kargolar" autocomplete="off"></div>
+              <div class="f"><label>Takip numarası</label><input id="i_track" autocomplete="off" spellcheck="false"></div>
+              <div class="f" id="w_iboxes"><label>Koli sayısı</label><input id="i_boxes" type="number" min="1" step="1" inputmode="numeric"><div class="err">En az 1 koli.</div></div>
+              <div class="f"><label>Tahmini varış tarihi</label><input id="i_date" type="date"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="i_note"></textarea></div>
+            </div>
+            <datalist id="kargolar"><option value="UPS"><option value="DHL"><option value="FedEx"><option value="Royal Mail"><option value="DPD"><option value="Parcelforce"><option value="Evri"><option value="Aras Kargo"><option value="Yurtiçi Kargo"><option value="MNG Kargo"></datalist>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin:8px 0 6px">Kolilerdeki ürünler</label>
+            <div class="ihead"><span>SKU</span><span>Ürün adı</span><span>Adet</span><span>x</span></div>
+            <div class="items" id="items"></div>
+            <button class="addrow" id="b_addrow" type="button">+ Ürün satırı ekle</button>
+            <div class="err" id="items_err" style="display:none;font-size:.76rem;color:var(--bad);margin-top:6px">En az bir ürün satırı doldurun (SKU ve adet).</div>
+            <button class="btn primary" id="b_inbound" style="margin-top:14px">Bildirimi Gönder</button>
+            <div class="msg" id="m_inbound"></div>
+          </div>
+
+          <h2 style="font-size:1rem">Bildirimlerim</h2>
+          <div class="msg" id="m_inlist"></div>
+          <div id="inlist"></div>
+          <div class="note info" id="in_empty" hidden>Henüz bildirim yok.</div>
+          <button class="btn second" id="b_inreload" style="margin-top:12px">Yenile</button>
+        </section>
+
+        <!-- returns -->
+        <section id="pg_ret" hidden>
+          <h2>İade Bildirimi</h2>
+          <p class="lead">Müşterinizden depomuza dönecek bir ürünü bildirin. Ulaştığında durumunu kontrol eder, size bildirir ve sağlam olanları stoğunuza geri ekleriz.</p>
+          <div class="card" style="margin-bottom:16px">
+            <div class="grid2">
+              <div class="f full" id="w_rsku"><label>Ürün</label><select class="sel" id="r_sku"></select><div class="err">Lütfen ürünü seçin veya SKU yazın.</div></div>
+              <div class="f full" id="w_rskutxt" hidden><label>SKU</label><input id="r_skutxt" autocapitalize="characters" spellcheck="false"></div>
+              <div class="f" id="w_rqty"><label>Adet</label><input id="r_qty" type="number" min="1" value="1" inputmode="numeric"><div class="err">Adet en az 1 olmalıdır.</div></div>
+              <div class="f"><label>Sipariş numarası (isteğe bağlı)</label><input id="r_order" spellcheck="false" placeholder="203-1234567-1234567"></div>
+              <div class="f full" id="w_rreason"><label>İade sebebi</label><select class="sel" id="r_reason">
+                <option value="">Seçin…</option><option>Yanlış beden</option><option>Yanlış ürün gönderildi</option>
+                <option>Hasarlı geldi</option><option>Müşteri vazgeçti</option><option>Ürün beğenilmedi</option>
+                <option>Teslim edilemedi</option><option>Diğer</option></select><div class="err">Lütfen bir sebep seçin.</div></div>
+              <div class="f"><label>Kargo firması (isteğe bağlı)</label><input id="r_courier" list="kargolar"></div>
+              <div class="f"><label>Takip numarası (isteğe bağlı)</label><input id="r_track" spellcheck="false"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="r_note"></textarea></div>
+            </div>
+            <button class="btn primary" id="b_ret">Bildirimi Gönder</button>
+            <div class="msg" id="m_ret"></div>
+          </div>
+          <h2 style="font-size:1rem">İade bildirimlerim</h2>
+          <div class="msg" id="m_retlist"></div>
+          <div id="retlist"></div>
+          <div class="note info" id="ret_empty" hidden>Henüz iade bildirimi yok.</div>
+        </section>
+
+        <!-- forwarding -->
+        <section id="pg_fwd" hidden>
+          <h2>Kargo Yönlendirme</h2>
+          <p class="lead">Depomuza gelecek bir kargoyu, ulaştığında başka bir adrese yönlendirmemizi isteyin.</p>
+          <div class="card" style="margin-bottom:16px">
+            <div class="grid2">
+              <div class="f"><label>Gelen kargo firması</label><input id="fw_courier" list="kargolar"></div>
+              <div class="f" id="w_wtrack"><label>Gelen takip numarası</label><input id="fw_track" spellcheck="false"><div class="err">Lütfen takip numarasını yazın.</div></div>
+              <div class="f"><label>Gönderen / tedarikçi (isteğe bağlı)</label><input id="fw_from"></div>
+              <div class="f"><label>Koli sayısı (isteğe bağlı)</label><input id="fw_boxes" type="number" min="1" inputmode="numeric"></div>
+              <div class="f full"><label>Beklenen varış tarihi (isteğe bağlı)</label><input id="fw_date" type="date"></div>
+              <div class="f" id="w_wname"><label>Yönlendirilecek kişi / firma</label><input id="fw_name"><div class="err">Lütfen alıcıyı yazın.</div></div>
+              <div class="f" id="w_wphone"><label>Alıcı telefonu</label><input id="fw_phone" type="tel"><div class="err">Lütfen geçerli bir telefon yazın.</div></div>
+              <div class="f full" id="w_waddr"><label>Yönlendirilecek adres</label><textarea id="fw_addr"></textarea><div class="err">Lütfen açık adresi yazın.</div></div>
+              <div class="f" id="w_wcountry"><label>Ülke</label><input id="fw_country" list="ulkeler" value="Birleşik Krallık"><div class="err">Lütfen ülkeyi yazın.</div></div>
+              <div class="f"><label>Tercih edilen servis (isteğe bağlı)</label><input id="fw_service" placeholder="En ucuz / En hızlı"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="fw_note"></textarea></div>
+            </div>
+            <button class="btn primary" id="b_fwd">Talebi Gönder</button>
+            <div class="msg" id="m_fwd"></div>
+          </div>
+          <h2 style="font-size:1rem">Yönlendirme taleplerim</h2>
+          <div class="msg" id="m_fwdlist"></div>
+          <div id="fwdlist"></div>
+          <div class="note info" id="fwd_empty" hidden>Henüz talep yok.</div>
+        </section>
+
+        <!-- FBA prep -->
+        <section id="pg_fba" hidden>
+          <h2>FBA Hazırlık</h2>
+          <p class="lead">Amazon deposuna gönderilecek ürünleri bildirin. Talebiniz kaydedildiğinde size özel bir talep numarası verilir.</p>
+          <div class="card" style="margin-bottom:16px">
+            <div class="fhead"><span>FNSKU / ASIN (ürünün üzerindeki)</span><span>Adet</span><span>Yeni FNSKU (yapıştırılacak)</span><span>x</span></div>
+            <div id="fbarows"></div>
+            <button class="addrow" id="b_fbarow" type="button">+ Satır ekle</button>
+            <div class="err" id="fba_err" style="display:none;font-size:.76rem;color:var(--bad);margin-top:6px">En az bir satır doldurun (FNSKU ve adet).</div>
+            <div class="grid2" style="margin-top:12px">
+              <div class="f"><label>Amazon Shipment ID (isteğe bağlı)</label><input id="f_ship" spellcheck="false" placeholder="FBA15ABCDEFG"></div>
+              <div class="f"><label>Hedef Amazon deposu (isteğe bağlı)</label><input id="f_dest" placeholder="LTN4, BHX4 …"></div>
+              <div class="f full"><label>Not (isteğe bağlı)</label><textarea id="f_note"></textarea></div>
+            </div>
+            <button class="btn primary" id="b_fba">Talebi Gönder</button>
+            <div class="msg" id="m_fba"></div>
+          </div>
+          <h2 style="font-size:1rem">FBA taleplerim</h2>
+          <div class="msg" id="m_fbalist"></div>
+          <div id="fbalist"></div>
+          <div class="note info" id="fba_empty" hidden>Henüz talep yok.</div>
+        </section>
+
+        <!-- their enquiries -->
+        <section id="pg_mine" hidden>
+          <h2>Taleplerim</h2>
+          <p class="lead">Gönderdiğiniz talepler ve ekibimizin yanıtları.</p>
+          <div class="msg" id="m_mine"></div>
+          <div id="olist"></div>
+          <div class="note info" id="o_empty" hidden>Henüz bir talep göndermediniz.</div>
+          <button class="btn second" id="b_reload" style="margin-top:12px">Yenile</button>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="card" id="v_error" hidden>
+    <h2>Bağlantı kurulamadı</h2>
+    <div class="note bad" id="e_text">Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.</div>
+  </div>
+
+  <p class="foot">ecomFLEX · <a href="mailto:info@ecomflex.co.uk" style="color:#8E8EA3">info@ecomflex.co.uk</a></p>
+</div>
+
+<script src="shared.js"></script>
+<script src="ecomflex-config.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i);};
+var VIEWS=['v_load','v_choice','v_signup','v_pending','v_rejected','v_approved','v_login','v_panel','v_error'];
+function show(id){ VIEWS.forEach(function(v){ $(v).hidden = (v!==id); }); window.scrollTo(0,0); }
+function msg(el,t,k){ var e=$(el); e.innerHTML=t; e.className='msg'+(k?' '+k:''); }
+function busy(el,t){ msg(el,'<span class="spin"></span>'+t); }
+
+/* remember the email on this device so a returning visitor is recognised */
+function remembered(){ try{ return localStorage.getItem('ecomflex:email')||''; }catch(e){ return ''; } }
+function remember(v){ try{ localStorage.setItem('ecomflex:email',v); }catch(e){} }
+function forget(){ try{ localStorage.removeItem('ecomflex:email'); }catch(e){} }
+
+var sb=null;
+function loadScript(urls){
+  return new Promise(function(res,rej){
+    (function next(i){
+      if(i>=urls.length) return rej(new Error('cdn'));
+      var s=document.createElement('script'); s.src=urls[i];
+      s.onload=function(){res();}; s.onerror=function(){next(i+1);};
+      document.head.appendChild(s);
+    })(0);
+  });
+}
+function connect(){
+  var cfg=window.ECOMFLEX||{};
+  if(!cfg.SUPABASE_URL||/PASTE_/.test(cfg.SUPABASE_URL)){
+    $('e_text').textContent='Ayarlar tamamlanmamış. (ecomflex-config.js)';
+    show('v_error'); return Promise.reject(new Error('config'));
+  }
+  return loadScript([
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+    'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+  ]).then(function(){
+    sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{
+      auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}
+    });
+  });
+}
+
+/* ---------- validation ---------- */
+function bad(w,on){ $(w).classList.toggle('bad',!!on); return !on; }
+var EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function checkForm(pfx,ids){
+  var ok=true;
+  ids.forEach(function(x){
+    var v=$(x.i).value.trim(), good;
+    if(x.type==='email') good=EMAIL.test(v);
+    else if(x.type==='phone') good=v.replace(/[^\d]/g,'').length>=7;
+    else good=v.length>=2;
+    if(!bad(x.w,!good)) ok=false;
+  });
+  return ok;
+}
+var REQ_FIELDS=[
+  {i:'i_name',w:'w_name'},{i:'i_phone',w:'w_phone',type:'phone'},
+  {i:'i_email',w:'w_email',type:'email'},{i:'i_biz',w:'w_biz'},{i:'i_addr',w:'w_addr'}
+];
+var APP_FIELDS=[
+  {i:'a_name',w:'w2_name'},{i:'a_phone',w:'w2_phone',type:'phone'},
+  {i:'a_email',w:'w2_email',type:'email'},{i:'a_biz',w:'w2_biz'},{i:'a_addr',w:'w2_addr'}
+];
+
+/* ---------- routing ---------- */
+function statusOf(email){
+  return sb.rpc('request_status',{p_email:email}).then(function(r){
+    if(r.error) throw r.error;
+    return r.data||'';
+  });
+}
+function route(){
+  return sb.auth.getSession().then(function(r){
+    var s=r.data&&r.data.session;
+    if(s&&s.user){ return openPanel(s.user); }
+    var em=remembered();
+    if(!em){ show('v_choice'); return; }
+    return statusOf(em).then(function(st){
+      if(st==='approved'){ $('a_email').value=em; show('v_approved'); }
+      else if(st==='rejected'){ show('v_rejected'); }
+      else if(st==='pending'){ show('v_pending'); }
+      else { show('v_choice'); }
+    }).catch(function(){ show('v_choice'); });
+  });
+}
+var ME=null;
+function openPanel(user){
+  return statusOf(user.email).then(function(st){
+    if(st!=='approved'){
+      show('v_pending');
+      msg('m_pending','Hesabınız henüz onaylanmadı.','bad');
+      return;
+    }
+    ME=user;
+    var m=user.user_metadata||{};
+    $('p_hello').textContent='Merhaba'+(m.full_name?', '+m.full_name:'');
+    $('p_sub').textContent=(m.business_name?m.business_name+'\n':'')+user.email;
+    show('v_panel');
+    sb.rpc('link_my_account').then(function(){},function(){});
+    refreshAccount();
+    page('new');
+    loadOrders(); loadStock();
+  }).catch(function(){ show('v_panel'); });
+}
+
+/* ---------- pages ---------- */
+function page(p){
+  ['new','mine','stock','inbound','ret','fwd','fba','bulk','report','wallet'].forEach(function(k){ $('pg_'+k).hidden = (p!==k); });
+  Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
+    b.classList.toggle('on', b.getAttribute('data-p')===p);
+  });
+  if(p==='mine') loadOrders();
+  if(p==='stock') loadStock();
+  if(p==='inbound') loadInbounds();
+  if(p==='ret'){ fillSkuSelect(); loadReq('return'); }
+  if(p==='fwd') loadReq('forward');
+  if(p==='fba'){ if(!$('fbarows').children.length) $('fbarows').appendChild(fbaRow()); loadReq('fba'); }
+  if(p==='report') loadReport();
+  if(p==='wallet'){ refreshAccount(); loadWallet(); }
+}
+Array.prototype.forEach.call(document.querySelectorAll('.navitem'),function(b){
+  b.onclick=function(){ page(b.getAttribute('data-p')); };
+});
+
+/* ---------- new enquiry ---------- */
+var STOCK=[];
+function pickedSku(){
+  var v=$('o_pick').value;
+  if(!v||v==='__other') return null;
+  for(var i=0;i<STOCK.length;i++) if(STOCK[i].sku===v) return STOCK[i];
+  return null;
+}
+function drawPicker(){
+  var sel=$('o_pick'); sel.innerHTML='';
+  if(!STOCK.length){ $('w_pick').hidden=true; $('w_prod').hidden=false; return; }
+  var o0=document.createElement('option'); o0.value=''; o0.textContent='Seçin…'; sel.appendChild(o0);
+  STOCK.forEach(function(r){
+    var o=document.createElement('option'); o.value=r.sku;
+    o.textContent=r.sku+(r.product_name?' — '+r.product_name:'')+'  (mevcut: '+r.qty+')';
+    sel.appendChild(o);
+  });
+  var ox=document.createElement('option'); ox.value='__other'; ox.textContent='Listede yok — elle yazacağım'; sel.appendChild(ox);
+  $('w_pick').hidden=false; $('w_prod').hidden=true; $('o_avail').textContent='';
+}
+$('o_pick').onchange=function(){
+  var v=$('o_pick').value, r=pickedSku();
+  $('w_prod').hidden = (v!=='__other');
+  if(r){
+    $('o_prod').value=r.product_name||r.sku;
+    var q=parseInt($('o_qty').value,10)||1;
+    $('o_avail').className='avail'+(r.qty<q?' none':'');
+    $('o_avail').textContent = r.qty<=0 ? 'Bu üründen depoda stok yok.' : 'Depoda '+r.qty+' adet var.';
+  } else { $('o_avail').textContent=''; if(v==='__other') $('o_prod').value=''; }
+};
+$('o_qty').addEventListener('input',function(){ if(pickedSku()) $('o_pick').onchange(); });
+
+var ORDER_FIELDS=[
+  {i:'o_rname',w:'w_rname'},{i:'o_rphone',w:'w_rphone',type:'phone'},
+  {i:'o_raddr',w:'w_raddr'},{i:'o_rcountry',w:'w_rcountry'}
+];
+$('b_order').onclick=function(){
+  var ok=checkForm('',ORDER_FIELDS);
+  var q=parseInt($('o_qty').value,10);
+  if(!bad('w_qty',!(q>=1))) ok=false;
+  var picked=pickedSku();
+  var needText = !STOCK.length || $('o_pick').value==='__other';
+  if(needText){ if(!bad('w_prod',$('o_prod').value.trim().length<2)) ok=false; }
+  else if(!picked){ $('o_avail').className='avail none'; $('o_avail').textContent='Lütfen bir ürün seçin.'; ok=false; }
+  if(!ok){ msg('m_order','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  if(picked && picked.qty<q && !confirm('Depoda sadece '+picked.qty+' adet var. Yine de '+q+' adet talep etmek istiyor musunuz?')) return;
+  var m=(ME&&ME.user_metadata)||{};
+  var row={
+    sku: picked? picked.sku : null,
+    marketplace: $('o_market').value||null,
+    order_ref: $('o_ref').value.trim()||null,
+    user_id:ME.id, user_email:ME.email, business_name:m.business_name||null, form_key:'temp1',
+    recipient_name:$('o_rname').value.trim(),
+    recipient_address:$('o_raddr').value.trim(),
+    recipient_country:$('o_rcountry').value.trim(),
+    recipient_phone:$('o_rphone').value.trim(),
+    product_name: picked? (picked.product_name||picked.sku) : $('o_prod').value.trim(),
+    quantity:q,
+    note:$('o_note').value.trim()||null,
+    status:'pending'
+  };
+  $('b_order').disabled=true; busy('m_order','Gönderiliyor…');
+  sb.from('orders').insert(row).then(function(r){
+    $('b_order').disabled=false;
+    if(r.error){ msg('m_order','Gönderilemedi. Lütfen tekrar deneyin.','bad'); return; }
+    msg('m_order','Talebiniz alındı.','good');
+    ['o_rname','o_rphone','o_raddr','o_prod','o_note'].forEach(function(x){ $(x).value=''; });
+    $('o_qty').value='1'; $('o_pick').value=''; $('o_avail').textContent=''; $('o_market').value=''; $('o_ref').value='';
+    if(STOCK.length) $('w_prod').hidden=true;
+    loadOrders().then(function(){ page('mine'); });
+  });
+};
+
+/* ---------- their enquiries ---------- */
+function dt(iso){
+  var d=new Date(iso);
+  return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear()
+    +' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+function kv(k,v){
+  var r=document.createElement('div'); r.className='kv';
+  var a=document.createElement('div'); a.className='k'; a.textContent=k;
+  var b=document.createElement('div'); b.className='v'; b.textContent=v;
+  r.appendChild(a); r.appendChild(b); return r;
+}
+function loadOrders(){
+  if(!ME) return Promise.resolve();
+  busy('m_mine','Yükleniyor…');
+  return sb.from('orders').select('*').order('created_at',{ascending:false}).then(function(r){
+    if(r.error){ msg('m_mine','Talepler yüklenemedi.','bad'); return; }
+    msg('m_mine','');
+    var list=r.data||[], box=$('olist');
+    box.innerHTML=''; $('o_empty').hidden=list.length>0;
+    list.forEach(function(o){
+      var li=document.createElement('div'); li.className='oli '+o.status;
+      var head=document.createElement('div'); head.className='ohead';
+      var t=document.createElement('div'); t.className='t';
+      var p=document.createElement('div'); p.className='p';
+      p.textContent=o.product_name+' × '+o.quantity;
+      var sline=document.createElement('div'); sline.className='s';
+      sline.textContent=o.recipient_name+' · '+o.recipient_country+' · '+dt(o.created_at);
+      t.appendChild(p); t.appendChild(sline);
+      var bg=document.createElement('span'); bg.className='badge '+o.status;
+      bg.textContent = o.status==='answered'?'yanıtlandı':'beklemede';
+      head.appendChild(t); head.appendChild(bg);
+      li.appendChild(head);
+
+      var body=document.createElement('div'); body.className='obody'; body.hidden=(o.status!=='answered');
+      body.appendChild(kv('Ürün',o.product_name+(o.sku?' ('+o.sku+')':'')));
+      if(o.order_ref) body.appendChild(kv('Sipariş no',o.order_ref));
+      if(o.marketplace) body.appendChild(kv('Pazar yeri',o.marketplace));
+      body.appendChild(kv('Adet',String(o.quantity)));
+      body.appendChild(kv('Alıcı',o.recipient_name));
+      body.appendChild(kv('Telefon',o.recipient_phone));
+      body.appendChild(kv('Adres',o.recipient_address));
+      body.appendChild(kv('Ülke',o.recipient_country));
+      if(o.note) body.appendChild(kv('Not',o.note));
+
+      if(o.status==='answered'){
+        var rep=document.createElement('div'); rep.className='reply';
+        var h=document.createElement('h4'); h.textContent='ecomFLEX yanıtı'; rep.appendChild(h);
+        if(o.courier) rep.appendChild(kv('Kargo firması',o.courier));
+        if(o.service) rep.appendChild(kv('Servis',o.service));
+        if(o.eta)     rep.appendChild(kv('Tahmini süre',o.eta));
+        if(o.tracking){
+          var lab=document.createElement('div'); lab.className='k'; lab.textContent='Takip numarası';
+          lab.style.width='auto'; lab.style.paddingTop='10px'; rep.appendChild(lab);
+          var w=document.createElement('div'); w.className='trk';
+          var c=document.createElement('code'); c.textContent=o.tracking;
+          var cb=document.createElement('button'); cb.textContent='Kopyala';
+          cb.onclick=function(){ EFCopy(o.tracking,'Takip numarası kopyalandı',cb); };
+          w.appendChild(c); w.appendChild(cb); rep.appendChild(w);
+        }
+        body.appendChild(rep);
+      }
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+    });
+  });
+}
+$('b_reload').onclick=loadOrders;
+
+/* ---------- stock ---------- */
+function loadStock(){
+  if(!ME) return Promise.resolve();
+  busy('m_stock','Yükleniyor…');
+  return sb.from('stock').select('*').order('sku').then(function(r){
+    if(r.error){ msg('m_stock','Stok yüklenemedi.','bad'); return; }
+    msg('m_stock','');
+    STOCK=r.data||[];
+    drawPicker();
+    var tb=$('stockbody'); tb.innerHTML='';
+    $('stocktbl').hidden=!STOCK.length; $('stock_empty').hidden=STOCK.length>0;
+    STOCK.forEach(function(r){
+      var tr=document.createElement('tr');
+      var low = r.low_at>0 && r.qty<=r.low_at;
+      var td1=document.createElement('td'); td1.className='sku'; td1.textContent=r.sku;
+      if(low){ var b=document.createElement('span'); b.className='lowbadge'; b.textContent='düşük stok'; td1.appendChild(b); }
+      var td2=document.createElement('td'); td2.textContent=r.product_name||'';
+      var td3=document.createElement('td'); td3.className='qty'+(low?' low':''); td3.textContent=r.qty;
+      var td4=document.createElement('td');
+      var inp=document.createElement('input'); inp.type='number'; inp.min='0'; inp.value=r.low_at||0; inp.inputMode='numeric';
+      inp.onchange=function(){
+        sb.rpc('set_low_at',{p_sku:r.sku,p_low:parseInt(inp.value,10)||0}).then(function(x){
+          if(x.error){ msg('m_stock','Kaydedilemedi.','bad'); return; }
+          msg('m_stock','Uyarı eşiği kaydedildi.','good'); loadStock();
+        });
+      };
+      td4.appendChild(inp);
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4);
+      tb.appendChild(tr);
+    });
+  });
+}
+$('b_stockreload').onclick=loadStock;
+
+/* ---------- inbound notices ---------- */
+function itemRow(v){
+  v=v||{};
+  var row=document.createElement('div'); row.className='item';
+  var sku=document.createElement('input'); sku.placeholder='SKU'; sku.value=v.sku||''; sku.setAttribute('list','skulist'); sku.autocapitalize='characters';
+  var pn=document.createElement('input'); pn.className='pn'; pn.placeholder='Ürün adı'; pn.value=v.product_name||'';
+  var q=document.createElement('input'); q.type='number'; q.min='1'; q.placeholder='Adet'; q.inputMode='numeric'; q.value=v.qty||'';
+  var rm=document.createElement('button'); rm.type='button'; rm.className='rm'; rm.textContent='\u00D7';
+  rm.onclick=function(){ row.remove(); };
+  sku.onchange=function(){
+    var k=sku.value.trim().toUpperCase();
+    for(var i=0;i<STOCK.length;i++) if(STOCK[i].sku===k && !pn.value) pn.value=STOCK[i].product_name||'';
+  };
+  row.appendChild(sku); row.appendChild(pn); row.appendChild(q); row.appendChild(rm);
+  return row;
+}
+function readItems(){
+  var out=[];
+  Array.prototype.forEach.call($('items').querySelectorAll('.item'),function(row){
+    var i=row.querySelectorAll('input');
+    var sku=i[0].value.trim().toUpperCase(), pn=i[1].value.trim(), q=parseInt(i[2].value,10);
+    if(sku && q>0) out.push({sku:sku,product_name:pn||null,qty_declared:q});
+  });
+  return out;
+}
+$('b_addrow').onclick=function(){ $('items').appendChild(itemRow()); };
+if(!$('items').children.length){ $('items').appendChild(itemRow()); }
+(function(){ var dl=document.createElement('datalist'); dl.id='skulist'; document.body.appendChild(dl); })();
+function refreshSkuList(){
+  var dl=document.getElementById('skulist'); dl.innerHTML='';
+  STOCK.forEach(function(r){ var o=document.createElement('option'); o.value=r.sku; dl.appendChild(o); });
+}
+
+$('b_inbound').onclick=function(){
+  var items=readItems();
+  var boxes=parseInt($('i_boxes').value,10);
+  var ok=true;
+  if(!bad('w_iboxes',!(boxes>=1))) ok=false;
+  $('items_err').style.display = items.length? 'none':'block';
+  if(!items.length) ok=false;
+  if(!ok){ msg('m_inbound','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var m=(ME&&ME.user_metadata)||{};
+  var head={
+    user_id:ME.id, user_email:ME.email, business_name:m.business_name||null,
+    courier:$('i_courier').value.trim()||null, tracking:$('i_track').value.trim()||null,
+    boxes:boxes, expected_on:$('i_date').value||null, note:$('i_note').value.trim()||null, status:'expected'
+  };
+  $('b_inbound').disabled=true; busy('m_inbound','Gönderiliyor…');
+  sb.from('inbounds').insert(head).select('id').single().then(function(r){
+    if(r.error) throw r.error;
+    var id=r.data.id;
+    return sb.from('inbound_items').insert(items.map(function(it){ it.inbound_id=id; return it; }));
+  }).then(function(r){
+    if(r.error) throw r.error;
+    $('b_inbound').disabled=false;
+    msg('m_inbound','Bildiriminiz alındı.','good');
+    ['i_courier','i_track','i_boxes','i_date','i_note'].forEach(function(x){ $(x).value=''; });
+    $('items').innerHTML=''; $('items').appendChild(itemRow());
+    loadInbounds();
+  }).catch(function(){
+    $('b_inbound').disabled=false;
+    msg('m_inbound','Gönderilemedi. Lütfen tekrar deneyin.','bad');
+  });
+};
+
+function loadInbounds(){
+  if(!ME) return Promise.resolve();
+  refreshSkuList();
+  busy('m_inlist','Yükleniyor…');
+  return Promise.all([
+    sb.from('inbounds').select('*').order('created_at',{ascending:false}),
+    sb.from('inbound_items').select('*')
+  ]).then(function(res){
+    if(res[0].error||res[1].error){ msg('m_inlist','Yüklenemedi.','bad'); return; }
+    msg('m_inlist','');
+    var list=res[0].data||[], items=res[1].data||[], box=$('inlist');
+    box.innerHTML=''; $('in_empty').hidden=list.length>0;
+    list.forEach(function(ib){
+      var mine=items.filter(function(it){return it.inbound_id===ib.id;});
+      var tot=mine.reduce(function(a,b){return a+(b.qty_declared||0);},0);
+      var li=document.createElement('div'); li.className='oli '+ib.status;
+      var head=document.createElement('div'); head.className='ohead';
+      var t=document.createElement('div'); t.className='t';
+      var p=document.createElement('div'); p.className='p';
+      p.textContent=(ib.boxes||'?')+' koli · '+tot+' adet · '+mine.length+' ürün';
+      var sl=document.createElement('div'); sl.className='s';
+      sl.textContent=(ib.courier?ib.courier+' · ':'')+(ib.expected_on?'beklenen '+ib.expected_on.split('-').reverse().join('/')+' · ':'')+dt(ib.created_at);
+      t.appendChild(p); t.appendChild(sl);
+      var bg=document.createElement('span'); bg.className='badge '+ib.status;
+      bg.textContent= ib.status==='received'?'teslim alındı':'bekleniyor';
+      head.appendChild(t); head.appendChild(bg); li.appendChild(head);
+
+      var body=document.createElement('div'); body.className='obody'; body.hidden=true;
+      if(ib.tracking) body.appendChild(kv('Takip',ib.tracking));
+      if(ib.note) body.appendChild(kv('Not',ib.note));
+      mine.forEach(function(it){
+        var v = it.qty_declared+' adet';
+        if(ib.status==='received' && it.qty_received!==null && it.qty_received!==undefined){
+          v = 'bildirilen '+it.qty_declared+' · sayılan '+it.qty_received;
+        }
+        var row=kv(it.sku,(it.product_name?it.product_name+' — ':'')+v);
+        if(ib.status==='received' && it.qty_received!==it.qty_declared) row.querySelector('.v').className='v diff';
+        body.appendChild(row);
+      });
+      if(ib.status==='received'){
+        body.appendChild(kv('Teslim alındı',dt(ib.received_at)));
+        if(ib.receive_note) body.appendChild(kv('Depo notu',ib.receive_note));
+      }
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+    });
+  });
+}
+$('b_inreload').onclick=loadInbounds;
+
+
+/* =====================  BULK ORDERS  ===================== */
+var bulkRows=[];
+$('b_sample').onclick=function(){
+  var t=$('bulk');
+  var line=['Ali Yılmaz','07700900123','12 High Street, London SW1A 1AA','Birleşik Krallık',
+            (STOCK[0]?STOCK[0].sku:'004-LGG-G'),'2','203-1234567-1234567',''].join('\t');
+  t.value=(t.value.trim()? t.value.replace(/\s*$/,'')+'\n':'')+line;
+};
+function parseBulk(text){
+  var out=[];
+  text.split(/\r?\n/).forEach(function(line,i){
+    if(!line.trim()) return;
+    var c=line.split('\t');
+    if(c.length<2) c=line.split(/\s{2,}/);           /* pasted without tabs */
+    var r={
+      line:i+1,
+      recipient_name:(c[0]||'').trim(),
+      recipient_phone:(c[1]||'').trim(),
+      recipient_address:(c[2]||'').trim(),
+      recipient_country:(c[3]||'').trim()||'Birleşik Krallık',
+      sku:(c[4]||'').trim().toUpperCase(),
+      quantity:parseInt((c[5]||'').trim(),10),
+      order_ref:(c[6]||'').trim()||null,
+      note:(c[7]||'').trim()||null,
+      problems:[]
+    };
+    if(r.recipient_name.length<2) r.problems.push('alıcı adı eksik');
+    if(r.recipient_phone.replace(/\D/g,'').length<7) r.problems.push('telefon geçersiz');
+    if(r.recipient_address.length<5) r.problems.push('adres eksik');
+    if(!(r.quantity>=1)) r.problems.push('adet geçersiz');
+    if(r.sku){
+      var found=null;
+      for(var k=0;k<STOCK.length;k++) if(STOCK[k].sku===r.sku) found=STOCK[k];
+      if(!found) r.problems.push('SKU stokta yok');
+      else { r.product_name=found.product_name||found.sku;
+             if(found.qty<r.quantity) r.problems.push('stok yetersiz ('+found.qty+')'); }
+    } else r.problems.push('SKU eksik');
+    out.push(r);
+  });
+  return out;
+}
+$('b_check').onclick=function(){
+  bulkRows=parseBulk($('bulk').value);
+  var box=$('bulkprev'); box.innerHTML='';
+  if(!bulkRows.length){ msg('m_bulk','Yapıştırılan satır bulunamadı.','bad'); $('b_bulksend').hidden=true; return; }
+  var okN=bulkRows.filter(function(r){return !r.problems.length;}).length;
+  var badN=bulkRows.length-okN;
+  msg('m_bulk',okN+' satır hazır'+(badN?', '+badN+' satırda sorun var':''),badN?'warn':'good');
+  var wrap=document.createElement('div'); wrap.className='tblwrap';
+  var tb=document.createElement('table'); tb.className='tbl';
+  tb.innerHTML='<thead><tr><th>#</th><th>Alıcı</th><th>SKU</th><th>Adet</th><th>Durum</th></tr></thead>';
+  var body=document.createElement('tbody');
+  bulkRows.forEach(function(r){
+    var tr=document.createElement('tr');
+    var ok=!r.problems.length;
+    tr.innerHTML='<td>'+r.line+'</td><td>'+(r.recipient_name||'—')+'</td>'
+      +'<td class="sku">'+(r.sku||'—')+'</td><td>'+(r.quantity||'—')+'</td>'
+      +'<td style="color:'+(ok?'#1E6B4A':'#8E2A2F')+'">'+(ok?'hazır':r.problems.join(', '))+'</td>';
+    body.appendChild(tr);
+  });
+  tb.appendChild(body); wrap.appendChild(tb); box.appendChild(wrap);
+  $('b_bulksend').hidden = okN===0;
+  $('b_bulksend').textContent=okN+' siparişi gönder';
+};
+$('b_bulksend').onclick=function(){
+  var good=bulkRows.filter(function(r){return !r.problems.length;});
+  if(!good.length) return;
+  if(!confirm(good.length+' sipariş gönderilecek. Devam edilsin mi?')) return;
+  var m=(ME&&ME.user_metadata)||{};
+  var payload=good.map(function(r){
+    return {user_id:ME.id,user_email:ME.email,business_name:m.business_name||null,
+      recipient_name:r.recipient_name,recipient_address:r.recipient_address,
+      recipient_country:r.recipient_country,recipient_phone:r.recipient_phone,
+      product_name:r.product_name||r.sku,sku:r.sku,quantity:r.quantity,
+      order_ref:r.order_ref,note:r.note,status:'pending'};
+  });
+  $('b_bulksend').disabled=true; busy('m_bulk','Gönderiliyor…');
+  sb.from('orders').insert(payload).then(function(res){
+    $('b_bulksend').disabled=false;
+    if(res.error){ msg('m_bulk','Gönderilemedi: '+res.error.message,'bad'); return; }
+    msg('m_bulk',good.length+' sipariş gönderildi.','good');
+    $('bulk').value=''; $('bulkprev').innerHTML=''; $('b_bulksend').hidden=true;
+    loadOrders(); loadStock();
+  });
+};
+
+/* =====================  MONTHLY SUMMARY  ===================== */
+var REP_TR={dispatched:'Gönderilen sipariş',units_out:'Çıkan adet',received:'Teslim alınan sevkiyat',
+  units_in:'Giren adet',returns:'İşlenen iade',forwarded:'Yönlendirilen kargo',fba_jobs:'FBA hazırlık',
+  skus:'Farklı ürün (SKU)',units_held:'Depodaki toplam adet'};
+var repData=null;
+function loadReport(){
+  if(!$('rep_month').value){
+    var d=new Date(); $('rep_month').value=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2);
+  }
+  busy('m_report','Yükleniyor…');
+  return sb.rpc('my_month',{p_month:$('rep_month').value+'-01'}).then(function(r){
+    if(r.error){ msg('m_report','Yüklenemedi.','bad'); return; }
+    msg('m_report',''); repData=r.data||{};
+    var tb=$('repbody'); tb.innerHTML=''; $('reptbl').hidden=false;
+    ['dispatched','units_out','received','units_in','returns','forwarded','fba_jobs','skus','units_held'].forEach(function(k){
+      var tr=document.createElement('tr');
+      var a=document.createElement('td'); a.textContent=REP_TR[k];
+      var b=document.createElement('td'); b.className='qty'; b.textContent=repData[k]!==undefined?repData[k]:0;
+      tr.appendChild(a); tr.appendChild(b); tb.appendChild(tr);
+    });
+  });
+}
+$('rep_month').onchange=loadReport;
+$('b_repcopy').onclick=function(){
+  if(!repData) return;
+  var lines=[($('rep_month').value||'')+' — ecomFLEX aylık özet'];
+  ['dispatched','units_out','received','units_in','returns','forwarded','fba_jobs','skus','units_held'].forEach(function(k){
+    lines.push(REP_TR[k]+'\t'+(repData[k]!==undefined?repData[k]:0));
+  });
+  EFCopy(lines.join('\n'),'Aylık özet kopyalandı',$('b_repcopy'));
+};
+
+/* =====================  SERVICES (returns / forwarding / FBA)  ===================== */
+function fillSkuSelect(){
+  var sel=$('r_sku'); sel.innerHTML='';
+  var o0=document.createElement('option'); o0.value=''; o0.textContent='Seçin…'; sel.appendChild(o0);
+  STOCK.forEach(function(r){
+    var o=document.createElement('option'); o.value=r.sku;
+    o.textContent=r.sku+(r.product_name?' — '+r.product_name:''); sel.appendChild(o);
+  });
+  var ox=document.createElement('option'); ox.value='__other'; ox.textContent='Listede yok — elle yazacağım'; sel.appendChild(ox);
+}
+$('r_sku').onchange=function(){ $('w_rskutxt').hidden = ($('r_sku').value!=='__other'); };
+
+function fileRequest(kind, details, note, btnId, msgId, clear){
+  var m=(ME&&ME.user_metadata)||{};
+  $(btnId).disabled=true; busy(msgId,'Gönderiliyor…');
+  return sb.from('requests').insert({
+    user_id:ME.id, user_email:ME.email, business_name:m.business_name||null,
+    kind:kind, details:details, note:note||null, status:'pending'
+  }).then(function(r){
+    $(btnId).disabled=false;
+    if(r.error){ msg(msgId,'Gönderilemedi. Lütfen tekrar deneyin.','bad'); return false; }
+    msg(msgId,'Talebiniz alındı.','good');
+    (clear||[]).forEach(function(x){ var e=$(x); if(e) e.value=''; });
+    return true;
+  });
+}
+
+/* --- returns --- */
+$('b_ret').onclick=function(){
+  var useTxt=$('r_sku').value==='__other'||!STOCK.length;
+  var sku=useTxt? $('r_skutxt').value.trim().toUpperCase() : $('r_sku').value;
+  var q=parseInt($('r_qty').value,10);
+  var ok=true;
+  if(!bad('w_rsku',!sku)) ok=false;
+  if(!bad('w_rqty',!(q>=1))) ok=false;
+  if(!bad('w_rreason',!$('r_reason').value)) ok=false;
+  if(!ok){ msg('m_ret','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var pn=''; for(var i=0;i<STOCK.length;i++) if(STOCK[i].sku===sku) pn=STOCK[i].product_name||'';
+  fileRequest('return',{
+    sku:sku, product_name:pn||null, qty:q,
+    order_ref:$('r_order').value.trim()||null, reason:$('r_reason').value,
+    courier:$('r_courier').value.trim()||null, tracking:$('r_track').value.trim()||null
+  },$('r_note').value.trim(),'b_ret','m_ret',['r_order','r_courier','r_track','r_note','r_skutxt'])
+  .then(function(ok2){ if(ok2){ $('r_qty').value='1'; $('r_sku').value=''; $('r_reason').value=''; loadReq('return'); } });
+};
+
+/* --- forwarding --- */
+var FWD=[{i:'fw_track',w:'w_wtrack'},{i:'fw_name',w:'w_wname'},{i:'fw_phone',w:'w_wphone',type:'phone'},
+         {i:'fw_addr',w:'w_waddr'},{i:'fw_country',w:'w_wcountry'}];
+$('b_fwd').onclick=function(){
+  if(!checkForm('',FWD)){ msg('m_fwd','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  fileRequest('forward',{
+    in_courier:$('fw_courier').value.trim()||null, in_tracking:$('fw_track').value.trim(),
+    from:$('fw_from').value.trim()||null, boxes:parseInt($('fw_boxes').value,10)||null,
+    expected_on:$('fw_date').value||null,
+    to_name:$('fw_name').value.trim(), to_phone:$('fw_phone').value.trim(),
+    to_address:$('fw_addr').value.trim(), to_country:$('fw_country').value.trim(),
+    service:$('fw_service').value.trim()||null
+  },$('fw_note').value.trim(),'b_fwd','m_fwd',
+   ['w_courier','w_track','w_from','w_boxes','w_date','w_name','w_phone','w_addr','w_service','w_note'])
+  .then(function(ok){ if(ok){ $('fw_country').value='Birleşik Krallık'; loadReq('forward'); } });
+};
+
+/* --- FBA prep --- */
+function fbaRow(){
+  var row=document.createElement('div'); row.className='frow';
+  var a=document.createElement('input'); a.type='text'; a.placeholder='X001ABCDEF'; a.autocapitalize='characters'; a.spellcheck=false;
+  var q=document.createElement('input'); q.type='number'; q.min='1'; q.placeholder='Adet'; q.inputMode='numeric';
+  var wrap=document.createElement('div'); wrap.className='nf';
+  var n=document.createElement('input'); n.type='text'; n.placeholder='X002NEWAAA'; n.autocapitalize='characters'; n.spellcheck=false;
+  var pick=document.createElement('label'); pick.className='pick'; pick.textContent='Etiket dosyası ekle (PDF)';
+  var file=document.createElement('input'); file.type='file'; file.accept='application/pdf,image/*';
+  var fname=document.createElement('div'); fname.className='fname';
+  file.onchange=function(){ fname.textContent = file.files[0]? file.files[0].name : ''; };
+  pick.appendChild(file);
+  wrap.appendChild(n); wrap.appendChild(pick); wrap.appendChild(fname);
+  var rm=document.createElement('button'); rm.type='button'; rm.className='rm'; rm.textContent='\u00D7';
+  rm.onclick=function(){ row.remove(); };
+  row.appendChild(a); row.appendChild(q); row.appendChild(wrap); row.appendChild(rm);
+  row._get=function(){
+    var code=a.value.trim().toUpperCase(), qty=parseInt(q.value,10);
+    if(!code||!(qty>=1)) return null;
+    return {fnsku:code, qty:qty, new_fnsku:n.value.trim().toUpperCase()||null, _file:file.files[0]||null};
+  };
+  return row;
+}
+$('b_fbarow').onclick=function(){ $('fbarows').appendChild(fbaRow()); };
+
+function uploadLabel(file, reqId, name){
+  var path=ME.id+'/'+reqId+'/'+name+'-'+Date.now()+'-'+file.name.replace(/[^\w.\-]/g,'_');
+  return sb.storage.from('labels').upload(path,file,{upsert:true}).then(function(r){
+    if(r.error) throw r.error;
+    return {path:path, name:file.name};
+  });
+}
+
+$('b_fba').onclick=function(){
+  var rows=Array.prototype.slice.call($('fbarows').querySelectorAll('.frow'));
+  var lines=rows.map(function(r){return r._get();}).filter(Boolean);
+  $('fba_err').style.display=lines.length?'none':'block';
+  if(!lines.length){ msg('m_fba','En az bir satır ekleyin.','bad'); return; }
+
+  $('b_fba').disabled=true; busy('m_fba','Gönderiliyor…');
+  var files=lines.map(function(l){ var f=l._file; delete l._file; return f; });
+  var payload=lines.map(function(l,i){
+    l.ship = $('f_ship').value.trim()||null;
+    l.dest = $('f_dest').value.trim()||null;
+    return l;
+  });
+
+  /* label files go up first and travel with the job. (Customers cannot edit a job
+     afterwards, so attaching them later silently failed.) */
+  var folder='fba-'+Date.now();
+  Promise.all(files.map(function(f,i){
+    return f? uploadLabel(f,folder,'fnsku-'+(i+1)).then(function(meta){ payload[i].new_fnsku_file=meta; }) : null;
+  })).then(function(){
+    return sb.rpc('submit_fba',{p_lines:payload,p_note:$('f_note').value.trim()||null});
+  }).then(function(r){
+    if(r.error) throw r.error;
+    return r.data;
+  }).then(function(ref){
+    $('b_fba').disabled=false;
+    msg('m_fba','Talebiniz alındı. Talep numaranız: '+ref,'good');
+    $('fbarows').innerHTML=''; $('fbarows').appendChild(fbaRow());
+    ['f_ship','f_dest','f_note'].forEach(function(x){ $(x).value=''; });
+    loadReq('fba');
+  }).catch(function(e){
+    $('b_fba').disabled=false;
+    msg('m_fba','Gönderilemedi. '+((e&&e.message)||''),'bad');
+  });
+};
+
+/* --- one list renderer for all three --- */
+var KIND_UI={
+  'return':{list:'retlist',msg:'m_retlist',empty:'ret_empty'},
+  'forward':{list:'fwdlist',msg:'m_fwdlist',empty:'fwd_empty'},
+  'fba':{list:'fbalist',msg:'m_fbalist',empty:'fba_empty'}
+};
+var ST_TR={pending:'beklemede',boxed:'koli bilgisi hazır',labelled:'etiketler gönderildi',done:'tamamlandı',cancelled:'iptal edildi'};
+function loadReq(kind){
+  if(!ME) return Promise.resolve();
+  var ui=KIND_UI[kind];
+  busy(ui.msg,'Yükleniyor…');
+  return sb.from('requests').select('*').eq('kind',kind).order('created_at',{ascending:false}).then(function(r){
+    if(r.error){ msg(ui.msg,'Yüklenemedi.','bad'); return; }
+    msg(ui.msg,'');
+    var list=r.data||[], box=$(ui.list); box.innerHTML='';
+    $(ui.empty).hidden=list.length>0;
+    list.forEach(function(q){
+      var d=q.details||{}, o=q.outcome||{};
+      var li=document.createElement('div');
+      li.className='oli '+(q.status==='done'?'answered':(q.status==='cancelled'?'':q.status));
+      var head=document.createElement('div'); head.className='ohead';
+      var t=document.createElement('div'); t.className='t';
+      var p=document.createElement('div'); p.className='p';
+      var sline=document.createElement('div'); sline.className='s';
+      if(kind==='return'){ p.textContent=(d.product_name||d.sku)+' × '+d.qty; sline.textContent=(d.reason||'')+' · '+dt(q.created_at); }
+      else if(kind==='forward'){ p.textContent=(d.in_tracking||'takipsiz')+' → '+d.to_name; sline.textContent=(d.to_country||'')+' · '+dt(q.created_at); }
+      else { var n=(d.lines||[]).reduce(function(a,b){return a+(b.qty||0);},0);
+             p.textContent=(q.ref||'—')+' · '+(d.lines||[]).length+' ürün · '+n+' adet';
+             sline.textContent=dt(q.created_at); }
+      t.appendChild(p); t.appendChild(sline);
+      var bg=document.createElement('span');
+      bg.className='badge '+(q.status==='done'?'answered':'pending'); bg.textContent=ST_TR[q.status]||q.status;
+      head.appendChild(t); head.appendChild(bg); li.appendChild(head);
+
+      var body=document.createElement('div'); body.className='obody';
+      body.hidden = (kind==='fba') ? (q.status==='pending') : (q.status!=='done');
+      if(kind==='return'){
+        body.appendChild(kv('SKU',d.sku)); body.appendChild(kv('Adet',String(d.qty)));
+        if(d.order_ref) body.appendChild(kv('Sipariş no',d.order_ref));
+        body.appendChild(kv('Sebep',d.reason||'—'));
+        if(d.tracking) body.appendChild(kv('Takip',d.tracking));
+      } else if(kind==='forward'){
+        if(d.in_courier) body.appendChild(kv('Gelen kargo',d.in_courier));
+        body.appendChild(kv('Gelen takip',d.in_tracking||'—'));
+        if(d.from) body.appendChild(kv('Gönderen',d.from));
+        body.appendChild(kv('Alıcı',d.to_name));
+        body.appendChild(kv('Telefon',d.to_phone));
+        body.appendChild(kv('Adres',d.to_address));
+        body.appendChild(kv('Ülke',d.to_country));
+        if(d.service) body.appendChild(kv('Servis tercihi',d.service));
+      } else {
+        if(q.ref){
+          var rp=document.createElement('div'); rp.style.marginBottom='8px';
+          var pill=document.createElement('span'); pill.className='refpill'; pill.textContent='Talep no: '+q.ref;
+          rp.appendChild(pill); body.appendChild(rp);
+        }
+        (d.lines||[]).forEach(function(l){
+          var txt=l.qty+' adet';
+          if(l.new_fnsku) txt+=' · yeni FNSKU: '+l.new_fnsku;
+          if(l.new_fnsku_file) txt+=' · etiket dosyası eklendi';
+          body.appendChild(kv(l.fnsku||l.sku||'—',txt));
+        });
+        if(d.lines&&d.lines[0]&&d.lines[0].ship) body.appendChild(kv('Shipment ID',d.lines[0].ship));
+        if(d.lines&&d.lines[0]&&d.lines[0].dest) body.appendChild(kv('Hedef depo',d.lines[0].dest));
+      }
+      if(q.note) body.appendChild(kv('Notunuz',q.note));
+
+      if(kind==='fba' && (q.status==='boxed'||q.status==='labelled'||q.status==='done')){
+        var boxes=(o.boxes)||[], labels=(d.box_labels)||[];
+        function labelFor(no){ for(var i=0;i<labels.length;i++) if(labels[i].no===no) return labels[i]; return null; }
+        var bh=document.createElement('h4'); bh.style.cssText='margin:12px 0 8px;font-size:.9rem;color:var(--navy)';
+        bh.textContent = q.status==='done' ? 'Koliler' : 'Kolileriniz hazır — her koli için etiket yükleyin';
+        body.appendChild(bh);
+        boxes.forEach(function(b){
+          var card=document.createElement('div'); card.className='boxcard';
+          var h5=document.createElement('h5'); h5.textContent='Koli '+b.no; card.appendChild(h5);
+          var inr=document.createElement('div'); inr.className='in';
+          var its=document.createElement('div'); its.className='boxitems';
+          (b.items||[]).forEach(function(it){
+            var r2=document.createElement('div'); r2.textContent=it.code+' — '+it.qty+' adet'; its.appendChild(r2);
+          });
+          inr.appendChild(its);
+          var dm=document.createElement('div'); dm.className='dims';
+          dm.textContent=(b.l||'?')+' × '+(b.w||'?')+' × '+(b.h||'?')+' cm · '+(b.kg||'?')+' kg';
+          inr.appendChild(dm);
+          var lw=document.createElement('div'); lw.className='lbl';
+          var have=labelFor(b.no);
+          if(have){ var hv=document.createElement('span'); hv.className='has'; hv.textContent='✓ '+have.name; lw.appendChild(hv); }
+          if(q.status!=='done'){
+            var pk=document.createElement('label'); pk.textContent=have?'Değiştir':'FBA ve taşıyıcı etiketi yükle';
+            var fi=document.createElement('input'); fi.type='file'; fi.accept='application/pdf,image/*';
+            fi.onchange=function(){
+              if(!fi.files[0]) return;
+              pk.textContent='Yükleniyor…';
+              uploadLabel(fi.files[0],q.id,'box-'+b.no).then(function(meta){
+                meta.no=b.no;
+                var next=labels.filter(function(x){return x.no!==b.no;}).concat([meta]);
+                return sb.rpc('set_fba_labels',{p_id:q.id,p_labels:next});
+              }).then(function(r3){
+                if(r3&&r3.error) throw r3.error;
+                msg(ui.msg,'Etiket yüklendi.','good'); loadReq('fba');
+              }).catch(function(){ pk.textContent='Yüklenemedi — tekrar deneyin'; });
+            };
+            pk.appendChild(fi); lw.appendChild(pk);
+          }
+          inr.appendChild(lw); card.appendChild(inr); body.appendChild(card);
+        });
+        if(q.status==='boxed'&&boxes.length&&labels.length<boxes.length){
+          var warn=document.createElement('div'); warn.className='note warn'; warn.style.marginTop='8px';
+          warn.textContent=boxes.length-labels.length+' koli için etiket bekleniyor.';
+          body.appendChild(warn);
+        }
+        if(q.status==='labelled'){
+          var okn=document.createElement('div'); okn.className='note good'; okn.style.marginTop='8px';
+          okn.textContent='Etiketleriniz alındı. Ekibimiz kolilere yapıştırıp talebi kapatacak.';
+          body.appendChild(okn);
+        }
+      }
+
+      if(q.status==='done'){
+        var rep=document.createElement('div'); rep.className='reply';
+        var h=document.createElement('h4'); h.textContent='ecomFLEX yanıtı'; rep.appendChild(h);
+        if(kind==='return'){
+          if(o.condition) rep.appendChild(kv('Durum',o.condition));
+          if(o.decision) rep.appendChild(kv('Karar',o.decision));
+          if(o.restocked!==undefined) rep.appendChild(kv('Stoğa eklenen',o.restocked+' adet'));
+        } else if(kind==='forward'){
+          if(o.courier) rep.appendChild(kv('Kargo firması',o.courier));
+          if(o.service) rep.appendChild(kv('Servis',o.service));
+          if(o.eta) rep.appendChild(kv('Tahmini süre',o.eta));
+        } else {
+          if(o.courier) rep.appendChild(kv('Kargo firması',o.courier));
+          if(o.boxes&&o.boxes.length){
+            var tb=document.createElement('table'); tb.className='boxtbl';
+            tb.innerHTML='<thead><tr><th>Koli</th><th>U×G×Y (cm)</th><th>Ağırlık (kg)</th></tr></thead>';
+            var bd=document.createElement('tbody');
+            o.boxes.forEach(function(b){
+              var tr=document.createElement('tr');
+              tr.innerHTML='<td>'+b.no+'</td><td>'+b.l+' × '+b.w+' × '+b.h+'</td><td>'+b.kg+'</td>';
+              bd.appendChild(tr);
+            });
+            tb.appendChild(bd); rep.appendChild(tb);
+            var cp=document.createElement('button'); cp.className='btn second'; cp.style.marginTop='8px';
+            cp.textContent='Koli ölçülerini kopyala';
+            cp.onclick=function(){
+              var txt=o.boxes.map(function(b){return [b.no,b.l,b.w,b.h,b.kg].join('\t');}).join('\n');
+              EFCopy(txt,'Koli ölçüleri kopyalandı',cp);
+            };
+            rep.appendChild(cp);
+          }
+        }
+        if(o.tracking){
+          var lab=document.createElement('div'); lab.className='k'; lab.textContent='Takip numarası';
+          lab.style.width='auto'; lab.style.paddingTop='10px'; rep.appendChild(lab);
+          var w=document.createElement('div'); w.className='trk';
+          var c=document.createElement('code'); c.textContent=o.tracking;
+          var cb=document.createElement('button'); cb.textContent='Kopyala';
+          cb.onclick=function(){ EFCopy(o.tracking,'Takip numarası kopyalandı',cb); };
+          w.appendChild(c); w.appendChild(cb); rep.appendChild(w);
+        }
+        if(q.reply_note) rep.appendChild(kv('Not',q.reply_note));
+        body.appendChild(rep);
+      } else if(q.status==='pending'){
+        var cancel=document.createElement('button'); cancel.className='btn second'; cancel.style.marginTop='10px';
+        cancel.textContent='Talebi iptal et';
+        cancel.onclick=function(){
+          if(!confirm('Bu talebi iptal etmek istiyor musunuz?')) return;
+          sb.rpc('cancel_request',{p_id:q.id}).then(function(){ loadReq(kind); });
+        };
+        body.appendChild(cancel);
+      }
+      li.appendChild(body);
+      head.onclick=function(){ body.hidden=!body.hidden; };
+      box.appendChild(li);
+    });
+  });
+}
+
+
+
+/* ---------- actions ---------- */
+$('b_signup').onclick=function(){ location.href='signup.html'; };
+$('b_login').onclick=function(){ show('v_login'); };
+$('b_back1').onclick=function(){ show('v_choice'); };
+$('b_back2').onclick=function(){ show('v_choice'); };
+$('b_other1').onclick=function(){ forget(); show('v_login'); };
+$('b_other2').onclick=function(){ forget(); show('v_choice'); };
+
+$('b_send').onclick=function(){
+  if(!checkForm('',REQ_FIELDS)){ msg('m_signup','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var row={
+    full_name:$('i_name').value.trim(),
+    phone:$('i_phone').value.trim(),
+    email:$('i_email').value.trim(),
+    business_name:$('i_biz').value.trim(),
+    business_address:$('i_addr').value.trim(),
+    status:'pending'
+  };
+  $('b_send').disabled=true; busy('m_signup','Gönderiliyor…');
+  sb.from('signup_requests').insert(row).then(function(r){
+    $('b_send').disabled=false;
+    if(r.error){ msg('m_signup','Gönderilemedi. Lütfen tekrar deneyin.','bad'); return; }
+    remember(row.email);
+    show('v_pending');
+  });
+};
+
+$('b_recheck').onclick=function(){
+  var em=remembered();
+  if(!em){ show('v_choice'); return; }
+  busy('m_pending','Kontrol ediliyor…');
+  statusOf(em).then(function(st){
+    if(st==='approved'){ $('a_email').value=em; show('v_approved'); }
+    else if(st==='rejected'){ show('v_rejected'); }
+    else msg('m_pending','Talebiniz hâlâ inceleniyor.','');
+  }).catch(function(){ msg('m_pending','Kontrol edilemedi.','bad'); });
+};
+
+$('b_create').onclick=function(){
+  var ok=checkForm('',APP_FIELDS);
+  var pw=$('a_pw').value, pw2=$('a_pw2').value;
+  if(!bad('w2_pw',pw.length<8)) ok=false;
+  if(!bad('w2_pw2',pw!==pw2||!pw2)) ok=false;
+  if(!ok){ msg('m_approved','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var email=$('a_email').value.trim();
+  $('b_create').disabled=true; busy('m_approved','Hesabınız oluşturuluyor…');
+
+  statusOf(email).then(function(st){
+    if(st!=='approved') throw new Error('not-approved');
+    return sb.auth.signUp({email:email,password:pw,options:{data:{
+      full_name:$('a_name').value.trim(),
+      phone:$('a_phone').value.trim(),
+      business_name:$('a_biz').value.trim(),
+      business_address:$('a_addr').value.trim()
+    }}});
+  }).then(function(r){
+    if(r.error){
+      if(/already/i.test(r.error.message||'')){
+        return sb.auth.signInWithPassword({email:email,password:pw}).then(function(r2){
+          if(r2.error) throw r2.error;
+          return r2;
+        });
+      }
+      throw r.error;
+    }
+    return r;
+  }).then(function(r){
+    $('b_create').disabled=false;
+    remember(email);
+    if(!$('a_remember').checked) forget();
+    if(r.data&&r.data.session&&r.data.user) return openPanel(r.data.user);
+    msg('m_approved','Hesabınız oluşturuldu. Şimdi giriş yapabilirsiniz.','good');
+    $('l_email').value=email;
+    setTimeout(function(){ show('v_login'); },1200);
+  }).catch(function(e){
+    $('b_create').disabled=false;
+    if(e&&e.message==='not-approved'){ show('v_pending'); return; }
+    var m=(e&&e.message)||'';
+    if(/already|registered|exists/i.test(m)||/invalid login/i.test(m)){
+      msg('m_approved','Bu e-posta adresiyle zaten bir hesap var. Girdiğiniz şifre eşleşmedi. '
+        +'Mevcut şifrenizle giriş yapın; şifrenizi hatırlamıyorsanız info@ecomflex.co.uk adresine yazın.','bad');
+      $('l_email').value=email;
+      return;
+    }
+    if(/password/i.test(m)){ msg('m_approved','Şifre kabul edilmedi: en az 8 karakter olmalıdır.','bad'); return; }
+    if(/rate|too many/i.test(m)){ msg('m_approved','Çok fazla deneme yapıldı. Birkaç dakika sonra tekrar deneyin.','bad'); return; }
+    if(/fetch|network/i.test(m)){ msg('m_approved','Bağlantı kurulamadı. İnternetinizi kontrol edin.','bad'); return; }
+    msg('m_approved','Hesap oluşturulamadı. '+m,'bad');
+  });
+};
+
+$('b_dologin').onclick=function(){
+  var ok=true;
+  if(!bad('w_lemail',!EMAIL.test($('l_email').value.trim()))) ok=false;
+  if(!bad('w_lpw',!$('l_pw').value)) ok=false;
+  if(!ok){ msg('m_login','Lütfen işaretli alanları düzeltin.','bad'); return; }
+  var email=$('l_email').value.trim();
+  $('b_dologin').disabled=true; busy('m_login','Giriş yapılıyor…');
+  sb.auth.signInWithPassword({email:email,password:$('l_pw').value}).then(function(r){
+    $('b_dologin').disabled=false;
+    if(r.error){
+      var lm=(r.error.message)||'';
+      if(/confirm/i.test(lm)) msg('m_login','E-posta adresiniz doğrulanmamış. info@ecomflex.co.uk adresine yazın.','bad');
+      else if(/rate|too many/i.test(lm)) msg('m_login','Çok fazla deneme. Birkaç dakika sonra tekrar deneyin.','bad');
+      else msg('m_login','E-posta veya şifre hatalı.','bad');
+      return;
+    }
+    if($('l_remember').checked) remember(email); else forget();
+    msg('m_login','');
+    return openPanel(r.data.user);
+  });
+};
+
+$('b_logout').onclick=function(){
+  sb.auth.signOut().then(function(){ forget(); show('v_choice'); });
+};
+
+/* enter key submits the visible form */
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return;
+  if(!$('v_signup').hidden) $('b_send').click();
+  else if(!$('v_login').hidden) $('b_dologin').click();
+  else if(!$('v_approved').hidden) $('b_create').click();
+});
+
+/* =====================  ACCOUNT, BALANCE, LOCK  ===================== */
+var ACC={unlocked:false,balance:0,unit:null,bank:'',welcome:'',code:null};
+function money(p){ var n=(Number(p)||0)/100; return (n<0?'-':'')+'\u00A3'+Math.abs(n).toFixed(2); }
+function refreshAccount(){
+  if(!sb) return Promise.resolve();
+  return sb.rpc('my_account').then(function(r){
+    if(r.error) return;
+    var a=r.data||{};
+    ACC.unlocked=!!a.unlocked; ACC.balance=a.balance||0; ACC.unit=a.unit||null;
+    ACC.bank=a.bank||''; ACC.code=a.code||null;
+    $('lockbar').hidden=ACC.unlocked;
+    $('bal_amount').textContent=money(ACC.balance);
+    $('bal_amount').classList.toggle('neg',ACC.balance<0);
+    $('bankbox').textContent=ACC.bank||'—';
+    if(ACC.code && !document.querySelector('.me .mycode')){
+      var c=document.createElement('div'); c.className='mycode'; c.textContent='Kod: '+ACC.code;
+      var me=document.querySelector('.me'); if(me) me.insertBefore(c,$('b_logout'));
+    }
+    if(ACC.unit){
+      $('whtext').textContent=(a.company||'')+'\nAylesford Storage Unit '+ACC.unit
+        +'\nThe Coachworks, Old Mill Lane\nAylesford\nME20 7DT';
+      $('whbox').hidden=false;
+    } else $('whbox').hidden=true;
+  },function(){});
+}
+/* Nothing that creates work is allowed until the first top-up has landed. */
+function needsFunds(){
+  if(ACC.unlocked) return false;
+  alert('Talep oluşturabilmek için önce hesabınıza bakiye yüklemeniz gerekiyor.');
+  page('wallet');
+  return true;
+}
+$('b_tolock').onclick=function(){ page('wallet'); };
+$('b_whcopy').onclick=function(){ EFCopy($('whtext').textContent,'Depo adresi kopyalandı',$('b_whcopy')); };
+$('b_bankcopy').onclick=function(){ EFCopy($('bankbox').textContent,'Hesap bilgileri kopyalandı',$('b_bankcopy')); };
+
+var KIND_TR={topup:'Bakiye yükleme',charge:'Hizmet bedeli',refund:'İade',adjustment:'Düzeltme'};
+var WAL_SHOWN=200;
+/* "50", "50.5", "50,50", "£1,250.00" -> pence; NaN if not a number */
+function penceOf(v){
+  v=String(v||'').replace(/[\s£]/g,'');
+  if(v.indexOf(',')>-1 && v.indexOf('.')===-1) v=v.replace(',','.'); else v=v.replace(/,/g,'');
+  if(!/^[0-9]+(\.[0-9]{0,2})?$/.test(v)) return NaN;
+  return Math.round(parseFloat(v)*100);
+}
+function loadSummary(){
+  return sb.rpc('my_wallet_summary').then(function(r){
+    if(r.error||!r.data) return;
+    var s=r.data;
+    $('ws_today').textContent=money(s.today_spend);
+    $('ws_month').textContent=money(s.month_spend);
+    $('ws_in').textContent=money(s.lifetime_topups);
+    $('ws_out').textContent=money(s.lifetime_spend);
+    $('ws_bal').textContent=money(s.balance);
+    $('bal_amount').textContent=money(s.balance);
+    $('bal_amount').classList.toggle('neg',s.balance<0);
+    $('ws_company').textContent=s.company||(ME&&ME.user_metadata&&ME.user_metadata.business_name)||'—';
+  },function(){});
+}
+function loadWallet(){
+  if(!ME||!sb) return Promise.resolve();
+  loadSummary(); loadDecl();
+  busy('m_wallet','Yükleniyor…');
+  return sb.from('wallet_entries').select('*').order('at',{ascending:false}).limit(WAL_SHOWN).then(function(r){
+    if(r.error){ msg('m_wallet','Yüklenemedi.','bad'); return; }
+    msg('m_wallet','');
+    var list=r.data||[], tb=$('walbody'); tb.innerHTML='';
+    $('waltbl').hidden=!list.length; $('wal_empty').hidden=list.length>0;
+    $('wal_more').hidden=list.length<WAL_SHOWN;
+    list.forEach(function(w){
+      var tr=document.createElement('tr');
+      var a=document.createElement('td'); a.textContent=dt(w.at);
+      var b=document.createElement('td'); b.textContent=(KIND_TR[w.kind]||w.kind)+(w.note?' — '+w.note:'');
+      var c=document.createElement('td'); c.className='amt '+(w.pence<0?'neg':'pos'); c.textContent=money(w.pence);
+      tr.appendChild(a); tr.appendChild(b); tr.appendChild(c); tb.appendChild(tr);
+    });
+  });
+}
+$('b_walreload').onclick=loadWallet;
+
+/* ---- Excel download: the whole statement with a running balance ---- */
+$('b_walxls').onclick=function(){
+  var btn=$('b_walxls'); btn.disabled=true; busy('m_wallet','Excel hazırlanıyor…');
+  var all=[];
+  function fetchFrom(from){
+    return sb.from('wallet_entries').select('at,kind,note,pence').order('at',{ascending:true}).range(from,from+999).then(function(r){
+      if(r.error) throw r.error;
+      all=all.concat(r.data||[]);
+      if((r.data||[]).length===1000) return fetchFrom(from+1000);
+    });
+  }
+  Promise.all([fetchFrom(0), window.XLSX?null:loadScript([
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'])]).then(function(){
+    var run=0, rows=[['Tarih','İşlem','Açıklama','Tutar (£)','Bakiye (£)']];
+    all.forEach(function(w){
+      run+=Number(w.pence)||0;
+      rows.push([dt(w.at), KIND_TR[w.kind]||w.kind, w.note||'', (Number(w.pence)||0)/100, run/100]);
+    });
+    var ws=XLSX.utils.aoa_to_sheet(rows);
+    for(var i=2;i<=rows.length;i++){ ['D','E'].forEach(function(c){ if(ws[c+i]) ws[c+i].z='#,##0.00'; }); }
+    ws['!cols']=[{wch:17},{wch:16},{wch:42},{wch:12},{wch:12}];
+    var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Hesap hareketleri');
+    XLSX.writeFile(wb,'ecomflex-hesap-hareketleri-'+new Date().toISOString().slice(0,10)+'.xlsx');
+    msg('m_wallet','');
+  }).catch(function(){
+    msg('m_wallet','Excel dosyası hazırlanamadı. Lütfen tekrar deneyin.','bad');
+  }).then(function(){ btn.disabled=false; });
+};
+
+/* ---- bank transfer: payment declarations ---- */
+var DST={pending:'Kontrol ediliyor',confirmed:'Onaylandı',rejected:'Reddedildi',cancelled:'İptal edildi'};
+function loadDecl(){
+  return sb.from('payment_declarations').select('*').order('created_at',{ascending:false}).limit(10).then(function(r){
+    var box=$('decllist'); box.innerHTML='';
+    if(r.error) return;
+    (r.data||[]).forEach(function(d){
+      var row=document.createElement('div'); row.className='decl';
+      var a=document.createElement('div'); a.className='a'; a.textContent=money(d.amount_pence);
+      var t=document.createElement('div'); t.className='d';
+      t.textContent=(d.sent_on?d.sent_on.split('-').reverse().join('/'):dt(d.created_at).slice(0,10))
+        +(d.reference?' · '+d.reference:'')
+        +(d.status==='rejected'&&d.decision_note?' · '+d.decision_note:'');
+      var st=document.createElement('span'); st.className='st '+d.status; st.textContent=DST[d.status]||d.status;
+      row.appendChild(a); row.appendChild(t); row.appendChild(st);
+      if(d.status==='pending'){
+        var x=document.createElement('button'); x.textContent='İptal';
+        x.onclick=function(){
+          if(!confirm('Bu ödeme bildirimini iptal etmek istiyor musunuz?')) return;
+          sb.rpc('cancel_declaration',{p_id:d.id}).then(function(){ loadDecl(); });
+        };
+        row.appendChild(x);
+      }
+      box.appendChild(row);
+    });
+  },function(){});
+}
+$('b_declare').onclick=function(){
+  var p=penceOf($('d_amt').value);
+  if(!(p>=100)){ bad('w_damt',true); return; }
+  bad('w_damt',false);
+  $('b_declare').disabled=true; busy('m_declare','Gönderiliyor…');
+  sb.rpc('declare_payment',{p_pence:p,p_sent_on:$('d_date').value||null,p_reference:$('d_ref').value.trim()||null}).then(function(r){
+    $('b_declare').disabled=false;
+    if(r.error){
+      msg('m_declare',/TOO_MANY_PENDING/.test(r.error.message||'')
+        ? 'Kontrol edilmeyi bekleyen çok sayıda bildiriminiz var. Lütfen onaylanmalarını bekleyin.'
+        : 'Gönderilemedi. Lütfen tekrar deneyin.','bad');
+      return;
+    }
+    msg('m_declare','Bildiriminiz alındı. Ödeme hesabımıza ulaştığında bakiyeniz güncellenecek.','good');
+    $('d_amt').value=''; $('d_ref').value='';
+    loadDecl();
+  },function(){ $('b_declare').disabled=false; msg('m_declare','Gönderilemedi. Lütfen tekrar deneyin.','bad'); });
+};
+$('d_date').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+
+/* ---- card top-up (Stripe). Shown only once a Stripe key is set in ecomflex-config.js ---- */
+var STRIPE_PK=(window.ECOMFLEX&&window.ECOMFLEX.STRIPE_PUBLISHABLE_KEY)||'';
+var STRIPE=null, CHECKOUT=null, CARD_BEFORE=0;
+if(STRIPE_PK) $('cardsec').hidden=false; else $('bank_num').textContent='02';
+function cardReset(){
+  if(CHECKOUT){ try{ CHECKOUT.destroy(); }catch(e){} CHECKOUT=null; }
+  $('stripebox').innerHTML='';
+  $('b_cardgo').hidden=false; $('b_cardgo').disabled=false;
+  $('b_cardstop').hidden=true; $('c_amt').disabled=false;
+}
+$('b_cardgo').onclick=function(){
+  var p=penceOf($('c_amt').value);
+  if(!(p>=5000 && p<=500000)){ bad('w_camt',true); return; }
+  bad('w_camt',false);
+  $('b_cardgo').disabled=true; busy('m_card','Ödeme sayfası hazırlanıyor…');
+  CARD_BEFORE=ACC.balance;
+  var secret='';
+  sb.functions.invoke('create-topup',{body:{pence:p}}).then(function(r){
+    if(r.error||!r.data||!r.data.clientSecret) throw new Error('START');
+    secret=r.data.clientSecret;
+    return window.Stripe?null:loadScript(['https://js.stripe.com/v3/']);
+  }).then(function(){
+    if(!STRIPE) STRIPE=window.Stripe(STRIPE_PK);
+    var make=STRIPE.createEmbeddedCheckoutPage||STRIPE.initEmbeddedCheckout;
+    return make.call(STRIPE,{
+      fetchClientSecret:function(){ return Promise.resolve(secret); },
+      onComplete:function(){ cardPaid(p); }
+    });
+  }).then(function(co){
+    CHECKOUT=co; co.mount('#stripebox'); msg('m_card','');
+    $('b_cardgo').hidden=true; $('b_cardstop').hidden=false; $('c_amt').disabled=true;
+  }).catch(function(){
+    cardReset(); msg('m_card','Ödeme başlatılamadı. Lütfen biraz sonra tekrar deneyin.','bad');
+  });
+};
+$('b_cardstop').onclick=function(){ cardReset(); msg('m_card',''); };
+/* Stripe has taken the payment; the webhook credits the balance, usually within seconds. */
+function cardPaid(p){
+  cardReset(); busy('m_card','Ödemeniz alındı. Bakiyeniz güncelleniyor…');
+  var tries=0;
+  (function poll(){
+    tries++;
+    refreshAccount().then(function(){
+      var landed=ACC.balance>=CARD_BEFORE+p;
+      if(landed||tries>=15){
+        msg('m_card', landed ? 'Teşekkürler! '+money(p)+' bakiyenize eklendi.'
+          : 'Ödemeniz alındı. Bakiyeniz birkaç dakika içinde güncellenecek.','good');
+        loadWallet();
+      } else setTimeout(poll,2000);
+    });
+  })();
+}
+
+/* ---- sign in with the access code alone ---- */
+$('b_showpw').onclick=function(){ $('pwbox').hidden=!$('pwbox').hidden; };
+$('b_codelogin').onclick=function(){
+  var code=$('l_code').value.trim().toUpperCase().replace(/\s/g,'');
+  if(code.length<6){ bad('w_code',true); msg('m_login','Lütfen kodunuzu yazın.','bad'); return; }
+  bad('w_code',false);
+  $('b_codelogin').disabled=true; busy('m_login','Giriş yapılıyor…');
+  sb.rpc('email_for_code',{p_code:code}).then(function(r){
+    if(r.error||!r.data) throw new Error('BADCODE');
+    return sb.auth.signInWithPassword({email:r.data,password:code});
+  }).then(function(r){
+    $('b_codelogin').disabled=false;
+    if(r.error) throw new Error('BADCODE');
+    if($('l_remember').checked) remember(r.data.user.email); else forget();
+    msg('m_login','');
+    return openPanel(r.data.user);
+  }).catch(function(e){
+    $('b_codelogin').disabled=false;
+    msg('m_login', (e&&e.message==='BADCODE')
+      ? 'Bu kod tanınmadı. Kodunuzu kontrol edin veya info@ecomflex.co.uk adresine yazın.'
+      : 'Giriş yapılamadı. Lütfen tekrar deneyin.','bad');
+  });
+};
+$('l_code').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); $('b_codelogin').click(); } });
+
+;['b_order','b_bulksend','b_inbound','b_ret','b_fwd','b_fba'].forEach(function(id){
+  var el=$(id); if(!el||!el.onclick) return;
+  var orig=el.onclick;
+  el.onclick=function(ev){ if(needsFunds()) return; return orig.call(this,ev); };
+});
+
+connect().then(route).catch(function(){
+  if($('v_error').hidden){
+    $('e_text').textContent='Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.';
+    show('v_error');
+  }
+});
+})();
+</script>
+</body>
+</html>

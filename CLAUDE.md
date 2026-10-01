@@ -22,7 +22,7 @@ Last updated: 24 September 2026.
 
 ### Language rules
 
-- **Customer-facing screens are in Turkish** (`panel.html`, `panel2.html`, `signup.html`).
+- **Customer-facing screens are written in Turkish** (`panel.html`, `signup.html`), with a TR / EN switch (top right) since 1 Oct 2026 that shows them in English (`i18n.js`).
 - **Admin and warehouse screens are in English** (`admin.html`, `scanner.html`, `labels.html`, `index.html`).
 - Carrier, legal and customer email correspondence is written in **British English**.
 - The owner (Mert) communicates casually and in mixed English/Turkish. He is not a developer.
@@ -66,8 +66,8 @@ Mert wanted everything free, on his phone, and editable without a developer. Sta
 |---|---|
 | Repository | `github.com/kolatanya/parcel-scanner` |
 | Ecomflex app (staff hub) | `https://kolatanya.github.io/parcel-scanner/` |
-| Customer panel (current) | `https://kolatanya.github.io/parcel-scanner/panel.html` |
-| **New customer panel (being tested)** | `https://kolatanya.github.io/parcel-scanner/panel2.html` |
+| **Customer panel** | `https://kolatanya.github.io/parcel-scanner/panel.html` |
+| Old customer panel (kept, hidden) | `https://kolatanya.github.io/parcel-scanner/panel-old.html` |
 | Customer signup | `https://kolatanya.github.io/parcel-scanner/signup.html` |
 | Admin tool | `https://kolatanya.github.io/parcel-scanner/admin.html` |
 | Supabase project ref | `padskodcofmmrwzuszym` (region: London) |
@@ -105,12 +105,14 @@ All files sit **flat in the repository root**. There are no folders except a str
 | `index.html` | "Warehouse tools", the staff home page and the site root. A `TOOLS` array at the top of its script lists the cards (`icon` is one of the SVG symbols in the page). Also links customers to the panel. |
 | `scanner.html` | Live camera barcode scanner for Royal Mail and DPD. |
 | `labels.html` | Label reader: drop Royal Mail label PDFs, get one spreadsheet row per parcel/SKU. |
-| `panel.html` | Current customer panel, Turkish. Will be replaced by `panel2.html`. |
-| `panel2.html` | **New customer panel**, Turkish, modelled on the competitor's. See 8. |
+| `panel.html` | **The customer panel**, Turkish (the former `panel2.html`, switched 1 Oct 2026). Built from the scratchpad `p2/` parts. See 8. |
+| `panel2.html` | Tiny forwarder: sends old test links to `panel.html`, keeping `#/page`. |
+| `panel-old.html` | The old beige customer panel, kept in case it is needed; `noindex`, linked from nowhere. |
 | `admin.html` | Admin console, English. The main staff application (v5). |
 | `404.html` | Custom "page not found" page (Turkish, short English line). GitHub Pages serves it for any missing address. |
 | `robots.txt`, `sitemap.xml` | For search engines. The sitemap lists only the public pages (`panel.html`, `signup.html`). |
 | `signup.html` | Public self-signup for new customers, Turkish. |
+| `i18n.js` | The **TR / EN switch** for the customer screens (`panel.html`, `signup.html`). See 8. |
 | `shared.js` | `window.EFCopy(text, label, button)` — clipboard copy with a toast, beep, vibration and button flash. Used everywhere. |
 | `ecomflex-config.js` | `window.ECOMFLEX = { SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLISHABLE_KEY }`. |
 | `manifest.webmanifest`, `sw.js` | PWA manifest ("Ecomflex Warehouse Tools", staff app, starts at the hub) and service worker. Customer pages must **not** link this manifest. |
@@ -128,7 +130,7 @@ All files sit **flat in the repository root**. There are no folders except a str
 
 Two looks exist:
 
-**Old look** (only `panel.html` now): light beige. `signup.html` moved to the admin look on 1 Oct 2026 (Inter, light grey page, white cards, numbered sections, red "Kaydı tamamla"); Mert asked for the same style and colours as the admin, not a copy of its layout.
+**Old look** (only `panel-old.html` now): light beige. `signup.html` moved to the admin look on 1 Oct 2026 (Inter, light grey page, white cards, numbered sections, red "Kaydı tamamla"); Mert asked for the same style and colours as the admin, not a copy of its layout.
 
 ```css
 --cream:#F4EEE2; --panel:#FFFCF6; --edge:#E1D8C6; --edge2:#D3C7AF;
@@ -155,10 +157,10 @@ Rules for both:
 ### Page tags (every page)
 
 - A unique `<title>`, a `<meta name="description">`, a `<meta name="robots">` and a self-referencing `<link rel="canonical" href="https://panel.ecomflex.co.uk/…">`.
-- `index, follow` only on `panel.html` and `signup.html` (they also carry Open Graph tags for link previews). Everything else (admin, hub, scanner, label reader, `panel2.html`, 404) is `noindex`.
+- `index, follow` only on `panel.html` and `signup.html` (they also carry Open Graph tags for link previews). Everything else (admin, hub, scanner, label reader, `panel2.html` forwarder, `panel-old.html`, 404) is `noindex`.
 - **Exactly one `<h1>` per file.** Admin keeps one `h1` element and moves it from the sign-in card into the page header on sign-in; its text and the tab title change per section (`Orders · Ecomflex Admin`). `panel2.html` keeps its `h1` on the sign-in card; its page headings are `h2` styled the same.
 - `lang="tr"` on customer pages, `lang="en-GB"` on staff pages.
-- When `panel2.html` becomes `panel.html`, give it `panel.html`'s title, description, `index, follow`, canonical and Open Graph tags.
+- Done 1 Oct 2026: the new panel at `panel.html` carries the public title, description, `index, follow`, canonical and Open Graph tags (they live in `p2/01_head.html`).
 
 ---
 
@@ -278,7 +280,7 @@ biz_period(from, to)                          internal only: the figures for one
 
 ## 8. What each application does
 
-### `panel2.html` — new customer panel (Turkish)
+### `panel.html` — the customer panel (Turkish; was `panel2.html` until 1 Oct 2026)
 
 Sign-in: 8-character access code (primary) or email + password; link to `signup.html`. A signed-in user who is not a customer sees "Hesabınız bulunamadı". Hash routing (`#/shipments` etc.), so back/forward work.
 
@@ -290,9 +292,13 @@ Notifications are worked out in the browser from the customer's own records (dis
 
 Phase 10 added **Hizmet Satın Al** (price list as a shop: quantities, basket with balance before/after, "Bakiyeden öde", confirmation, "Hizmet siparişlerim" with detail and cancel) and **Mesajlar** (one WhatsApp-style conversation with the Ecomflex team, also on a chat button in the top bar with an unread count; Enter sends, Shift+Enter new line; failed messages can be retried). The panel checks every 25 seconds for new messages and tells the server it is open (that is what turns staff messages to two grey ticks). The bell also reports completed or cancelled service orders and staff charges.
 
-### `panel.html` — current customer panel (Turkish)
+**First payment (1 Oct 2026, `p2/066_firstpay.js`).** Until the first top-up lands: the home page leads with a large "İlk ödemenizi yapın" card (bank icon, "İlk ödememi yap" button, three reassurance points); every other page shows a calm white bar ("Hesabınızı açmak için ilk ödemenizi yapın") instead of the old amber "not active" bar; anything that needs funds opens the guide instead of jumping to Balance. The guide has four steps: 1 bank details (from `my_account().bank`) with copy and a safety note (pay only into the account shown here), 2 **ÖNEMLİ**: the payment reference = customer code + company name in plain capitals, cut at a whole word to 18 characters (the UK Faster Payments limit), with copy, 3 tell us (amount, date, reference prefilled) → `declare_payment`, 4 what happens next. While a notice is waiting, the home card says "Ödemeniz kontrol ediliyor" instead.
 
-The older, simpler panel. Still live until `panel2.html` is approved; then `panel2.html` is renamed to `panel.html`. Has the phase 8 balance page and (23 Sep) the FBA label-file fix.
+**TR / EN switch (1 Oct 2026, `i18n.js`).** The pages stay written in Turkish. `i18n.js` (loaded in `<head>`) holds a Turkish → English dictionary plus patterns for text with numbers or amounts in it (`"£5.00 bakiyenize iade edildi"`), and a MutationObserver that swaps visible text, `placeholder`, `title` and `aria-label` when EN is on, and puts the Turkish back for TR. It also translates `alert/confirm/prompt`, multi-line copied text, and (via `saveXlsx`) Excel headings and file names. Canvas text (Chart.js) is not in the page, so chart labels use `tx()` and `MONTHS_EN` at drawing time, and the panel redraws the open page when the language changes. The choice is stored in `localStorage` (`ecomflex:lang`) and shared by the panel and the sign-up page. Elements with `data-noi18n` are never touched: chat and ticket message bodies, the sign-up code. **Not translated:** what people type (messages, notes, product names, ticket subjects) and what staff write (announcements, document titles, extra price-list lines); the 18 seeded price-list lines, their categories and units, and the database's own ledger notes are in the dictionary. **When adding Turkish text to the panel, add its English to `i18n.js`**; `scratchpad/i18n/missing.mjs` lists every Turkish string in the parts that has no English, and `lang_flows.mjs` opens every page in EN and lists any Turkish still on screen. On phones the switch shows only the other language (one button) so the page name keeps its room.
+
+### `panel-old.html` — the old customer panel (Turkish)
+
+The older, simpler panel, replaced on 1 Oct 2026 and kept as `panel-old.html`. Has the phase 8 balance page and (23 Sep) the FBA label-file fix.
 
 ### `admin.html` — admin console (English, v7)
 
@@ -338,7 +344,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v22`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v24`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 
@@ -376,7 +382,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 
 - Stripe setup (Mert, after meeting Ecomflex). Card top-up is hidden until then.
 - `regenerate_code` writes the new code as the Supabase password (`auth.users`); confirm "New code" works on the live project.
-- Swap `panel2.html` → `panel.html` once Mert approves it; update the website's PANEL button if needed.
+- ~~Swap `panel2.html` → `panel.html`~~ done 1 Oct 2026. Check the ecomflex.co.uk website's PANEL button points to `panel.html` (not `panel2.html`).
 - Remove the TEST +£50 button before real customers use the system.
 
 ### Known data to clean up
@@ -421,6 +427,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - **Behaviour**: `playwright-core` driving the installed Chrome headless, against a copy of the page served locally with a fake in-browser Supabase (`window.supabase.createClient` returning a client with `from/rpc/auth/storage/functions` backed by sample data, recording every call). Click through each action and assert on the recorded calls; take full-page screenshots at 1440×900 and 390×844 and look at them.
 - **Edge Functions**: run the `.ts` files in Node with a `Deno` shim and a fake `fetch`; sign test webhook bodies with HMAC-SHA256 like Stripe.
 - **Label parsing**: reportlab test PDFs through the page's parsing functions via pdfjs-dist 3.11.174.
+- **1 Oct 2026**: `firstpay_flows.mjs` (first payment card and guide, locked and unlocked, desk and phone), `lang_flows.mjs` (every page and the main pop-ups in EN, Turkish left on screen, back to TR, Excel names, sign-up, phone), `signup_flows.mjs`, plus `flows.mjs` and `flows10.mjs` again.
 - **Phase 11**: `test_phase11.mjs` (database) and `admin_v7_flows.mjs` (click-through). The fake Supabase returns 24 months of sample business figures.
 - **Phase 10**: `test_phase10.mjs` (database), `admin_v6_flows.mjs` and `flows10.mjs` (click-through) in the working scratch folder; the fake Supabase knows the new tables and functions.
 - **Page tags**: for every `.html` check one `<h1`, a unique `<title>`, description, robots and canonical. Test `404.html` with a small local server that serves the repo at both `/` and `/parcel-scanner/` and answers missing paths with `404.html` and status 404.
@@ -432,7 +439,6 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - **Stripe live** (built; needs Mert's Stripe account).
 - **Marketplace connections** (eBay/Shopify orders straight into shipments) — needs developer accounts and approvals.
 - **Create UK shipping labels** from the panel (Royal Mail Click & Drop API) — needs an account with API access.
-- **Turkish/English switch** in the customer panel.
 - **Automatic emails** via Resend (free up to 3,000/month) through a Supabase Edge Function (e.g. "your parcel has shipped", "ticket answered").
 - **Customer directory import** from a spreadsheet of ~200 customers with shelf numbers. It contains **plain-text passwords**: never import those; recommend a password manager.
 - **Root address for customers**: `panel.ecomflex.co.uk/` currently opens the staff hub (with a link to the customer panel). It could open the customer sign-in instead, with the hub moved to its own page. Not done without asking: it changes the staff app's start page.
