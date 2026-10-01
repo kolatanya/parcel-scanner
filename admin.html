@@ -735,6 +735,33 @@ input[type=month].inl{width:180px}
   .splitleg .chg{display:none}
   .tblwrap.flat{margin:0 -16px -18px}
 }
+
+/* v8: import, codes, edit details */
+.dethead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px}
+.dethead h3{margin:0;font-size:.98rem;font-weight:650}
+.noemail{color:var(--faint);font-style:italic}
+.impsum{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.impsum .pill{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;font-size:.76rem;font-weight:600;border:1px solid var(--line);background:var(--soft2);color:var(--ink)}
+.impsum .pill.good{background:var(--greensoft);border-color:var(--greenline);color:var(--green)}
+.impsum .pill.warn{background:var(--ambersoft);border-color:var(--amberline);color:#7A5210}
+.impsum .pill.bad{background:var(--redsoft);border-color:var(--redline);color:var(--redtext)}
+.imptbl{font-size:.8rem}
+.imptbl td{vertical-align:top}
+.imptbl td.addr{max-width:220px;white-space:pre-line;color:var(--muted)}
+.imptbl td.fl{min-width:150px}
+.imptbl .flag{display:block;font-size:.72rem;color:#7A5210}
+.imptbl .flag.bad{color:var(--redtext)}
+.imptbl .flag.ok{color:var(--green)}
+.imptbl tr.skip td{opacity:.55}
+.imptbl input[type=checkbox]{width:16px;height:16px;accent-color:var(--ink)}
+.impwrap{max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.impwrap .tbl thead th{position:sticky;top:0;background:var(--soft);z-index:1}
+.impbar{height:8px;border-radius:999px;background:var(--soft2);overflow:hidden;margin:12px 0 6px}
+.impbar i{display:block;height:100%;width:0;background:var(--ink);transition:width .2s}
+.frm.two{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.frm.two .full{grid-column:1/-1}
+.frm.two textarea.inl{height:auto;min-height:78px;padding:9px 12px;resize:vertical;line-height:1.45}
+@media (max-width:700px){ .frm.two{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -756,6 +783,7 @@ input[type=month].inl{width:180px}
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
   <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M5 3h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
@@ -794,7 +822,7 @@ input[type=month].inl{width:180px}
     <button class="btn brand block" id="b_in" type="button">Sign in</button>
     <div class="msg" id="m_login"></div>
   </div>
-  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v7</span></p>
+  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v8</span></p>
 </main>
 
 <main class="auth" id="v_error" hidden>
@@ -836,7 +864,7 @@ input[type=month].inl{width:180px}
     </nav>
     <div class="me">
       <div class="avatar" id="me_av">EF</div>
-      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v7</span></div></div>
+      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v8</span></div></div>
       <button class="ib" id="b_out" type="button" title="Sign out" aria-label="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
     </div>
   </aside>
@@ -973,7 +1001,10 @@ input[type=month].inl{width:180px}
             <button data-c="inv" type="button">Invoices</button>
             <button data-c="setup" type="button">Bank details</button>
           </div></div>
-          <div class="tr"><button class="btn" id="b_clreload" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
+          <div class="tr">
+            <button class="btn" id="b_climport" type="button"><svg class="i"><use href="#i-upload"/></svg>Import customers</button>
+            <button class="btn" id="b_clcodes" type="button"><svg class="i"><use href="#i-download"/></svg>Download codes</button>
+            <button class="btn" id="b_clreload" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
         </div>
         <div class="msg" id="m_cl"></div>
 
@@ -1022,7 +1053,7 @@ input[type=month].inl{width:180px}
             </div>
             <div class="card">
               <h2>Welcome message template</h2>
-              <p class="lead">{UNIT} and {COMPANY} are replaced with that customer’s details.</p>
+              <p class="lead">{UNIT}, {COMPANY} and {CODE} are replaced with that customer’s details. If there is no {CODE}, their login code is added at the end.</p>
               <label class="sr" for="welcedit">Welcome message</label>
               <textarea id="welcedit" class="ta mono"></textarea>
               <button class="btn" id="b_welcsave" type="button">Save template</button>
@@ -1222,7 +1253,9 @@ input[type=month].inl{width:180px}
         </div>
         <div id="ac_chat" hidden></div>
         <div id="ac_orders" hidden><div class="rows" id="ac_olist"></div><div class="empty" id="ac_oempty" hidden>No service orders yet.</div></div>
-        <div id="ac_details" hidden><div class="card"><div class="detgrid" id="ac_dl"></div></div></div>
+        <div id="ac_details" hidden><div class="card">
+          <div class="dethead"><h3>Customer details</h3><button class="btn" id="ac_edit" type="button"><svg class="i"><use href="#i-edit"/></svg>Edit details</button></div>
+          <div class="detgrid" id="ac_dl"></div></div></div>
       </section>
 
       <!-- messages -->
@@ -2039,6 +2072,8 @@ function openFile(path){
 }
 
 /* =====================  helpers for the phase 9 screens  ===================== */
+/* customers imported without an email sign in with a private placeholder address */
+function realEmail(e){ return /@no-email\.ecomflex\.invalid$/i.test(e||'')? '' : (e||''); }
 function ce(tag,cls,text){ var e=document.createElement(tag); if(cls) e.className=cls; if(text!==undefined&&text!==null) e.textContent=text; return e; }
 function openBucketFile(bucket,path){
   var w=window.open('about:blank','_blank');
@@ -3081,7 +3116,7 @@ function renderClients(){
 
     var who=document.createElement('td');
     who.appendChild(ce('div','t1',c.company||c.full_name));
-    who.appendChild(ce('div','t2',c.full_name+' \u00B7 '+c.email+(c.phone?' \u00B7 '+c.phone:'')));
+    who.appendChild(ce('div','t2',[c.full_name,realEmail(c.email)||'no email',c.phone].filter(Boolean).join(' \u00B7 ')));
 
     var acc=document.createElement('td');
     var ab=document.createElement('button'); ab.type='button'; ab.className='accbtn'; ab.title='Statement, messages and service orders';
@@ -3557,7 +3592,7 @@ function reloadAccount(){
 function drawAccHead(){
   var P=ACC.prof;
   $('h1').textContent=P.company||P.full_name||P.email;
-  $('pdesc').textContent=[P.full_name,P.email,P.phone].filter(Boolean).join(' · ');
+  $('pdesc').textContent=[P.full_name,realEmail(P.email)||'no email',P.phone].filter(Boolean).join(' · ');
   setTitle();
   setCount('c_acchat',P.unread); setCount('c_acorders',P.orders_open);
 }
@@ -3572,13 +3607,13 @@ function drawDetails(){
   var P=ACC.prof, box=$('ac_dl'); box.innerHTML='';
   function row(k,v){ box.appendChild(el('div',{class:'kv'},[el('div',{class:'k',text:k}),el('div',{class:'v'},[v||'—'])])); }
   row('Company',P.company); row('Manager',P.full_name);
-  row('Email',P.email?el('a',{href:'mailto:'+P.email,text:P.email}):null);
+  row('Email',realEmail(P.email)?el('a',{href:'mailto:'+P.email,text:P.email}):el('span',{class:'noemail',text:'No email (signs in with the code)'}));
   row('Phone',P.phone?el('a',{href:'tel:'+String(P.phone).replace(/\s+/g,''),text:P.phone}):null);
   row('Company address',P.address); row('Unit number',P.unit);
   if(P.code){ var cb=el('button',{class:'rowbtn',type:'button',text:'Copy'}); cb.onclick=function(){ EFCopy(P.code,'Access code copied',cb); };
     row('Access code',el('span',{class:'codeinline'},[el('code',{text:P.code}),cb])); }
   row('Customer since',P.since?dmy(P.since):null);
-  row('Account type',P.kind==='signup'?'Self sign-up (access code)':'Older approval flow');
+  row('Account type',P.source==='import'?'Imported from the customer list (access code)':P.kind==='signup'?'Self sign-up (access code)':'Older approval flow');
   if(P.notes) row('Internal notes',P.notes);
 }
 $('ac_back').onclick=function(e){ e.preventDefault(); setSection('clients'); };
@@ -3616,7 +3651,7 @@ $('ac_more').onclick=function(){
 function openAccChat(){
   stopChat();
   var P=ACC.prof||{};
-  ACTIVE_CHAT=new ChatView($('ac_chat'),ACC.uid,{title:P.company||P.full_name||'Customer',sub:(P.full_name?P.full_name+' · ':'')+(P.email||'')+' · they read and reply in Turkish'});
+  ACTIVE_CHAT=new ChatView($('ac_chat'),ACC.uid,{title:P.company||P.full_name||'Customer',sub:(P.full_name?P.full_name+' · ':'')+(realEmail(P.email)||'no email')+' · they read and reply in Turkish'});
 }
 function loadAccOrders(){
   var uid=ACC.uid, box=$('ac_olist'); box.innerHTML=''; box.appendChild(el('div',{class:'muted',style:'padding:14px 18px'},[el('span',{class:'spin'}),'Loading…']));
@@ -3626,6 +3661,252 @@ function loadAccOrders(){
     if(r.error){ msg('m_ac','Could not load service orders.','bad'); return; }
     (r.data||[]).forEach(function(o){ box.appendChild(soRow(o,false,function(t){ msg('m_ac',t,'good'); reloadAccount(); pulse(); })); });
     $('ac_oempty').hidden=(r.data||[]).length>0;
+  });
+}
+
+
+/* ---------------- v8: edit a customer's details ---------------- */
+$('ac_edit').onclick=function(){
+  var P=current(); if(!P) return; var uid=P.user_id;
+  if(P.kind!=='signup'){ msg('m_ac','This customer is from the older approval flow; their details cannot be edited here.','bad'); return; }
+  function f(label,input,full){ return el('div',full?{class:'full'}:null,[el('label',{text:label}),input]); }
+  var co=el('input',{class:'inl',maxlength:'200',value:P.company||''});
+  var nm=el('input',{class:'inl',maxlength:'200',value:P.full_name||''});
+  var em=el('input',{class:'inl',type:'email',maxlength:'200',value:realEmail(P.email),placeholder:'No email: they sign in with the code'});
+  var ph=el('input',{class:'inl',maxlength:'100',value:P.phone||''});
+  var un=el('input',{class:'inl',maxlength:'20',value:P.unit||''});
+  var ad=el('textarea',{class:'inl',maxlength:'1000'}); ad.value=P.address||'';
+  var no=el('textarea',{class:'inl',maxlength:'2000',placeholder:'Only staff see this'}); no.value=P.notes||'';
+  var body=el('div',null,[
+    el('div',{class:'frm two'},[f('Company name',co),f('Manager',nm),f('Email',em),f('Phone',ph),f('Suite / unit number',un),el('div'),f('Company address',ad,true),f('Internal notes',no,true)]),
+    el('p',{class:'hint',style:'margin:12px 0 0',text:'The email is also the address they sign in with. Changing it does not change their code; leave it empty if they have none.'})]);
+  dialog({title:'Edit details · '+(P.company||P.full_name),sub:'Changes are saved for everyone straight away.',wide:true,body:body,
+    actions:[{t:'Cancel',close:true},{t:'Save',primary:true,i:'check',on:function(D,b){
+      var out={}, was={company:P.company||'',full_name:P.full_name||'',email:realEmail(P.email),phone:P.phone||'',unit_number:P.unit||'',company_address:P.address||'',notes:P.notes||''};
+      var now={company:co.value.trim(),full_name:nm.value.trim(),email:em.value.trim().toLowerCase(),phone:ph.value.trim(),unit_number:un.value.trim(),company_address:ad.value.trim(),notes:no.value.trim()};
+      if(!now.company){ D.msg('The company name cannot be empty.','bad'); co.focus(); return; }
+      if(now.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(now.email)){ D.msg('That email does not look right.','bad'); em.focus(); return; }
+      Object.keys(now).forEach(function(k){ if(now[k]!==String(was[k]).trim()) out[k]=now[k]; });
+      if(!Object.keys(out).length){ D.close(); return; }
+      if(out.email!==undefined&&!confirm('Change the sign-in email to '+(out.email||'none (code only)')+'?\n\nTheir code keeps working.')) return;
+      b.disabled=true; D.busy('Saving…');
+      sb.rpc('update_client_details',{p_user:uid,p:out}).then(function(x){
+        b.disabled=false;
+        if(x.error){
+          var m=x.error.message||'', t='Could not save: '+m;
+          if(/UNIT_TAKEN/.test(m)) t='That suite number is already used by '+m.replace(/^.*UNIT_TAKEN:\s*/,'')+'.';
+          else if(/EMAIL_TAKEN/.test(m)) t='Another account already uses that email.';
+          else if(/EMAIL_IS_STAFF/.test(m)) t='That is a staff email; customers cannot use it.';
+          else if(/EMAIL_INVALID/.test(m)) t='That email does not look right.';
+          else if(/COMPANY_NEEDED/.test(m)) t='The company name cannot be empty.';
+          D.msg(t,'bad'); return;
+        }
+        D.close(); msg('m_ac','Details saved','good'); reloadAccount(); if(CLIENTS) loadClients();
+      });
+    }}]});
+};
+
+/* ---------------- v8: download every customer's code ---------------- */
+function suiteSort(a,b){ var x=parseFloat(a.unit_number), y=parseFloat(b.unit_number); if(isNaN(x)&&isNaN(y)) return String(a.company).localeCompare(String(b.company)); if(isNaN(x)) return 1; if(isNaN(y)) return -1; return x-y; }
+$('b_clcodes').onclick=function(){
+  var btn=$('b_clcodes'), list=(CLIENTS||[]).slice().sort(suiteSort);
+  if(!list.length){ msg('m_cl','No customers loaded yet.','bad'); return; }
+  btn.disabled=true;
+  needXLSXA().then(function(){
+    var rows=[['Suite','Company','Manager','Email','Phone','Code','Status']];
+    list.forEach(function(c){ rows.push([c.unit_number||'',c.company||'',c.full_name||'',realEmail(c.email),c.phone||'',c.code||'',c.complete?'Active':'Onboarding']); });
+    var ws=window.XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[8,32,22,30,18,12,12].map(function(w){ return {wch:w}; });
+    var wb=window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb,ws,'Codes');
+    window.XLSX.writeFile(wb,'ecomflex-customer-codes-'+todayYmdA()+'.xlsx');
+    msg('m_cl','Codes downloaded. Keep this file private: a code is all anyone needs to enter that account.','good');
+  }).catch(function(){ msg('m_cl','Could not prepare the Excel file.','bad'); }).then(function(){ btn.disabled=false; });
+};
+
+/* ---------------- v8: import the customer list from Excel ----------------
+   Reads the file in this browser (nothing is uploaded except the rows you import),
+   sorts every cell into email / phone / address / manager / notes, and leaves out
+   web links and anything that looks like a password. */
+var IMP_PW=/(ş|s)ifre|parola|password|passw|\bpass\b|\bpw\b|\blogin\b|giri(ş|s)\s*bilgi/i;
+var IMP_PW_CUT=/((ş|s)ifre(si)?|parola|password|passw(or)?d?|\bpass\b|\bpw\b)\s*[:=\-]?\s*\S+/gi;
+var IMP_EMAIL=/[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+function impIsPhone(t){ var d=t.replace(/[^\d]/g,''); return d.length>=7&&d.length<=16&&!/[A-Za-zÇĞİÖŞÜçğıöşü]{3,}/.test(t); }
+function impIsAddr(t){ return /\b[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}\b/i.test(t)||/\b\d{5}(-\d{4})?\b/.test(t)||/(street|\bst\b|road|\brd\b|avenue|\bave\b|lane|close|drive|way|unit|floor|house|park|sokak|cadde|mahalle|apt|suite)/i.test(t)||(t.length>=18&&/\d/.test(t)&&/[A-Za-z]{3}/.test(t)); }
+function impSuite(v){ var t=String(v==null?'':v).trim(); if(/^\d+(\.0+)?$/.test(t)) return String(parseInt(t,10)); return t; }
+function impParse(aoa){
+  /* header row: the first row naming a suite and a company */
+  var hi=-1;
+  for(var i=0;i<Math.min(aoa.length,15);i++){ var r=(aoa[i]||[]).map(function(x){ return String(x==null?'':x).toLowerCase(); }).join('|'); if(/suite/.test(r)&&/(company|şirket|sirket)/.test(r)){ hi=i; break; } }
+  var H=(hi>-1?aoa[hi]:[]).map(function(x){ return String(x==null?'':x).toLowerCase(); });
+  function col(re,def){ for(var k=0;k<H.length;k++) if(re.test(H[k])) return k; return def; }
+  var cS=col(/suite/,0), cC=col(/company|şirket|sirket/,1), cM=col(/manager|yetkili|ad[ıi] soyad|name/,3), cA=col(/adres|address/,6);
+  var cStop=col(/unneeded|gereksiz/,H.length||8);
+  var out=[];
+  for(var r2=hi+1;r2<aoa.length;r2++){
+    var row=aoa[r2]||[]; var company=String(row[cC]==null?'':row[cC]).replace(/\s+/g,' ').trim(); var suite=impSuite(row[cS]);
+    if(!company) continue;
+    var R={line:r2+1,suite:suite,company:company,manager:'',email:'',phone:'',address:'',notes:[],flags:[]};
+    var emails=[], phones=[], addrs=[], names=[], other=[];
+    for(var c=0;c<Math.max(row.length,cStop+6);c++){
+      if(c===cS||c===cC) continue;
+      var v=row[c]; if(v==null) continue; var t=String(v).trim(); if(!t) continue;
+      if(/^https?:\/\//i.test(t)||/^www\./i.test(t)) continue;                       /* web links: not needed */
+      if(IMP_PW.test(t)){ t=t.replace(IMP_PW_CUT,' ').replace(IMP_PW,' '); if(R.flags.indexOf('pw')<0) R.flags.push('pw'); }
+      (t.match(IMP_EMAIL)||[]).forEach(function(e){ e=e.toLowerCase(); if(emails.indexOf(e)<0) emails.push(e); });
+      t=t.replace(IMP_EMAIL,' ').replace(/https?:\/\/\S+/gi,' ');
+      var pieces=(c===cA)? [t.replace(/[ \t]+/g,' ').replace(/\s*\n\s*/g,'\n').trim()] : t.split(/\n|\s*[\/|;]\s*(?=\+?\d)/);
+      pieces.forEach(function(pc){
+        pc=pc.replace(/^[\s,;:\-\/|]+|[\s,;:\-\/|]+$/g,'');
+        if(!pc||!/[A-Za-z0-9ÇĞİÖŞÜçğıöşü]/.test(pc)) return;
+        if(c===cA&&!impIsPhone(pc)){ addrs.push(pc); return; }
+        if(impIsPhone(pc)){ var d=pc.replace(/\s+/g,' '); if(phones.indexOf(d)<0) phones.push(d); return; }
+        if(impIsAddr(pc)&&pc.length>=10){ addrs.push(pc); return; }
+        if(c===cM&&!/\d/.test(pc)&&pc.length<=80){ names.push(pc); return; }
+        if(c>=cStop) { other.push(pc); return; }
+        if(!/\d/.test(pc)&&pc.length<=60&&!names.length){ names.push(pc); return; }
+        other.push(pc);
+      });
+    }
+    R.email=emails[0]||''; R.phone=phones[0]||''; R.address=addrs.join('\n'); R.manager=names[0]||'';
+    if(emails.length>1) R.notes.push('Other email: '+emails.slice(1).join(', '));
+    if(phones.length>1) R.notes.push('Other phone: '+phones.slice(1).join(', '));
+    if(names.length>1) R.notes.push('Also: '+names.slice(1).join(', '));
+    if(other.length) R.notes.push(other.join(' · '));
+    if(!R.email) R.flags.push('noemail');
+    if(!R.suite) R.flags.push('nosuite');
+    out.push(R);
+  }
+  /* the same email on more than one company: the later ones sign in with the code only */
+  var seen={}; out.forEach(function(R){ if(!R.email) return; if(seen[R.email]) R.flags.push('shared:'+seen[R.email]); else seen[R.email]=R.suite; });
+  return out;
+}
+/* cell values as text; numbers keep every digit (Excel shows long phone numbers as 9.05E+11) */
+function impAoa(ws){
+  return window.XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null,blankrows:false}).map(function(r){
+    return (r||[]).map(function(v){
+      if(v==null) return null;
+      if(typeof v==='number') return String(v);
+      return String(v).replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g,'');
+    });
+  });
+}
+function impLoadFile(file){
+  return needXLSXA().then(function(){
+    return new Promise(function(res,rej){
+      var fr=new FileReader();
+      fr.onload=function(){
+        try{
+          var wb=window.XLSX.read(new Uint8Array(fr.result),{type:'array'});
+          /* the sheet that names suites and companies, else the first */
+          var pick=null;
+          wb.SheetNames.forEach(function(n){
+            if(pick) return;
+            var a=impAoa(wb.Sheets[n]);
+            for(var i=0;i<Math.min(a.length,15);i++){ var r=(a[i]||[]).join('|').toLowerCase(); if(/suite/.test(r)&&/(company|şirket|sirket)/.test(r)){ pick={name:n,aoa:a}; return; } }
+          });
+          if(!pick){ var n0=wb.SheetNames[0]; pick={name:n0,aoa:impAoa(wb.Sheets[n0])}; }
+          res(pick);
+        }catch(e){ rej(e); }
+      };
+      fr.onerror=rej; fr.readAsArrayBuffer(file);
+    });
+  });
+}
+$('b_climport').onclick=function(){
+  var file=el('input',{type:'file',accept:'.xlsx,.xls,.csv',style:'display:none'});
+  var pickB=el('button',{class:'btn',type:'button'},[svgI('upload'),'Choose the Excel file…']);
+  var fname=el('span',{class:'muted',style:'font-size:.82rem'});
+  var sum=el('div',{class:'impsum'}), wrap=el('div',{class:'impwrap',hidden:true}), tb=el('tbody');
+  var bar=el('div',{class:'impbar',hidden:true},[el('i')]), prog=el('p',{class:'hint',style:'margin:0'});
+  var rows=[], done=false, results=[];
+  var all=el('input',{type:'checkbox','aria-label':'Select all',checked:true});
+  wrap.appendChild(el('table',{class:'tbl imptbl'},[el('thead',null,[el('tr',null,[el('th',null,[all]),el('th',{text:'Suite'}),el('th',{text:'Company'}),el('th',{text:'Manager'}),el('th',{text:'Email'}),el('th',{text:'Phone'}),el('th',{text:'Address'}),el('th',{text:'Notes'}),el('th',{text:'Check'})])]),tb]));
+  pickB.onclick=function(){ file.click(); };
+  var known={}; (CLIENTS||[]).forEach(function(c){ if(c.unit_number) known[String(c.unit_number).trim().toLowerCase()]=c; });
+  function flagsFor(R){
+    var f=[], k=known[String(R.suite).toLowerCase()];
+    if(k&&String(k.company).trim().toLowerCase()===R.company.toLowerCase()) f.push(['ok','Already imported']);
+    else if(k) f.push(['bad','Suite used by '+k.company]);
+    if(R.flags.indexOf('nosuite')>-1) f.push(['bad','No suite number']);
+    if(R.flags.indexOf('noemail')>-1) f.push(['warn','No email: code only']);
+    R.flags.forEach(function(x){ if(/^shared:/.test(x)) f.push(['warn','Email also on suite '+x.slice(7)+': code only']); });
+    if(R.flags.indexOf('pw')>-1) f.push(['warn','Password text left out']);
+    return f;
+  }
+  function draw(){
+    tb.innerHTML='';
+    var n={ready:0,skip:0,noemail:0,pw:0};
+    rows.forEach(function(R){
+      var f=flagsFor(R), blocked=f.some(function(x){ return x[0]==='bad'||x[1]==='Already imported'; });
+      if(R.sel===undefined) R.sel=!blocked;
+      if(blocked) R.sel=false;
+      var cb=el('input',{type:'checkbox','aria-label':'Import '+R.company}); cb.checked=!!R.sel; cb.disabled=blocked||done;
+      cb.onchange=function(){ R.sel=cb.checked; count(); };
+      var res=R.result? el('span',{class:'flag '+(R.result.ok?'ok':'bad'),text:R.result.text}) : null;
+      tb.appendChild(el('tr',{class:R.sel?'':'skip'},[el('td',null,[cb]),el('td',{class:'mono',text:R.suite||'—'}),el('td',{text:R.company}),el('td',{text:R.manager||'—'}),
+        el('td',{text:R.email||'—'}),el('td',{class:'mono',text:R.phone||'—'}),el('td',{class:'addr',text:R.address||'—'}),el('td',{class:'addr',text:R.notes.join('\n')||'—'}),
+        el('td',{class:'fl'},[res].concat(f.map(function(x){ return el('span',{class:'flag '+x[0],text:x[1]}); })))]));
+      if(blocked) n.skip++; if(R.flags.indexOf('noemail')>-1) n.noemail++; if(R.flags.indexOf('pw')>-1) n.pw++;
+    });
+    sum.innerHTML='';
+    sum.appendChild(el('span',{class:'pill',text:rows.length+' companies found'}));
+    if(n.skip) sum.appendChild(el('span',{class:'pill warn',text:n.skip+' skipped (already in or suite clash)'}));
+    if(n.noemail) sum.appendChild(el('span',{class:'pill warn',text:n.noemail+' without email'}));
+    if(n.pw) sum.appendChild(el('span',{class:'pill bad',text:n.pw+' with password text left out'}));
+    count();
+  }
+  function count(){
+    var k=rows.filter(function(R){ return R.sel; }).length;
+    go.lastChild.textContent=done?'Download codes':'Import '+k+' customer'+(k===1?'':'s');
+    go.disabled=!done&&!k;
+  }
+  file.onchange=function(){
+    if(!file.files[0]) return; fname.textContent=file.files[0].name; D.busy('Reading the file…');
+    impLoadFile(file.files[0]).then(function(pk){
+      rows=impParse(pk.aoa);
+      D.msg(rows.length?'Sheet “'+pk.name+'”. Check the rows, untick any you do not want, then import.':'No rows with a company name were found in “'+pk.name+'”.',rows.length?'':'bad');
+      wrap.hidden=!rows.length; draw();
+    },function(){ D.msg('Could not read that file. Save it as .xlsx and try again.','bad'); });
+  };
+  var body=el('div',null,[
+    el('p',{class:'help top',style:'margin:0 0 14px'},[svgI('info'),el('span',{text:'Each ticked company gets a login and an 8-character code, and appears under Active customers. The file is read on this computer; web links and anything that looks like a password are left out. Companies without an email sign in with the code only; add their email later under Account → Details → Edit details. Running it again skips suites already imported.'})]),
+    el('div',{style:'display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px'},[pickB,fname,file]),
+    sum,wrap,bar,prog]);
+  var go;
+  var D=dialog({title:'Import customers',sub:'From the customer list spreadsheet (suite, company, manager, email, phone, address).',wide:true,body:body,
+    actions:[{t:'Close',close:true},{t:'Import',primary:true,i:'check',on:function(D2,b){
+      if(done){ impCodes(results); return; }
+      var todo=rows.filter(function(R){ return R.sel; }); if(!todo.length) return;
+      if(!confirm('Create '+todo.length+' customer account'+(todo.length===1?'':'s')+' with login codes?')) return;
+      b.disabled=true; pickB.disabled=true; all.disabled=true; bar.hidden=false;
+      var i=0, okN=0, badN=0;
+      (function next(){
+        if(i>=todo.length){
+          done=true; b.disabled=false; bar.firstChild.style.width='100%'; draw(); loadClients();
+          D.msg(okN+' imported'+(badN?', '+badN+' could not be imported (see the Check column)':'')+'. Download the codes to send them to the customers.',badN?'warn':'good');
+          prog.textContent=''; return;
+        }
+        var R=todo[i];
+        prog.textContent='Importing '+(i+1)+' of '+todo.length+' · suite '+R.suite+' · '+R.company;
+        bar.firstChild.style.width=Math.round(i/todo.length*100)+'%';
+        sb.rpc('import_customer',{p:{suite:R.suite,company:R.company,manager:R.manager,email:R.email,phone:R.phone,address:R.address,notes:R.notes.join('\n')}}).then(function(x){
+          if(x.error){ badN++; R.result={ok:false,text:'Not imported: '+x.error.message}; }
+          else if(x.data.status==='suite_taken'){ badN++; R.result={ok:false,text:'Suite used by '+x.data.by}; }
+          else { okN++; R.result={ok:true,text:(x.data.status==='exists'?'Already in · ':x.data.status==='linked'?'Linked to existing login · ':'Imported · ')+'code '+x.data.code};
+                 results.push({suite:R.suite,company:R.company,manager:R.manager,email:realEmail(x.data.login),phone:R.phone,code:x.data.code}); }
+          R.sel=false; i++; next();
+        },function(){ badN++; R.result={ok:false,text:'No connection'}; i++; next(); });
+      })();
+    }}]});
+  go=D.box.querySelector('.dlf .btn.primary'); go.disabled=true;
+  all.onchange=function(){ rows.forEach(function(R){ var f=flagsFor(R); if(!f.some(function(x){ return x[0]==='bad'||x[1]==='Already imported'; })) R.sel=all.checked; }); draw(); };
+};
+function impCodes(list){
+  needXLSXA().then(function(){
+    var rows=[['Suite','Company','Manager','Email','Phone','Code']];
+    list.slice().sort(function(a,b){ return (parseFloat(a.suite)||0)-(parseFloat(b.suite)||0); }).forEach(function(r){ rows.push([r.suite,r.company,r.manager||'',r.email||'',r.phone||'',r.code]); });
+    var ws=window.XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[8,32,22,30,18,12].map(function(w){ return {wch:w}; });
+    var wb=window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb,ws,'Imported');
+    window.XLSX.writeFile(wb,'ecomflex-imported-codes-'+todayYmdA()+'.xlsx');
   });
 }
 

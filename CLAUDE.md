@@ -120,7 +120,7 @@ All files sit **flat in the repository root**. There are no folders except a str
 | `.nojekyll` | Tells GitHub Pages not to run Jekyll. **Not currently in the repo**; harmless while no file starts with `_`. |
 | `_shared.js` | Old copy of `shared.js` from the underscore mistake. Unused; can be deleted. |
 | `supabase-schema.sql` | Snapshot of the whole live database, taken 21 Sep 2026. See 6. |
-| `supabase-phase7.sql` … `-phase11.sql` | Migrations since the snapshot. |
+| `supabase-phase7.sql` … `-phase12.sql` | Migrations since the snapshot. |
 | `supabase-function-create-topup.ts`, `supabase-function-stripe-webhook.ts` | The two Supabase Edge Functions for Stripe card top-ups. Not run from GitHub; pasted into Supabase. |
 | `CLAUDE.md` | This handover. |
 
@@ -177,6 +177,7 @@ Run once each, in order, in Supabase → SQL Editor → **Create a new snippet**
 3. `supabase-phase8.sql` — balance page totals, bank-transfer payment declarations, card payments table and functions for Stripe. **Deployed 23 Sep 2026.**
 4. `supabase-phase9.sql` — everything behind `panel2.html`: product details on stock rows, saved recipients, announcements, price list, documents, invoices, support tickets, dashboard figures. **Deployed 23 Sep 2026.**
 5. `supabase-phase10.sql` — services paid from the balance (`service_orders`, `service_order_lines`, `price_items.orderable`, the Ecomflex price list), customer statements and profiles, the customer chat with delivery/read ticks, `today_counts` with service orders and unread chat. **Deployed 24 Sep 2026.**
+7. `supabase-phase12.sql` — importing the customer list: `clients.source` (`signup` | `import`), `import_customer(p)` (admin; creates the Supabase login the way a sign-up does — confirmed email, bcrypt of the code as password, empty-string token columns, an `email` identity — plus the access code and the `clients` row; skips a suite already imported; reports a suite used by another company; companies without a usable email, or whose email is a staff login or already used by another customer, get `suite-N@no-email.ecomflex.invalid` and a note; an existing login with the same email is linked and its password becomes the code), `update_client_details(user, p)` (admin; changing the email also changes `auth.users` and the identity; `UNIT_TAKEN`, `EMAIL_TAKEN`, `EMAIL_IS_STAFF`, `EMAIL_INVALID`, `COMPANY_NEEDED`), `onboarding()` now counts imported customers with a suite as Active even before a top-up (the first-payment lock still applies: `is_unlocked` is unchanged), `customer_profile` adds `source`, `welcome_for` fills `{CODE}`. Internal helpers `make_login`, `placeholder_login` are not callable from browsers. **Not yet deployed** (see 10).
 6. `supabase-phase11.sql` — the business overview: `biz_period` (internal), `business_stats`, `business_trends`, and date indexes on `wallet_entries.at` and `orders.responded_at`. Read-only; changes no data. **Not yet deployed** (see 10).
 
 When Supabase warns "creates a table without enabling Row Level Security", choose **Run and enable RLS**. To see what is really live, the export query used on 21 Sep (functions, policies, triggers, tables, one CSV cell) can be rerun; ask Claude for it.
@@ -300,9 +301,17 @@ Phase 10 added **Hizmet Satın Al** (price list as a shop: quantities, basket wi
 
 The older, simpler panel, replaced on 1 Oct 2026 and kept as `panel-old.html`. Has the phase 8 balance page and (23 Sep) the FBA label-file fix.
 
-### `admin.html` — admin console (English, v7)
+### `admin.html` — admin console (English, v8)
 
 Sections: **Today, Orders, Inbound, Services, Stock, Customers, Support, Access requests, Content, Reports, Staff**, plus links to the label reader, scanner and customer panel. Each section has an address (`admin.html#orders`, `#customers`, `#reports`…), so refresh keeps the place and Back works. On phones the menu slides in from a button at the top left.
+
+**v8 (1 Oct 2026): customer list import and editable details.**
+- Customers → **Import customers**: choose the old customer spreadsheet (`Musteri Takip.xlsx`, sheet "SUITE Bilgileri": suite no, company name, a links column, manager, email/phone, phone/email, address, then "unneeded" columns). The file is read **in the browser only**; nothing goes to GitHub. Every cell is sorted into email / phone / address / manager / notes whatever column it is in (the two contact columns are swapped on many rows); web links are dropped; text next to "şifre / password / pass / pw" is cut out and the row flagged. Phone numbers stored as numbers keep every digit (read with `raw:true`; with `raw:false` Excel gives `9.05E+11`), and hidden direction marks are removed. Preview with ticks and checks (already imported, suite used by another company, no email, email shared, password text left out), then one `import_customer` call per row with a progress bar, results per row, and **Download codes** (Excel of the new codes).
+- **Download codes** (toolbar): every customer's suite, company, manager, email, phone and code. Private: a code is all anyone needs to enter an account.
+- Account → Details → **Edit details**: company, manager, email (= sign-in address), phone, suite / unit, address, internal notes; only changed fields are sent (`update_client_details`).
+- Placeholder sign-in addresses (`suite-N@no-email.ecomflex.invalid`) show as "no email" everywhere (`realEmail()`), in admin and in the customer panel.
+- The welcome message takes `{CODE}`; without it the code is added at the end.
+- The real list (1 Oct 2026): 257 companies, 158 with an email, 99 without (code only), 5 with password text cut out, 1 email shared by two companies.
 
 **v7 (24 Sep 2026): Business overview** (menu, Insights; `#business`). Period tabs This month / Last month / This quarter / This year / Last 12 months, each compared with the fair period (same days last month, the month before, same days of last quarter, same days last year, the 12 months before).
 - Headline figures with the change and a 12-month sparkline: **Revenue** (large), money received, orders dispatched, service orders completed, deliveries received, active customers, average spend per active customer.
@@ -344,7 +353,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v24`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v25`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 
@@ -361,7 +370,14 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - Admin v5 redesign, new hub, `404.html`, `robots.txt`, `sitemap.xml`, page tags and single `h1` on every page, scanner/label reader colours, `manifest.webmanifest`, `sw.js` v19, `CLAUDE.md`. No SQL. Mert confirmed v5 live.
 - Tested with: 48 admin click-through checks (the 27 from v4 plus section addresses, single `h1`, tab titles, Back button, folded orders, dispatch call, More menu, TEST top-up amount, phone menu, no sideways scrolling), the 52 customer checks on `panel2.html` again, a page audit (title, description, robots, canonical, one `h1` per file, no duplicate titles), the 404 page served at both `/` and `/parcel-scanner/`, and screenshots at 1440×900 and 390×844.
 
-### Phase 11 (built and tested, not uploaded)
+### Phase 12 (built and tested, not uploaded)
+
+- `supabase-phase12.sql`, `admin.html` v8, `panel.html` (hides placeholder emails), `sw.js` v25, `CLAUDE.md`.
+- Before importing: the sign-up test account "wad a" uses unit 1, which is Ecomflex Ltd's suite in the list; clear or change it with Edit details, or the import reports "Suite used by wad a" for suite 1.
+- Import one row first and sign in with its code in an incognito window, to prove the live project accepts logins made by `make_login`; then import the rest.
+- Tested with: 42 database checks, 31 admin click-through checks, the earlier 48 + 58 + 32 admin checks on v8, and all customer panel checks.
+
+### Phase 11 (deployed 1 Oct 2026)
 
 - `supabase-phase11.sql`, `admin.html` v7 (Business overview), `sw.js` v21, `CLAUDE.md`.
 - Tested with: 26 database checks (every figure worked out by hand from a small ledger, including entries either side of UK midnight at month end, TEST top-ups left out, a cancelled and refunded order adding nothing, comparison periods, top lists, and that customers and signed-out visitors are refused), 32 click-through checks (period dates sent for each tab, charts, tooltips by mouse and keyboard, Excel, phone width, month labels not overlapping), the earlier 48 + 58 admin checks on v7, screenshots.
@@ -418,6 +434,9 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 23. **Late replies on screens that change subject.** On the customer account screen a slow reply for customer A could land after staff opened customer B, and the money buttons would then act on B under A's name. Every request remembers who it was for and ignores a reply that no longer matches; money buttons read the customer from the loaded details (`current()`).
 24. **One lock for every debit.** Anything that takes money off a balance takes `pg_advisory_xact_lock(hashtext('wallet:' || user_id))` before reading the balance (buy_services, staff_add_charge, cancel refunds, dispatch_order, adjust_balance).
 
+25. **Excel numbers.** Reading a sheet with SheetJS `raw:false` turns long numbers into what Excel shows, so phone numbers stored as numbers came out as `9.05E+11` with digits lost. Read with `raw:true` and turn numbers into text yourself.
+26. **Test file paths in headless Chrome.** `setInputFiles` with a path in the long Temp scratch folder gave the page an empty file (`NotFoundError`, size 0). Pass `{name, mimeType, buffer}` instead.
+27. **Real customer data stays out of tests and the repo.** Profile the real list with totals and masked shapes only; build tests from a made-up sample with the same layout.
 ---
 
 ## 12. How to test changes
@@ -427,6 +446,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 - **Behaviour**: `playwright-core` driving the installed Chrome headless, against a copy of the page served locally with a fake in-browser Supabase (`window.supabase.createClient` returning a client with `from/rpc/auth/storage/functions` backed by sample data, recording every call). Click through each action and assert on the recorded calls; take full-page screenshots at 1440×900 and 390×844 and look at them.
 - **Edge Functions**: run the `.ts` files in Node with a `Deno` shim and a fake `fetch`; sign test webhook bodies with HMAC-SHA256 like Stripe.
 - **Label parsing**: reportlab test PDFs through the page's parsing functions via pdfjs-dist 3.11.174.
+- **Phase 12**: `test_phase12.mjs` (database; stubs `auth.users` and `auth.identities` with the real Supabase columns), `admin_v8_flows.mjs` (import with a made-up sample list `ptest_import_sample.xlsx` in the same untidy layout, codes, edit details, phone). Never use the real customer list as test data; `real_check.mjs` only prints totals.
 - **1 Oct 2026**: `firstpay_flows.mjs` (first payment card and guide, locked and unlocked, desk and phone), `lang_flows.mjs` (every page and the main pop-ups in EN, Turkish left on screen, back to TR, Excel names, sign-up, phone), `signup_flows.mjs`, plus `flows.mjs` and `flows10.mjs` again.
 - **Phase 11**: `test_phase11.mjs` (database) and `admin_v7_flows.mjs` (click-through). The fake Supabase returns 24 months of sample business figures.
 - **Phase 10**: `test_phase10.mjs` (database), `admin_v6_flows.mjs` and `flows10.mjs` (click-through) in the working scratch folder; the fake Supabase knows the new tables and functions.

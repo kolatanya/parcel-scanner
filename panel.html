@@ -1279,6 +1279,8 @@ function num(n){ return (Number(n)||0).toLocaleString(LANG()==='en'?'en-GB':'tr-
 /* the TR / EN switch (i18n.js): the page is written in Turkish; tx() gives the English when EN is on */
 function LANG(){ return window.EFLang? window.EFLang.get() : 'tr'; }
 function tx(s){ return window.EFLang? window.EFLang.t(s) : s; }
+/* customers imported without an email sign in with a private placeholder address; never show it */
+function realEmail(e){ return /@no-email\.ecomflex\.invalid$/i.test(e||'')? '' : (e||''); }
 function initials(s){ s=String(s||'').trim(); if(!s) return '·'; var p=s.split(/\s+/); return (p[0][0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase(); }
 /* "50", "50.5", "50,50", "£1,250.00" -> pence; NaN if not a number */
 function penceOf(v){
@@ -1827,8 +1829,8 @@ function startApp(){
   show('v_app');
   $('yr').textContent=String(new Date().getFullYear());
   var m=ME.user_metadata||{};
-  var nm=m.full_name||String(ME.email||'').split('@')[0];
-  $('s_name').textContent=nm; $('s_email').textContent=ME.email||'';
+  var nm=m.full_name||String(realEmail(ME.email)||'').split('@')[0]||m.business_name||'';
+  $('s_name').textContent=nm; $('s_email').textContent=realEmail(ME.email);
   $('s_avatar').textContent=initials(nm); $('t_avatar').textContent=initials(nm);
   if(m.business_name) $('s_company').textContent=m.business_name;
   sb.rpc('link_my_account').then(noop,noop);
@@ -1930,7 +1932,7 @@ $('b_bell').onclick=function(e){
 $('b_user').onclick=function(e){
   e.stopPropagation();
   var m=ME.user_metadata||{};
-  var head=h('div',{class:'mh'},[h('div',{style:'font-weight:700;color:var(--ink);font-size:.84rem',text:m.full_name||ME.email}),h('div',{text:ME.email})]);
+  var head=h('div',{class:'mh'},[h('div',{style:'font-weight:700;color:var(--ink);font-size:.84rem',text:m.full_name||realEmail(ME.email)||m.business_name||''}),h('div',{text:realEmail(ME.email)})]);
   openMenu($('b_user'),[
     S.acc.code?{t:'Giriş kodumu kopyala ('+S.acc.code+')',i:'copy',on:function(){ window.EFCopy(S.acc.code,'Giriş kodunuz kopyalandı'); }}:null,
     {t:'Depo adresim',i:'pin',on:function(){ go('address'); }},
