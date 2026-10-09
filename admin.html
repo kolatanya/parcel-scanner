@@ -762,6 +762,19 @@ input[type=month].inl{width:180px}
 .frm.two .full{grid-column:1/-1}
 .frm.two textarea.inl{height:auto;min-height:78px;padding:9px 12px;resize:vertical;line-height:1.45}
 @media (max-width:700px){ .frm.two{grid-template-columns:1fr} }
+
+/* v9: stock import */
+.stimp .row2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px 14px;margin:0 0 14px}
+.stimp label.l{display:block;font-size:.74rem;font-weight:600;color:var(--muted);margin:0 0 5px}
+.stimp .filebox{display:flex;align-items:center;gap:10px;min-height:38px;flex-wrap:wrap}
+.stimptbl td.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+.stimptbl td.st{min-width:170px}
+.stimptbl .chg{font-family:var(--mono);font-weight:600}
+.stimptbl tr.out td{background:#FFF8F8}
+.stimptbl tr.out td.st{color:var(--redtext)}
+.stimptbl tr.same td{color:var(--muted)}
+.stimptbl .sheet{font-size:.7rem;color:var(--faint);display:block}
+@media (max-width:700px){ .stimp .row2{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -822,7 +835,7 @@ input[type=month].inl{width:180px}
     <button class="btn brand block" id="b_in" type="button">Sign in</button>
     <div class="msg" id="m_login"></div>
   </div>
-  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v8</span></p>
+  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v9</span></p>
 </main>
 
 <main class="auth" id="v_error" hidden>
@@ -864,7 +877,7 @@ input[type=month].inl{width:180px}
     </nav>
     <div class="me">
       <div class="avatar" id="me_av">EF</div>
-      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v8</span></div></div>
+      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v9</span></div></div>
       <button class="ib" id="b_out" type="button" title="Sign out" aria-label="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
     </div>
   </aside>
@@ -956,6 +969,7 @@ input[type=month].inl{width:180px}
         <div class="toolbar">
           <div class="tl"><label class="sr" for="stockcust">Customer</label>
             <select class="custsel" id="stockcust"><option value="">Choose a customer…</option></select></div>
+          <div class="tr"><button class="btn" id="b_stimport" type="button"><svg class="i"><use href="#i-upload"/></svg>Import stock</button></div>
         </div>
         <div class="msg" id="m_stock"></div>
         <div class="empty" id="stock_pick">Choose a customer to see and edit their stock list.</div>
@@ -1211,6 +1225,7 @@ input[type=month].inl{width:180px}
           <div class="tl"><a class="btn" href="#customers" id="ac_back"><svg class="i"><use href="#i-left"/></svg>All customers</a></div>
           <div class="tr">
             <button class="btn" id="ac_msg" type="button"><svg class="i"><use href="#i-chat"/></svg>Message</button>
+            <button class="btn" id="ac_stimport" type="button"><svg class="i"><use href="#i-upload"/></svg>Import stock</button>
             <button class="btn" id="ac_charge" type="button"><svg class="i"><use href="#i-plus"/></svg>Add charge</button>
             <button class="btn primary" id="ac_topup" type="button"><svg class="i"><use href="#i-wallet"/></svg>Record top-up</button>
             <button class="btn" id="ac_more" type="button" aria-label="More actions"><svg class="i"><use href="#i-dots"/></svg></button>
@@ -1999,7 +2014,7 @@ function loadStockCustomers(){
     var sel=$('stockcust'); var keep=sel.value; sel.innerHTML='<option value="">Choose a customer\u2026</option>';
     (r.data||[]).forEach(function(c){
       var o=document.createElement('option');
-      o.value=c.user_id||''; o.textContent=(c.business_name||c.full_name)+' \u2014 '+c.email+(c.user_id?'':' (has not logged in yet)');
+      o.value=c.user_id||''; o.textContent=(c.business_name||c.full_name)+' \u2014 '+(realEmail(c.email)||'no email')+(c.user_id?'':' (has not logged in yet)');
       o.disabled=!c.user_id; o.setAttribute('data-email',c.email); sel.appendChild(o);
     });
     if(keep) sel.value=keep;
@@ -3908,6 +3923,240 @@ function impCodes(list){
     var wb=window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb,ws,'Imported');
     window.XLSX.writeFile(wb,'ecomflex-imported-codes-'+todayYmdA()+'.xlsx');
   });
+}
+
+
+/* ---------------- v9: opening stock from the old per-customer spreadsheets ----------------
+   Ecomflex's customer files keep remaining stock on a "Kalan Stok" sheet (stock name, Amazon SKU,
+   deliveries by date, Toplam, Toplam Satilan, Kalan Stok) and sometimes a "Stok Kontrol …" sheet
+   (SKU, Barcode, Gelen, Guncel Satilan, Depoda Kalan). The numbers are formulas, so some come out
+   negative or as #N/A: those lines are left out and listed, never guessed. */
+function stCellsAoa(ws){
+  /* read cell by cell so formula errors (#N/A) stay errors instead of becoming numbers */
+  if(!ws||!ws['!ref']) return [];
+  var R=window.XLSX.utils.decode_range(ws['!ref']), out=[], maxR=Math.min(R.e.r,5000), maxC=Math.min(R.e.c,80);
+  for(var r=R.s.r;r<=maxR;r++){
+    var row=[];
+    for(var c=0;c<=maxC;c++){
+      var cell=ws[window.XLSX.utils.encode_cell({r:r,c:c})];
+      if(!cell||cell.v==null||cell.v===''){ row.push(null); continue; }
+      if(cell.t==='e'){ row.push({err:cell.w||'#ERROR'}); continue; }
+      if(cell.t==='n'){ row.push(cell.v); continue; }
+      row.push(String(cell.v).replace(/[‎‏‪-‮⁦-⁩﻿]/g,'').trim());
+    }
+    out.push(row);
+  }
+  return out;
+}
+function stNorm(v){ return String(v==null?'':v).replace(/\s+/g,' ').trim().toLowerCase(); }
+function stSku(v){ return String(v==null?'':v).replace(/\s+/g,' ').trim().toUpperCase(); }
+/* a cell as a whole number of units, or why not */
+function stQty(v){
+  if(v==null||v==='') return {bad:'No quantity in the file'};
+  if(typeof v==='object'&&v.err) return {bad:'Formula error '+v.err+' in the file'};
+  var n=typeof v==='number'? v : parseFloat(String(v).replace(',','.'));
+  if(!isFinite(n)) return {bad:'“'+String(v).slice(0,20)+'” is not a number'};
+  if(n<0) return {bad:'Negative stock ('+n+') in the file'};
+  if(Math.abs(n-Math.round(n))>1e-9) return {bad:'Not a whole number ('+n+')'};
+  if(n>1000000) return {bad:'Too large ('+n+')'};
+  return {qty:Math.round(n)};
+}
+function stShow(v){ if(v==null||v==='') return '—'; if(typeof v==='object'&&v.err) return v.err; return String(typeof v==='number'?Math.round(v*100)/100:v); }
+function stFindHeader(aoa,test){
+  for(var i=0;i<Math.min(aoa.length,30);i++){ var r=(aoa[i]||[]).map(stNorm); if(test(r)) return i; }
+  return -1;
+}
+function stParseWorkbook(wb){
+  var lines=[], used=[];
+  wb.SheetNames.forEach(function(name){
+    var nm=stNorm(name), aoa;
+    if(/kalan\s*stok/.test(nm)){
+      aoa=stCellsAoa(wb.Sheets[name]);
+      var h=stFindHeader(aoa,function(r){ return r.indexOf('kalan stok')>-1&&r.some(function(x){ return /amazon sku|sku/.test(x); }); });
+      if(h<0) return;
+      var H=aoa[h].map(stNorm), cRem=H.indexOf('kalan stok'), cTot=H.lastIndexOf('toplam',cRem), cSold=-1, cName=-1, cSku=-1;
+      for(var k=cTot+1;k<cRem;k++) if(/satilan|satılan/.test(H[k])){ cSold=k; break; }
+      H.forEach(function(x,k){ if(k<cRem&&/depo stok ad|urun ad|ürün ad|product/.test(x)&&cName<0) cName=k; if(k<cRem&&/amazon sku|^sku$/.test(x)) cSku=k; });
+      if(cSku<0) return;
+      used.push(name);
+      for(var r=h+1;r<aoa.length;r++){
+        var row=aoa[r]||[], sku=row[cSku], nm2=cName>-1?row[cName]:null;
+        if((sku==null||sku==='')&&(nm2==null||nm2==='')) continue;
+        lines.push({sheet:name,sku:stSku(sku&&typeof sku!=='object'?sku:''),name:nm2&&typeof nm2!=='object'?String(nm2).trim():'',
+          barcode:'',recv:cTot>-1?row[cTot]:null,sold:cSold>-1?row[cSold]:null,rem:row[cRem]});
+      }
+    } else if(/stok\s*kontrol/.test(nm)){
+      aoa=stCellsAoa(wb.Sheets[name]);
+      var h2=stFindHeader(aoa,function(r){ return r.indexOf('sku')>-1&&r.some(function(x){ return /depoda kalan|kalan/.test(x); }); });
+      if(h2<0) return;
+      var H2=aoa[h2].map(stNorm), cS=H2.indexOf('sku'), cR=-1, cB=H2.indexOf('barcode'), cG=-1, cSo=-1;
+      H2.forEach(function(x,k){ if(cR<0&&/depoda kalan|^kalan$/.test(x)) cR=k; if(cG<0&&/^gelen/.test(x)) cG=k; if(cSo<0&&/satilan|satılan/.test(x)) cSo=k; });
+      if(cR<0) return;
+      used.push(name);
+      for(var r2=h2+1;r2<aoa.length;r2++){
+        var w=aoa[r2]||[], s2=w[cS];
+        if(s2==null||s2===''||typeof s2==='object') continue;
+        var bc=cB>-1?w[cB]:null;
+        lines.push({sheet:name,sku:stSku(s2),name:'',barcode:bc==null||typeof bc==='object'?'':(typeof bc==='number'?String(Math.round(bc)):String(bc).replace(/\.0+$/,'')),
+          recv:cG>-1?w[cG]:null,sold:cSo>-1?w[cSo]:null,rem:w[cR]});
+      }
+    }
+  });
+  return {lines:lines,sheets:used};
+}
+/* pasted "SKU <tab> quantity" lines, for files laid out differently */
+function stParsePaste(text){
+  var lines=[];
+  String(text||'').split(/\r?\n/).forEach(function(l){
+    if(!l.trim()) return;
+    var c=l.split('\t'); if(c.length<2) c=l.split(/\s{2,}|;|,(?=\S)/);
+    var sku=stSku(c[0]), q=String(c[c.length-1]||'').trim();
+    if(/^(sku|amazon sku|stok|urun|ürün)$/i.test(sku)) return;
+    lines.push({sheet:'pasted',sku:sku,name:c.length>2?String(c[1]).trim():'',barcode:'',recv:null,sold:null,rem:q===''?null:(isFinite(parseFloat(q.replace(',','.')))?parseFloat(q.replace(',','.')):q)});
+  });
+  return {lines:lines,sheets:['pasted lines']};
+}
+function stClassify(lines,current,prefer){
+  var groups={};
+  lines.forEach(function(L){ L.out=null; L.dup=false; L.now=L.sku?current[L.sku]:null; L.qty=null;
+    if(!L.sku){ L.out='No SKU in the file'; return; }
+    if(L.sku.length>64){ L.out='SKU longer than 64 characters'; return; }
+    var q=stQty(L.rem); if(q.bad) L.bad=q.bad; else { L.bad=null; L.qty=q.qty; }
+    (groups[L.sku]=groups[L.sku]||[]).push(L); });
+  Object.keys(groups).forEach(function(k){
+    var g=groups[k];
+    if(g.length===1){ if(g[0].bad) g[0].out=g[0].bad; return; }
+    var sheets={}; g.forEach(function(L){ sheets[L.sheet]=(sheets[L.sheet]||0)+1; });
+    var twiceOnOne=Object.keys(sheets).some(function(sh){ return sheets[sh]>1; });
+    var nums=g.map(function(L){ return L.bad?null:L.qty; }), allSame=nums.every(function(n){ return n!==null&&n===nums[0]; });
+    if(!twiceOnOne&&nums.every(function(n){ return n===null; })){ g.forEach(function(L){ L.out=L.bad+' (on every sheet)'; }); return; }
+    if(!twiceOnOne&&!allSame&&prefer){
+      /* staff chose which sheet to trust when two sheets disagree */
+      var pick=g.filter(function(L){ return stNorm(L.sheet).indexOf(prefer)>-1&&!L.bad; })[0];
+      if(pick){ g.forEach(function(L){ if(L!==pick){ L.out=null; L.dup=true; L.other=true; } }); return; }
+    }
+    if(!twiceOnOne&&allSame){
+      /* the same number on two sheets: import it once */
+      g.forEach(function(L,i){ if(i>0){ L.out=null; L.dup=true; } });
+      return;
+    }
+    var why=twiceOnOne? 'SKU appears twice on '+Object.keys(sheets).filter(function(sh){ return sheets[sh]>1; }).join(', ')
+      : 'Different numbers on two sheets: '+g.map(function(L){ return stShow(L.rem)+' on '+L.sheet; }).join(', ');
+    g.forEach(function(L){ L.out=why; });
+  });
+  return lines;
+}
+function stGuessCustomer(fileName){
+  var f=String(fileName||'').replace(/\.[a-z0-9]+$/i,''), m=f.match(/(?:unit|suite|birim)\s*#?\s*(\d+)/i), list=CLIENTS||[];
+  if(m){ var hit=list.filter(function(c){ return String(c.unit_number||'').trim()===m[1]; })[0]; if(hit) return hit.user_id; }
+  var fl=stNorm(f);
+  var byName=list.filter(function(c){ var co=stNorm(c.company); return co.length>=4&&fl.indexOf(co)>-1; });
+  return byName.length===1? byName[0].user_id : '';
+}
+function stOpenImport(uid){
+  var start=(CLIENTS&&CLIENTS.length)? Promise.resolve() : loadClients();
+  Promise.resolve(start).then(function(){ stImportDialog(uid); },function(){ stImportDialog(uid); });
+}
+$('b_stimport').onclick=function(){ stOpenImport($('stockcust').value||''); };
+$('ac_stimport').onclick=function(){ var P=current(); if(P) stOpenImport(P.user_id); };
+function stImportDialog(uid){
+  var cust=el('select',{class:'custsel','aria-label':'Customer'},[el('option',{value:'',text:'Choose the customer…'})]);
+  (CLIENTS||[]).slice().sort(suiteSort).forEach(function(c){ cust.appendChild(el('option',{value:c.user_id,text:(c.unit_number?'Suite '+c.unit_number+' · ':'')+(c.company||c.full_name)})); });
+  if(uid) cust.value=uid;
+  var file=el('input',{type:'file',accept:'.xlsx,.xls',style:'display:none'});
+  var pickB=el('button',{class:'btn',type:'button'},[svgI('upload'),'Choose the stock Excel file…']);
+  var fname=el('span',{class:'muted',style:'font-size:.82rem'});
+  var pasteT=el('button',{class:'linkbtn',type:'button',text:'or paste SKU and quantity columns instead'});
+  var paste=el('textarea',{class:'inl',hidden:true,placeholder:'BR-TN2410-UK\t40\nBR-TN2420-UK\t125',style:'height:auto;min-height:110px;padding:9px 12px;font-family:var(--mono);font-size:.8rem;margin:0 0 12px'});
+  var sum=el('div',{class:'impsum'}), wrap=el('div',{class:'impwrap',hidden:true}), tb=el('tbody');
+  wrap.appendChild(el('table',{class:'tbl stimptbl'},[el('thead',null,[el('tr',null,[el('th',{text:'SKU'}),el('th',{text:'Product'}),el('th',{class:'r',text:'Received'}),el('th',{class:'r',text:'Sold'}),el('th',{class:'r',text:'Remaining'}),el('th',{text:'What happens'})])]),tb]));
+  var lines=[], source='', current={}, done=false, go;
+  var prefSel=el('select',{class:'custsel','aria-label':'When two sheets disagree',style:'max-width:420px'},[el('option',{value:'',text:'Leave those lines out (count them later)'}),
+    el('option',{value:'kalan stok',text:'Use the “Kalan Stok” number'}),el('option',{value:'stok kontrol',text:'Use the “Stok Kontrol” (stock check) number'})]);
+  var prefBox=el('div',{hidden:true,style:'margin:0 0 12px'},[el('label',{class:'l',text:'Some products are on two sheets with different numbers. Which should count?'}),prefSel]);
+  prefSel.onchange=function(){ done=false; draw(); };
+  pickB.onclick=function(){ file.click(); };
+  pasteT.onclick=function(){ paste.hidden=!paste.hidden; if(!paste.hidden) paste.focus(); };
+  function loadCurrent(){
+    current={}; if(!cust.value) return Promise.resolve();
+    return sb.from('stock').select('sku,qty,product_name').eq('user_id',cust.value).then(function(r){ (r.data||[]).forEach(function(x){ current[stSku(x.sku)]=x; }); });
+  }
+  function draw(){
+    stClassify(lines,current,prefSel.value);
+    var conflicts=lines.some(function(L){ return /Different numbers on two sheets/.test(L.out||'')||L.other; });
+    prefBox.hidden=!conflicts;
+    tb.innerHTML='';
+    var ok=lines.filter(function(L){ return !L.out&&!L.dup; }), out=lines.filter(function(L){ return L.out; });
+    var units=0, n={add:0,upd:0,same:0};
+    lines.forEach(function(L){
+      var what, cls='';
+      if(L.out){ what=el('span',null,['Left out: '+L.out]); cls='out'; }
+      else if(L.dup){ what=el('span',{text:L.other?'Ignored: you chose the other sheet':'Same number as on the other sheet (imported once)'}); cls='same'; }
+      else if(!L.now){ what=el('span',null,['New product · ',el('span',{class:'chg',text:String(L.qty)})]); n.add++; }
+      else if(Number(L.now.qty)===L.qty){ what=el('span',{text:'Same as in the app ('+L.qty+')'}); cls='same'; n.same++; }
+      else { what=el('span',null,['In the app ',el('span',{class:'chg',text:String(L.now.qty)}),' → ',el('span',{class:'chg',text:String(L.qty)})]); n.upd++; }
+      if(!L.out&&!L.dup) units+=L.qty;
+      tb.appendChild(el('tr',{class:cls},[el('td',{class:'mono'},[L.sku||'—',el('span',{class:'sheet',text:L.sheet})]),el('td',{text:L.name||(L.barcode?'Barcode '+L.barcode:'—')}),
+        el('td',{class:'n',text:stShow(L.recv)}),el('td',{class:'n',text:stShow(L.sold)}),el('td',{class:'n',text:stShow(L.rem)}),el('td',{class:'st'},[what])]));
+    });
+    sum.innerHTML='';
+    sum.appendChild(el('span',{class:'pill good',text:ok.length+' lines to import · '+units.toLocaleString('en-GB')+' units'}));
+    if(n.add) sum.appendChild(el('span',{class:'pill',text:n.add+' new'}));
+    if(n.upd) sum.appendChild(el('span',{class:'pill warn',text:n.upd+' change the quantity in the app'}));
+    if(n.same) sum.appendChild(el('span',{class:'pill',text:n.same+' already the same'}));
+    if(out.length) sum.appendChild(el('span',{class:'pill bad',text:out.length+' left out (listed in red)'}));
+    wrap.hidden=!lines.length;
+    go.disabled=done||!ok.length||!cust.value;
+    go.lastChild.textContent=done?'Imported':'Import '+ok.length+' line'+(ok.length===1?'':'s');
+    dl.hidden=!out.length;
+  }
+  function useParsed(res,src){
+    lines=res.lines; source=src;
+    if(!lines.length){ D.msg(src==='pasted lines'?'No lines found in what was pasted.':'No stock sheet found. The file needs a “Kalan Stok” or “Stok Kontrol” sheet; otherwise paste the SKU and quantity columns.','bad'); wrap.hidden=true; go.disabled=true; return; }
+    D.msg('Read '+res.sheets.join(' and ')+'. Check the lines, then import. Lines in red are left out and can be added later in the Stock screen.', '');
+    loadCurrent().then(draw);
+  }
+  file.onchange=function(){
+    var f=file.files[0]; if(!f) return; fname.textContent=f.name; done=false;
+    var guess=stGuessCustomer(f.name); if(guess&&!cust.value){ cust.value=guess; }
+    D.busy('Reading the file…');
+    needXLSXA().then(function(){
+      return new Promise(function(res,rej){ var fr=new FileReader(); fr.onload=function(){ try{ res(window.XLSX.read(new Uint8Array(fr.result),{type:'array'})); }catch(e){ rej(e); } }; fr.onerror=rej; fr.readAsArrayBuffer(f); });
+    }).then(function(wb){ useParsed(stParseWorkbook(wb),f.name); },function(){ D.msg('Could not read that file. Save it as .xlsx and try again.','bad'); });
+  };
+  paste.oninput=function(){ done=false; useParsed(stParsePaste(paste.value),'pasted lines'); };
+  cust.onchange=function(){ done=false; if(lines.length) loadCurrent().then(draw); else if(go) go.disabled=true; };
+  var dl=el('button',{class:'btn',type:'button',hidden:true},[svgI('download'),'Download the left-out lines']);
+  dl.onclick=function(){
+    needXLSXA().then(function(){
+      var rows=[['Sheet','SKU','Product','Received','Sold','Remaining in file','Why it was left out']];
+      lines.filter(function(L){ return L.out; }).forEach(function(L){ rows.push([L.sheet,L.sku,L.name,stShow(L.recv),stShow(L.sold),stShow(L.rem),L.out]); });
+      var ws=window.XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[22,24,26,10,10,16,34].map(function(w){ return {wch:w}; });
+      var wb=window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb,ws,'Left out');
+      var co=cust.options[cust.selectedIndex]?cust.options[cust.selectedIndex].text:'customer';
+      window.XLSX.writeFile(wb,'ecomflex-stock-left-out-'+safeName(co)+'-'+todayYmdA()+'.xlsx');
+    });
+  };
+  var body=el('div',{class:'stimp'},[
+    el('p',{class:'help top',style:'margin:0 0 14px'},[svgI('info'),el('span',{text:'Reads the customer’s old stock file on this computer: the “Kalan Stok” sheet (remaining stock by Amazon SKU) and any “Stok Kontrol” sheet. The remaining quantity becomes their stock in the app, replacing what the app has for that SKU. Lines whose numbers are negative, #N/A, blank or duplicated are left out and listed; add those by hand after counting. Do this on the switch-over day, after the last dispatch.'})]),
+    el('div',{class:'row2'},[el('div',null,[el('label',{class:'l',text:'Customer'}),cust]),el('div',null,[el('label',{class:'l',text:'Stock file'}),el('div',{class:'filebox'},[pickB,fname,file])])]),
+    el('div',{style:'margin:-4px 0 12px'},[pasteT]), paste, prefBox, sum, wrap, el('div',{style:'margin-top:10px'},[dl])]);
+  var D=dialog({title:'Import stock from Excel',sub:'Opening stock from the old per-customer spreadsheet.',wide:true,body:body,
+    actions:[{t:'Close',close:true},{t:'Import',primary:true,i:'check',on:function(D2,b){
+      var ok=lines.filter(function(L){ return !L.out&&!L.dup; }); if(!ok.length||!cust.value) return;
+      var co=cust.options[cust.selectedIndex].text, chg=ok.filter(function(L){ return L.now&&Number(L.now.qty)!==L.qty; }).length;
+      if(!confirm('Import '+ok.length+' stock lines into '+co+'?'+(chg?'\n\n'+chg+' SKU'+(chg===1?'':'s')+' already in the app will get the quantity from the file.':''))) return;
+      b.disabled=true; D.busy('Importing…');
+      sb.rpc('import_stock',{p_user:cust.value,p_rows:ok.map(function(L){ return {sku:L.sku,name:L.name||null,qty:L.qty,barcode:L.barcode||null}; }),p_source:source}).then(function(x){
+        if(x.error){ b.disabled=false; D.msg('Could not import: '+x.error.message,'bad'); return; }
+        done=true; var d=x.data||{};
+        D.msg('Imported into '+co+': '+d.created+' new, '+d.updated+' changed, '+d.unchanged+' already the same · '+Number(d.units||0).toLocaleString('en-GB')+' units.'+(function(){ var o=lines.filter(function(L){ return L.out; }).length; return o?' '+o+' lines were left out; download them to fix by hand.':''; })(),'good');
+        loadCurrent().then(draw);
+        if($('stockcust').value===cust.value) loadStock();
+        if(section==='customer'&&ACC.uid===cust.value) reloadAccount();
+      },function(){ b.disabled=false; D.msg('No connection. Nothing was imported.','bad'); });
+    }}]});
+  go=D.box.querySelector('.dlf .btn.primary'); go.disabled=true;
 }
 
 /* ---------------- statement, like the old per-customer spreadsheets ---------------- */
