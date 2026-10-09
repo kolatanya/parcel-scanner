@@ -302,9 +302,16 @@ Phase 10 added **Hizmet Satın Al** (price list as a shop: quantities, basket wi
 
 The older, simpler panel, replaced on 1 Oct 2026 and kept as `panel-old.html`. Has the phase 8 balance page and (23 Sep) the FBA label-file fix.
 
-### `admin.html` — admin console (English, v9)
+### `admin.html` — admin console (English, v10)
 
 Sections: **Today, Orders, Inbound, Services, Stock, Customers, Support, Access requests, Content, Reports, Staff**, plus links to the label reader, scanner and customer panel. Each section has an address (`admin.html#orders`, `#customers`, `#reports`…), so refresh keeps the place and Back works. On phones the menu slides in from a button at the top left.
+
+**v10 (9 Oct 2026): finding things** (Mert: "the program is missing basic simple ease of life stuff").
+- **Find a customer** box at the top of the menu (`#qfind`; **Ctrl+K** focuses it, and opens the menu on phones): matches suite number, company, manager, email, phone and login code; exact suite matches first; arrow keys and Enter; opens the Account screen.
+- A **search bar** under the toolbar of Customers (customer table, Payments, Invoices), Orders, Inbound, Service orders, Services, Stock (the chosen customer's SKUs) and Support and Access requests (`searchBar()`; containers' children are rows). Every typed word must match; case and Turkish accents are ignored (`normQ`: `ş`→`s`, `ı`→`i`); text inside input boxes counts (unit numbers, stock names). It shows "N of M shown", a Clear button, a "Nothing matches" line, survives list refreshes and tab changes (MutationObservers), hides itself when no list is on screen, and **"/"** jumps to it; Escape clears it.
+- Customers: **sort** by suite number (default), company A–Z, newest, lowest balance (remembered in `localStorage` `ecomflex:clsort`); the company name is a link to the Account screen.
+- Stock and Invoices: a **Find a customer** box beside the long customer drop-down.
+- Tested with `admin_v10_flows.mjs` (34 checks) plus all earlier admin sets.
 
 **v9 (9 Oct 2026): opening stock from the old per-customer spreadsheets.** Stock → **Import stock from Excel**: pick the customer (guessed from "Unit <suite> …" in the file name, matched on suite, else a unique company name in the file name), choose their file. Ecomflex's per-customer files share one template (one real customer's file, named "Unit <suite> <company>.xlsx", was the sample; never name customers here): **Sayfa1** = statement (not imported: Mert chose stock only), **Siparis Takip** = ~9,300 past orders with end-buyers' names and postcodes (not imported; stays as the archive), **Kalan Stok** = remaining stock (`Depo Stok Adi` = name, the right-hand `Amazon SKU` column = SKU, deliveries by date, `Toplam`, `Toplam Satilan`, `Kalan Stok`, all formulas), **Stok Kontrol <date>** = a dated stock check (`SKU`, `Barcode`, `Gelen`, `Guncel Satilan`, `Depoda Kalan`), plus Stok Hareketleri, summaries, Ucretlendirme (price list and bank details) and **Fatura** sheets copied between files that hold **other customers' names and addresses** (never send these files to customers as they are). Cells are read one by one so formula errors stay errors (`sheet_to_json` with `raw:true` turns `#N/A` into the number 42). Lines are left out and listed (Mert's choice: never guess) when the remaining quantity is negative, a formula error, blank, not a whole number, has no SKU, or the SKU appears twice on one sheet; the same SKU on both sheets with the same number is imported once; with different numbers it is left out unless staff choose which sheet counts (the sample file: 15 bag SKUs differ between the two sheets). Preview shows received / sold / remaining and what happens ("New product", "In the app 5 → 40", "Same"), a download of the left-out lines, and one `import_stock` call. A paste box takes SKU + quantity columns for files laid out differently. **On a customer's Account screen, Import stock opens the file chooser at once and the import is locked to that customer** (Mert's request, 9 Oct): no customer box; if the file name says another suite ("Unit 612 …"), a warning names that customer and the confirm question starts with WARNING. The sample file: 102 lines, 54 clean (3,734 units); 62 or 64 when a sheet is chosen. `-LIST2` SKUs are second Amazon listings of the same physical stock and have no quantity of their own.
 
@@ -356,7 +363,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v27`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v28`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 

@@ -776,6 +776,36 @@ input[type=month].inl{width:180px}
 .stimptbl .sheet{font-size:.7rem;color:var(--faint);display:block}
 @media (max-width:700px){ .stimp .row2{grid-template-columns:1fr} }
 .stimp .lockedcust{display:flex;align-items:center;min-height:38px;font-weight:650;color:var(--ink)}
+
+/* v10: finding things */
+.qfind{position:relative;padding:12px 12px 4px}
+.qbox{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px;border:1px solid var(--line2);border-radius:var(--radius-sm);background:var(--soft);color:var(--muted);transition:border-color .15s,background .15s}
+.qbox:focus-within{border-color:var(--blue);background:var(--surface);box-shadow:0 0 0 3px var(--bluesoft)}
+.qbox svg.i{width:16px;height:16px;flex:none}
+.qbox input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:.84rem;color:var(--ink);height:100%}
+.qbox input::-webkit-search-cancel-button{display:none}
+.qbox kbd{font-family:var(--font);font-size:.66rem;font-weight:600;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 5px;background:var(--surface);white-space:nowrap}
+.qlist{position:absolute;left:12px;right:12px;top:calc(100% - 2px);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-lg);z-index:120;max-height:min(420px,60vh);overflow-y:auto;padding:4px}
+.qlist.wide{left:0;right:auto;width:min(460px,90vw)}
+.qitem{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:7px;text-align:left;cursor:pointer;color:var(--ink)}
+.qitem:hover,.qitem.on{background:var(--soft2)}
+.qitem .su{font-family:var(--mono);font-size:.74rem;color:var(--muted);min-width:42px}
+.qitem .nm{font-weight:600;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qitem .sb{font-size:.74rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qitem .tx{min-width:0;flex:1}
+.qnone{padding:12px;font-size:.8rem;color:var(--muted)}
+.pickfind{position:relative;width:260px;max-width:100%}
+.pickfind .qbox{background:var(--surface)}
+.sbar{display:flex;align-items:center;gap:12px;margin:0 0 14px;flex-wrap:wrap}
+.sbar .qbox{flex:1 1 320px;max-width:520px;background:var(--surface)}
+.sbar .sinfo{font-size:.78rem;color:var(--muted)}
+.sbar .sclear{border:0;background:none;color:var(--deep);font-weight:600;font-size:.78rem;cursor:pointer;padding:0}
+.sfhide{display:none!important}
+.snone{background:var(--surface);border:1px dashed var(--line2);border-radius:var(--radius);padding:22px;text-align:center;color:var(--muted);font-size:.84rem;margin:0 0 14px}
+.clsort{width:auto;height:36px;font-size:.8rem}
+.cname{border:0;background:none;padding:0;font:inherit;font-weight:650;color:var(--ink);cursor:pointer;text-align:left}
+.cname:hover{color:var(--deep);text-decoration:underline}
+@media (max-width:700px){ .pickfind{width:100%} .sbar .qbox{max-width:none} }
 </style>
 </head>
 <body>
@@ -836,7 +866,7 @@ input[type=month].inl{width:180px}
     <button class="btn brand block" id="b_in" type="button">Sign in</button>
     <div class="msg" id="m_login"></div>
   </div>
-  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v9</span></p>
+  <p class="authfoot"><span>Ecomflex Ltd · staff access only</span><span class="ver" id="ver_login">v10</span></p>
 </main>
 
 <main class="auth" id="v_error" hidden>
@@ -851,6 +881,7 @@ input[type=month].inl{width:180px}
 <div class="app" id="v_main" hidden>
   <aside class="side" id="side" aria-label="Admin menu">
     <div class="brand"><img src="logo.png" alt="ecomFLEX" width="141" height="24"><span class="role">Admin</span></div>
+    <div class="qfind" id="qfind"></div>
     <nav class="nav" id="nav">
       <a href="#today" data-s="today"><svg class="i"><use href="#i-grid"/></svg>Today</a>
       <div class="gl">operations</div>
@@ -878,7 +909,7 @@ input[type=month].inl{width:180px}
     </nav>
     <div class="me">
       <div class="avatar" id="me_av">EF</div>
-      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v9</span></div></div>
+      <div class="who"><div class="nm" id="me_email">Signed in</div><div class="rl">Administrator <span class="ver" id="ver">v10</span></div></div>
       <button class="ib" id="b_out" type="button" title="Sign out" aria-label="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
     </div>
   </aside>
@@ -946,6 +977,7 @@ input[type=month].inl{width:180px}
             </div>
           </div>
         </div>
+        <div class="sbar" id="sb_m_needs"></div>
         <div class="msg" id="m_needs"></div>
         <div class="rows" id="custlist"></div>
         <div class="empty" id="needs_empty" hidden>No customers yet.</div>
@@ -960,6 +992,7 @@ input[type=month].inl{width:180px}
           </div></div>
           <div class="tr"><button class="btn" id="b_refresh_in" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
         </div>
+        <div class="sbar" id="sb_m_inbound"></div>
         <div class="msg" id="m_inbound"></div>
         <div class="rows" id="inbox"></div>
         <div class="empty" id="in_empty" hidden>Nothing expected.</div>
@@ -968,10 +1001,11 @@ input[type=month].inl{width:180px}
       <!-- stock -->
       <section id="sec_stock" aria-label="Stock" hidden>
         <div class="toolbar">
-          <div class="tl"><label class="sr" for="stockcust">Customer</label>
+          <div class="tl"><div class="pickfind" id="pf_stock"></div><label class="sr" for="stockcust">Customer</label>
             <select class="custsel" id="stockcust"><option value="">Choose a customer…</option></select></div>
           <div class="tr"><button class="btn" id="b_stimport" type="button"><svg class="i"><use href="#i-upload"/></svg>Import stock</button></div>
         </div>
+        <div class="sbar" id="sb_m_stock"></div>
         <div class="msg" id="m_stock"></div>
         <div class="empty" id="stock_pick">Choose a customer to see and edit their stock list.</div>
         <div class="tblwrap"><table class="tbl" id="stocktbl" hidden>
@@ -1001,6 +1035,7 @@ input[type=month].inl{width:180px}
             <button class="btn" id="b_refresh_sv" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button>
           </div>
         </div>
+        <div class="sbar" id="sb_m_sv"></div>
         <div class="msg" id="m_sv"></div>
         <div class="rows" id="svlist"></div>
         <div class="empty" id="sv_empty" hidden>Nothing waiting.</div>
@@ -1015,12 +1050,18 @@ input[type=month].inl{width:180px}
             <button data-c="pay" type="button">Payments<span class="count" id="c_paycl" hidden></span></button>
             <button data-c="inv" type="button">Invoices</button>
             <button data-c="setup" type="button">Bank details</button>
-          </div></div>
+          </div>
+            <label class="sr" for="clsort">Sort customers</label>
+            <select class="inl clsort" id="clsort">
+              <option value="suite">Sort: suite number</option><option value="name">Sort: company A–Z</option>
+              <option value="new">Sort: newest first</option><option value="bal">Sort: lowest balance first</option>
+            </select></div>
           <div class="tr">
             <button class="btn" id="b_climport" type="button"><svg class="i"><use href="#i-upload"/></svg>Import customers</button>
             <button class="btn" id="b_clcodes" type="button"><svg class="i"><use href="#i-download"/></svg>Download codes</button>
             <button class="btn" id="b_clreload" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
         </div>
+        <div class="sbar" id="sb_m_cl"></div>
         <div class="msg" id="m_cl"></div>
 
         <div id="cl_board">
@@ -1043,7 +1084,7 @@ input[type=month].inl{width:180px}
             <h2>Upload an invoice</h2>
             <p class="lead">The customer sees it on their Faturalar page and can open or download it.</p>
             <div class="frm">
-              <div class="full"><label for="inv_cust">Customer</label><select class="custsel" id="inv_cust"><option value="">Choose a customer…</option></select></div>
+              <div class="full"><label for="inv_cust">Customer</label><div class="pickfind" id="pf_inv" style="margin-bottom:6px"></div><select class="custsel" id="inv_cust"><option value="">Choose a customer…</option></select></div>
               <div class="full"><label for="inv_title">Title</label><input class="inl" id="inv_title" placeholder="Invoice INV-1416"></div>
               <div><label for="inv_period">Period (optional)</label><input class="inl" id="inv_period" placeholder="September 2026"></div>
               <div><label for="inv_amount">Amount £ (optional)</label><input class="inl" id="inv_amount" inputmode="decimal" placeholder="273.30"></div>
@@ -1088,6 +1129,7 @@ input[type=month].inl{width:180px}
           </div></div>
           <div class="tr"><button class="btn" id="b_tkreload" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
         </div>
+        <div class="sbar" id="sb_m_tk"></div>
         <div class="msg" id="m_tk"></div>
         <div class="rows" id="tklist"></div>
         <div class="empty" id="tk_empty" hidden>Nothing here.</div>
@@ -1299,6 +1341,7 @@ input[type=month].inl{width:180px}
           </div></div>
           <div class="tr"><button class="btn" id="b_soreload" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
         </div>
+        <div class="sbar" id="sb_m_so"></div>
         <div class="msg" id="m_so"></div>
         <div class="rows" id="solist"></div>
         <div class="empty" id="so_empty" hidden>Nothing waiting.</div>
@@ -1315,6 +1358,7 @@ input[type=month].inl{width:180px}
           </div><span class="tbnote" id="sub"></span></div>
           <div class="tr"><button class="btn" id="b_refresh" type="button"><svg class="i"><use href="#i-refresh"/></svg>Refresh</button></div>
         </div>
+        <div class="sbar" id="sb_m_main"></div>
         <div class="msg" id="m_main"></div>
         <ul class="list rows" id="list"></ul>
         <div class="empty" id="empty" hidden>Nothing here.</div>
@@ -3120,7 +3164,7 @@ function loadPayments(){
 }
 function renderClients(){
   if(clTab==='setup'||clTab==='pay'||clTab==='inv') return;
-  var list=CLIENTS.filter(function(c){ return clTab==='new' ? !c.complete : c.complete; });
+  var list=CLIENTS.filter(function(c){ return clTab==='new' ? !c.complete : c.complete; }).sort(clSorter());
   var tb=$('clbody'); tb.innerHTML='';
   $('cl_empty').hidden=list.length>0;
   $('cl_empty').textContent = clTab==='new' ? 'Nobody waiting to be set up.' : 'No active customers yet.';
@@ -3131,7 +3175,8 @@ function renderClients(){
     var n=document.createElement('td'); n.textContent=i+1;
 
     var who=document.createElement('td');
-    who.appendChild(ce('div','t1',c.company||c.full_name));
+    var nmB=el('button',{class:'cname',type:'button',title:'Open their account',text:c.company||c.full_name}); nmB.onclick=function(){ openAccount(c.user_id); };
+    who.appendChild(el('div',{class:'t1'},[nmB]));
     who.appendChild(ce('div','t2',[c.full_name,realEmail(c.email)||'no email',c.phone].filter(Boolean).join(' \u00B7 ')));
 
     var acc=document.createElement('td');
@@ -4179,6 +4224,146 @@ function stImportDialog(uid,presetFile,locked){
   go=D.box.querySelector('.dlf .btn.primary'); go.disabled=true;
   if(presetFile) handleFile(presetFile);
 }
+
+
+/* ---------------- v10: finding things ----------------
+   Search matches every word typed, ignores capitals and Turkish accents (ş = s, ı = i), and also looks
+   inside input boxes (stock names, units). Lists keep their search when they refresh. */
+function normQ(v){ return String(v==null?'':v).toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i'); }
+function rowText(row){
+  var t=row.textContent||'';
+  Array.prototype.forEach.call(row.querySelectorAll('input:not([type=checkbox]):not([type=file]),textarea,select'),function(x){
+    t+=' '+(x.tagName==='SELECT'? (x.options[x.selectedIndex]?x.options[x.selectedIndex].text:'') : x.value);
+  });
+  return normQ(t);
+}
+function matchWords(text,q){ var w=q.split(/\s+/).filter(Boolean); for(var i=0;i<w.length;i++) if(text.indexOf(w[i])<0) return false; return true; }
+function qBox(ph,key){
+  var inp=el('input',{type:'search',placeholder:ph,'aria-label':ph,autocomplete:'off',spellcheck:'false'});
+  return {box:el('div',{class:'qbox'},[svgI('search'),inp].concat(key?[el('kbd',{text:key})]:[])),input:inp};
+}
+/* a search bar above one or more lists; rows are the children of each container */
+var SEARCHES={};
+function searchBar(host,sectionKey,ph,containers){
+  var q=qBox(ph,'/'), info=el('span',{class:'sinfo'}), clr=el('button',{class:'sclear',type:'button',hidden:true,text:'Clear'});
+  var none=el('div',{class:'snone',hidden:true});
+  host.appendChild(q.box); host.appendChild(info); host.appendChild(clr);
+  host.parentNode.insertBefore(none,host.nextSibling);
+  var raf=0;
+  function rows(){
+    var out=[];
+    containers.forEach(function(id){
+      var c=$(id); if(!c) return;
+      var vis=!c.closest('[hidden]');
+      Array.prototype.forEach.call(c.children,function(r){ if(!r.classList.contains('empty')&&!r.classList.contains('snone')) out.push({r:r,vis:vis}); });
+    });
+    return out;
+  }
+  function apply(){
+    raf=0;
+    var v=normQ(q.input.value).trim(), all=rows(), shown=0, total=0;
+    /* no list on screen (e.g. Bank details tab, or no customer chosen): no search bar either */
+    host.hidden=!containers.some(function(id){ var c=$(id); return c&&!c.closest('[hidden]'); });
+    all.forEach(function(x){
+      var hit=!v||matchWords(rowText(x.r),v);
+      x.r.classList.toggle('sfhide',!hit);
+      if(x.vis){ total++; if(hit) shown++; }
+    });
+    clr.hidden=!v;
+    info.textContent=v? shown+' of '+total+' shown' : '';
+    none.hidden=!(v&&total&&!shown);
+    none.textContent=v? 'Nothing matches “'+q.input.value.trim()+'”.' : '';
+  }
+  function later(){ if(!raf) raf=requestAnimationFrame(apply); }
+  q.input.addEventListener('input',apply);
+  q.input.addEventListener('keydown',function(e){ if(e.key==='Escape'&&q.input.value){ e.stopPropagation(); q.input.value=''; apply(); } });
+  clr.onclick=function(){ q.input.value=''; apply(); q.input.focus(); };
+  var mo=new MutationObserver(later);
+  containers.forEach(function(id){ var c=$(id); if(c) mo.observe(c,{childList:true}); });
+  /* tabs that show or hide a whole list also change the counts */
+  var sec=$('sec_'+sectionKey); if(sec) new MutationObserver(later).observe(sec,{attributes:true,subtree:true,attributeFilter:['hidden']});
+  SEARCHES[sectionKey]=q.input;
+  return {input:q.input,apply:apply};
+}
+searchBar($('sb_m_cl'),'clients','Search customers: name, suite, email, phone, code',['clbody','paybody','invlist']);
+searchBar($('sb_m_needs'),'needs','Search orders: customer, recipient, SKU, tracking, order no',['custlist']);
+searchBar($('sb_m_inbound'),'inbound','Search deliveries: customer, courier, tracking, SKU',['inbox']);
+searchBar($('sb_m_so'),'sorders','Search service orders: customer, service, order no',['solist']);
+searchBar($('sb_m_sv'),'services','Search requests: customer, reference, SKU, tracking',['svlist']);
+searchBar($('sb_m_stock'),'stock','Search this customer’s stock: SKU, product, location, barcode',['stockbody']);
+searchBar($('sb_m_tk'),'support','Search tickets: customer, subject, ticket no',['tklist']);
+searchBar($('sb_m_main'),'access','Search requests: name, company, email',['list']);
+/* "/" jumps to the search bar of the open page */
+document.addEventListener('keydown',function(e){
+  if(e.key!=='/'||e.ctrlKey||e.metaKey||e.altKey) return;
+  var t=e.target, tag=(t&&t.tagName)||'';
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)||DLG) return;
+  var box=SEARCHES[section]; if(box&&!box.closest('[hidden]')){ e.preventDefault(); box.focus(); box.select(); }
+});
+
+/* sorting the customer table */
+function clSorter(){
+  var k=$('clsort').value;
+  function suiteN(c){ var n=parseFloat(c.unit_number); return isNaN(n)? Infinity : n; }
+  if(k==='name') return function(a,b){ return normQ(a.company||a.full_name).localeCompare(normQ(b.company||b.full_name),'tr'); };
+  if(k==='new') return function(a,b){ return String(b.created_at).localeCompare(String(a.created_at)); };
+  if(k==='bal') return function(a,b){ return (Number(a.balance_pence)||0)-(Number(b.balance_pence)||0); };
+  return function(a,b){ var x=suiteN(a), y=suiteN(b); return x===y? normQ(a.company).localeCompare(normQ(b.company),'tr') : x-y; };
+}
+try{ var savedSort=localStorage.getItem('ecomflex:clsort'); if(savedSort) $('clsort').value=savedSort; }catch(e){}
+$('clsort').onchange=function(){ try{ localStorage.setItem('ecomflex:clsort',$('clsort').value); }catch(e){} renderClients(); };
+
+/* "Find a customer": type a name, suite number, email, phone or code; Enter or click opens them */
+function custHay(c){ return normQ([c.unit_number?'suite '+c.unit_number:'',c.unit_number,c.company,c.full_name,realEmail(c.email),c.phone,String(c.phone||'').replace(/\D/g,''),c.code].join(' ')); }
+function custFinder(host,opts){
+  var q=qBox(opts.ph,opts.key), list=el('div',{class:'qlist'+(opts.wide?' wide':''),hidden:true,role:'listbox'}), hits=[], at=0;
+  host.appendChild(q.box); host.appendChild(list);
+  function ensure(){ return (CLIENTS&&CLIENTS.length)? Promise.resolve() : Promise.resolve(loadClients()).then(function(){},function(){}); }
+  function draw(){
+    var v=normQ(q.input.value).trim(); list.innerHTML='';
+    if(!v){ list.hidden=true; return; }
+    var exact=[], rest=[];
+    (CLIENTS||[]).forEach(function(c){
+      if(!matchWords(custHay(c),v)) return;
+      (String(c.unit_number||'').trim()===q.input.value.trim()? exact : rest).push(c);
+    });
+    hits=exact.concat(rest.sort(function(a,b){ return (parseFloat(a.unit_number)||1e9)-(parseFloat(b.unit_number)||1e9); })).slice(0,12);
+    at=0;
+    if(!hits.length) list.appendChild(el('div',{class:'qnone',text:(CLIENTS&&CLIENTS.length)?'No customer matches “'+q.input.value.trim()+'”.':'Loading customers…'}));
+    hits.forEach(function(c,i){
+      var b=el('button',{class:'qitem'+(i===0?' on':''),type:'button',role:'option'},[el('span',{class:'su',text:c.unit_number?'#'+c.unit_number:'—'}),
+        el('span',{class:'tx'},[el('div',{class:'nm',text:c.company||c.full_name}),el('div',{class:'sb',text:[c.full_name,realEmail(c.email)||'no email',c.phone].filter(Boolean).join(' · ')})])]);
+      b.onmousedown=function(e){ e.preventDefault(); pick(c); };
+      list.appendChild(b);
+    });
+    list.hidden=false;
+  }
+  function mark(){ Array.prototype.forEach.call(list.querySelectorAll('.qitem'),function(b,i){ b.classList.toggle('on',i===at); if(i===at) b.scrollIntoView({block:'nearest'}); }); }
+  function pick(c){ q.input.value=''; list.hidden=true; q.input.blur(); opts.onPick(c); }
+  q.input.addEventListener('focus',function(){ ensure().then(draw); });
+  q.input.addEventListener('input',function(){ ensure().then(draw); });
+  q.input.addEventListener('blur',function(){ setTimeout(function(){ list.hidden=true; },120); });
+  q.input.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'&&hits.length){ e.preventDefault(); at=Math.min(at+1,hits.length-1); mark(); }
+    else if(e.key==='ArrowUp'&&hits.length){ e.preventDefault(); at=Math.max(at-1,0); mark(); }
+    else if(e.key==='Enter'&&hits.length){ e.preventDefault(); pick(hits[at]); }
+    else if(e.key==='Escape'){ e.stopPropagation(); q.input.value=''; list.hidden=true; q.input.blur(); }
+  });
+  return q.input;
+}
+var QFIND=custFinder($('qfind'),{ph:'Find a customer…',key:'Ctrl K',wide:false,onPick:function(c){ closeNav(); openAccount(c.user_id); }});
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){ e.preventDefault(); if(window.innerWidth<=980&&typeof openNav==='function') openNav(); QFIND.focus(); QFIND.select(); }
+});
+custFinder($('pf_stock'),{ph:'Find a customer…',wide:true,onPick:function(c){
+  var sel=$('stockcust'); sel.value=c.user_id;
+  if(sel.value!==c.user_id){ msg('m_stock','That customer has not signed in yet, so they have no stock list.','bad'); return; }
+  loadStock();
+}});
+custFinder($('pf_inv'),{ph:'Find a customer…',wide:true,onPick:function(c){
+  var sel=$('inv_cust'); sel.value=c.user_id;
+  if(sel.value!==c.user_id) msg('m_cl','That customer cannot get invoices yet.','bad');
+}});
 
 /* ---------------- statement, like the old per-customer spreadsheets ---------------- */
 function stEntry(e,tr){
