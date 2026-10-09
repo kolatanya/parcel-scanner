@@ -775,6 +775,7 @@ input[type=month].inl{width:180px}
 .stimptbl tr.same td{color:var(--muted)}
 .stimptbl .sheet{font-size:.7rem;color:var(--faint);display:block}
 @media (max-width:700px){ .stimp .row2{grid-template-columns:1fr} }
+.stimp .lockedcust{display:flex;align-items:center;min-height:38px;font-weight:650;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -4053,18 +4054,28 @@ function stGuessCustomer(fileName){
   var byName=list.filter(function(c){ var co=stNorm(c.company); return co.length>=4&&fl.indexOf(co)>-1; });
   return byName.length===1? byName[0].user_id : '';
 }
-function stOpenImport(uid){
+function stOpenImport(uid,presetFile,locked){
   var start=(CLIENTS&&CLIENTS.length)? Promise.resolve() : loadClients();
-  Promise.resolve(start).then(function(){ stImportDialog(uid); },function(){ stImportDialog(uid); });
+  var open=function(){ stImportDialog(uid,presetFile,locked); };
+  Promise.resolve(start).then(open,open);
 }
 $('b_stimport').onclick=function(){ stOpenImport($('stockcust').value||''); };
-$('ac_stimport').onclick=function(){ var P=current(); if(P) stOpenImport(P.user_id); };
-function stImportDialog(uid){
+/* on a customer's own page: the file chooser opens at once, and the import is locked to that customer */
+$('ac_stimport').onclick=function(){
+  var P=current(); if(!P) return; var uid=P.user_id;
+  var f=el('input',{type:'file',accept:'.xlsx,.xls',style:'display:none'});
+  f.onchange=function(){ if(f.files[0]&&current()&&current().user_id===uid) stOpenImport(uid,f.files[0],true); if(f.parentNode) f.parentNode.removeChild(f); };
+  document.body.appendChild(f); f.click();
+};
+function stImportDialog(uid,presetFile,locked){
   var cust=el('select',{class:'custsel','aria-label':'Customer'},[el('option',{value:'',text:'Choose the customer…'})]);
   (CLIENTS||[]).slice().sort(suiteSort).forEach(function(c){ cust.appendChild(el('option',{value:c.user_id,text:(c.unit_number?'Suite '+c.unit_number+' · ':'')+(c.company||c.full_name)})); });
   if(uid) cust.value=uid;
+  var lockedName=locked&&cust.selectedIndex>0? cust.options[cust.selectedIndex].text : '';
+  if(locked&&!lockedName){ var P0=current(); lockedName=P0? (P0.unit?'Suite '+P0.unit+' · ':'')+(P0.company||P0.full_name||'this customer') : 'this customer'; }
+  var mismatch=el('div',{class:'note warn',hidden:true,style:'margin:0 0 12px'}), wrongFile='';
   var file=el('input',{type:'file',accept:'.xlsx,.xls',style:'display:none'});
-  var pickB=el('button',{class:'btn',type:'button'},[svgI('upload'),'Choose the stock Excel file…']);
+  var pickB=el('button',{class:'btn',type:'button'},[svgI('upload'),presetFile?'Choose a different file…':'Choose the stock Excel file…']);
   var fname=el('span',{class:'muted',style:'font-size:.82rem'});
   var pasteT=el('button',{class:'linkbtn',type:'button',text:'or paste SKU and quantity columns instead'});
   var paste=el('textarea',{class:'inl',hidden:true,placeholder:'BR-TN2410-UK\t40\nBR-TN2420-UK\t125',style:'height:auto;min-height:110px;padding:9px 12px;font-family:var(--mono);font-size:.8rem;margin:0 0 12px'});
@@ -4116,14 +4127,23 @@ function stImportDialog(uid){
     D.msg('Read '+res.sheets.join(' and ')+'. Check the lines, then import. Lines in red are left out and can be added later in the Stock screen.', '');
     loadCurrent().then(draw);
   }
-  file.onchange=function(){
-    var f=file.files[0]; if(!f) return; fname.textContent=f.name; done=false;
-    var guess=stGuessCustomer(f.name); if(guess&&!cust.value){ cust.value=guess; }
+  function handleFile(f){
+    if(!f) return; fname.textContent=f.name; done=false;
+    var guess=stGuessCustomer(f.name); if(guess&&!cust.value&&!locked){ cust.value=guess; }
+    /* the file name names a different suite than the customer chosen: say so loudly */
+    wrongFile='';
+    if(guess&&cust.value&&guess!==cust.value){
+      var g=(CLIENTS||[]).filter(function(c){ return c.user_id===guess; })[0];
+      wrongFile=g? (g.unit_number?'Suite '+g.unit_number+' · ':'')+(g.company||g.full_name) : 'another customer';
+    }
+    mismatch.textContent=wrongFile? 'Check the file: its name looks like it belongs to '+wrongFile+', not to '+(cust.options[cust.selectedIndex]?cust.options[cust.selectedIndex].text:'this customer')+'.' : '';
+    mismatch.hidden=!wrongFile;
     D.busy('Reading the file…');
     needXLSXA().then(function(){
       return new Promise(function(res,rej){ var fr=new FileReader(); fr.onload=function(){ try{ res(window.XLSX.read(new Uint8Array(fr.result),{type:'array'})); }catch(e){ rej(e); } }; fr.onerror=rej; fr.readAsArrayBuffer(f); });
     }).then(function(wb){ useParsed(stParseWorkbook(wb),f.name); },function(){ D.msg('Could not read that file. Save it as .xlsx and try again.','bad'); });
-  };
+  }
+  file.onchange=function(){ handleFile(file.files[0]); };
   paste.oninput=function(){ done=false; useParsed(stParsePaste(paste.value),'pasted lines'); };
   cust.onchange=function(){ done=false; if(lines.length) loadCurrent().then(draw); else if(go) go.disabled=true; };
   var dl=el('button',{class:'btn',type:'button',hidden:true},[svgI('download'),'Download the left-out lines']);
@@ -4139,13 +4159,13 @@ function stImportDialog(uid){
   };
   var body=el('div',{class:'stimp'},[
     el('p',{class:'help top',style:'margin:0 0 14px'},[svgI('info'),el('span',{text:'Reads the customer’s old stock file on this computer: the “Kalan Stok” sheet (remaining stock by Amazon SKU) and any “Stok Kontrol” sheet. The remaining quantity becomes their stock in the app, replacing what the app has for that SKU. Lines whose numbers are negative, #N/A, blank or duplicated are left out and listed; add those by hand after counting. Do this on the switch-over day, after the last dispatch.'})]),
-    el('div',{class:'row2'},[el('div',null,[el('label',{class:'l',text:'Customer'}),cust]),el('div',null,[el('label',{class:'l',text:'Stock file'}),el('div',{class:'filebox'},[pickB,fname,file])])]),
-    el('div',{style:'margin:-4px 0 12px'},[pasteT]), paste, prefBox, sum, wrap, el('div',{style:'margin-top:10px'},[dl])]);
-  var D=dialog({title:'Import stock from Excel',sub:'Opening stock from the old per-customer spreadsheet.',wide:true,body:body,
+    el('div',{class:'row2'},[el('div',null,[el('label',{class:'l',text:'Customer'}),locked? el('div',{class:'lockedcust',text:lockedName}) : cust]),el('div',null,[el('label',{class:'l',text:'Stock file'}),el('div',{class:'filebox'},[pickB,fname,file])])]),
+    el('div',{style:'margin:-4px 0 12px'},[pasteT]), mismatch, paste, prefBox, sum, wrap, el('div',{style:'margin-top:10px'},[dl])]);
+  var D=dialog({title:locked?'Import stock · '+lockedName:'Import stock from Excel',sub:locked?'Their old stock file goes into their stock in the app.':'Opening stock from the old per-customer spreadsheet.',wide:true,body:body,
     actions:[{t:'Close',close:true},{t:'Import',primary:true,i:'check',on:function(D2,b){
       var ok=lines.filter(function(L){ return !L.out&&!L.dup; }); if(!ok.length||!cust.value) return;
-      var co=cust.options[cust.selectedIndex].text, chg=ok.filter(function(L){ return L.now&&Number(L.now.qty)!==L.qty; }).length;
-      if(!confirm('Import '+ok.length+' stock lines into '+co+'?'+(chg?'\n\n'+chg+' SKU'+(chg===1?'':'s')+' already in the app will get the quantity from the file.':''))) return;
+      var co=locked? lockedName : cust.options[cust.selectedIndex].text, chg=ok.filter(function(L){ return L.now&&Number(L.now.qty)!==L.qty; }).length;
+      if(!confirm((wrongFile?'WARNING: the file name looks like it belongs to '+wrongFile+'.\n\n':'')+'Import '+ok.length+' stock lines into '+co+'?'+(chg?'\n\n'+chg+' SKU'+(chg===1?'':'s')+' already in the app will get the quantity from the file.':''))) return;
       b.disabled=true; D.busy('Importing…');
       sb.rpc('import_stock',{p_user:cust.value,p_rows:ok.map(function(L){ return {sku:L.sku,name:L.name||null,qty:L.qty,barcode:L.barcode||null}; }),p_source:source}).then(function(x){
         if(x.error){ b.disabled=false; D.msg('Could not import: '+x.error.message,'bad'); return; }
@@ -4157,6 +4177,7 @@ function stImportDialog(uid){
       },function(){ b.disabled=false; D.msg('No connection. Nothing was imported.','bad'); });
     }}]});
   go=D.box.querySelector('.dlf .btn.primary'); go.disabled=true;
+  if(presetFile) handleFile(presetFile);
 }
 
 /* ---------------- statement, like the old per-customer spreadsheets ---------------- */
