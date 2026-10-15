@@ -243,7 +243,7 @@ function looksLikeSku(v){
   if(RX.s10.test(t)) return false;                 /* tracking number */
   if(RX.mailcode.test(t)) return false;            /* the Royal Mail routing line */
   if(/^\d{1,2}$/.test(t)) return false;
-  if(t.indexOf('-')>-1) return t.replace(/[^0-9A-Z]/g,'').length>=4;
+  if(/[-+_]/.test(t)) return t.replace(/[^0-9A-Z]/g,'').length>=4;
   return /^[0-9A-Z]{6,}$/.test(t);
 }
 function tidyName(s){
@@ -317,7 +317,8 @@ function readPage(lines){
   for(var j=0;j<up.length;j++){
     var L=up[j];
     if(!L||OURS.test(L)||CHROME.test(L)||RX.ref.test(L)) continue;
-    var rx=/(?:^|[^0-9A-Z])(\d{1,3})\s*[X\u00D7]\s*[^0-9A-Z]{0,2}([0-9A-Z][0-9A-Z\-\/\.]{2,})/g, m2;
+    /* SKUs may contain + and _ as well (e.g. LR+B-L) */
+    var rx=/(?:^|[^0-9A-Z])(\d{1,3})\s*[X\u00D7]\s*[^0-9A-Z]{0,2}([0-9A-Z][0-9A-Z\-\/\.\+_]{2,})/g, m2;
     while((m2=rx.exec(L))!==null){
       var code=m2[2].replace(/[.,;:]+$/,'');
       if(!looksLikeSku(code)) continue;
@@ -484,7 +485,7 @@ function handle(files){
     return pdfs.reduce(function(chain,f){
       return chain.then(function(){
         return f.arrayBuffer()
-          .then(function(buf){ return lib.getDocument({data:buf}).promise; })
+          .then(function(buf){ return lib.getDocument({data:buf, isEvalSupported:false}).promise; })
           .then(function(doc){
             var pages=[];
             for(var p=1;p<=doc.numPages;p++) pages.push(p);
