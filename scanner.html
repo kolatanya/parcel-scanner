@@ -62,7 +62,10 @@ a.back img{height:19px;width:auto;display:block}
 .frame span:nth-child(4){bottom:0;right:0;border-left:0;border-top:0}
 .view.hit .frame span{border-color:var(--ok)}
 .view.dupe .frame span{border-color:var(--warn)}
-.tools{position:absolute;right:9px;top:9px}
+.tools{position:absolute;right:9px;top:9px;display:flex;gap:8px}
+.ring{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border:2px solid #fff;border-radius:50%;opacity:0;pointer-events:none}
+.ring.on{animation:ring .8s ease-out}
+@keyframes ring{0%{opacity:1;transform:scale(1.5)}55%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
 .tools button{width:42px;height:42px;border-radius:50%;border:1px solid #39424B;background:rgba(11,14,18,.78);color:#EDF1F3;font-size:1.05rem;cursor:pointer}
 .tools button[aria-pressed="true"]{background:var(--warn);color:#241C05;border-color:var(--warn)}
 .zoom{position:absolute;left:12px;right:12px;bottom:10px;display:flex;align-items:center;gap:9px}
@@ -133,7 +136,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
   <div class="top">
     <div class="count"><span id="n">0</span><small id="nlabel">nothing scanned yet</small></div>
     <div class="right">
-      <span class="ver">v8</span>
+      <span class="ver">v9</span>
       <label class="mode"><input type="checkbox" id="strict" checked><span>Parcel codes only</span></label>
       <label class="mode"><input type="checkbox" id="spaces"><span>Copy with spaces</span></label>
     </div>
@@ -144,10 +147,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
     <div class="idle" id="idle">
       <div class="bars" id="bars"></div>
       <div>Royal Mail or DPD</div>
-      <div style="font-size:.76rem">Point at the long barcode</div>
+      <div style="font-size:.76rem">Point at the long barcode, about 20 cm away</div>
     </div>
     <div class="frame"><span></span><span></span><span></span><span></span></div>
-    <div class="tools" id="tools" hidden><button id="torch" aria-pressed="false" title="Torch">☀</button></div>
+    <div class="ring" id="ring"></div>
+    <div class="tools" id="tools" hidden><button id="cam" type="button" title="Switch camera lens" aria-label="Switch camera lens" hidden>⇄</button><button id="torch" aria-pressed="false" title="Torch">☀</button></div>
     <div class="zoom" id="zoomwrap" hidden>
       <input type="range" id="zoom" min="1" max="1" step="0.1" value="1" aria-label="Zoom">
       <span id="zoomval">1.0×</span>
@@ -184,7 +188,7 @@ var $=function(i){return document.getElementById(i);};
 var video=$('video'),view=$('view'),idle=$('idle'),go=$('go'),msg=$('msg'),status=$('status'),
     listEl=$('list'),emptyEl=$('empty'),nEl=$('n'),nLabel=$('nlabel'),strict=$('strict'),
     spaces=$('spaces'),entry=$('entry'),tools=$('tools'),torchBtn=$('torch'),
-    zoomWrap=$('zoomwrap'),zoom=$('zoom'),zoomVal=$('zoomval');
+    zoomWrap=$('zoomwrap'),zoom=$('zoom'),zoomVal=$('zoomval'),camBtn=$('cam'),ring=$('ring');
 
 var bars=$('bars');
 for(var i=0;i<30;i++){var b=document.createElement('i');b.style.width=(1+Math.round(Math.random()*3))+'px';bars.appendChild(b);}
@@ -322,16 +326,104 @@ function loadScript(urls){
     })(0);
   });
 }
+/* Why scans were blurry: every camera lens has a closest distance it can focus at (about
+   10-20 cm), phones with several back lenses often hand a web page the wrong one, and the
+   page never asked for autofocus. So: ask for continuous autofocus, start zoomed in to 2x so
+   the phone is held further back (where it can focus), prefer the main back lens, tap the
+   picture to focus there, and a button to try the next lens. The lens and zoom that worked
+   are remembered on this phone. */
+var CAM_KEY='scan:camera', ZOOM_KEY='scan:zoom';
+var backCams=[], caps={}, focusTimer=null;
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,String(v)); }catch(e){} }
+function blocked(e){ return e&&(e.name==='NotAllowedError'||e.name==='SecurityError'); }
+function stopStream(s){ try{ s.getTracks().forEach(function(t){t.stop();}); }catch(e){} }
+
+/* big = the phone's own detector (fast enough for 1920 wide); otherwise 1280 for the JS decoder */
+function videoWant(deviceId,big){
+  var v={width:{ideal:big?1920:1280},height:{ideal:big?1440:960},advanced:[{focusMode:'continuous'}]};
+  if(deviceId) v.deviceId={exact:deviceId}; else v.facingMode={ideal:'environment'};
+  return {audio:false,video:v};
+}
+function listBackCams(){
+  if(!navigator.mediaDevices.enumerateDevices) return Promise.resolve();
+  return navigator.mediaDevices.enumerateDevices().then(function(d){
+    var v=d.filter(function(x){ return x.kind==='videoinput'; });
+    var back=v.filter(function(x){ return /back|rear|environment|arri|hinten|trasera|posterior|arka/i.test(x.label); });
+    backCams=back.length?back:v;
+  },function(){});
+}
+function trackDevice(s){
+  try{ return s.getVideoTracks()[0].getSettings().deviceId||''; }catch(e){ return ''; }
+}
+/* the saved lens if it still exists, else the phone's own choice of back camera;
+   the first time, Android's main back lens ("camera2 0") is preferred over wide and tele lenses */
+function openCam(big){
+  var saved=lsGet(CAM_KEY);
+  var first=saved
+    ? navigator.mediaDevices.getUserMedia(videoWant(saved,big)).catch(function(e){
+        if(blocked(e)) throw e;
+        lsSet(CAM_KEY,null); saved=null;
+        return navigator.mediaDevices.getUserMedia(videoWant(null,big));
+      })
+    : navigator.mediaDevices.getUserMedia(videoWant(null,big));
+  return first.then(function(s){
+    return listBackCams().then(function(){
+      if(saved||backCams.length<2) return s;
+      var cur=trackDevice(s), main=null;
+      backCams.forEach(function(c){ if(!main&&/\bcamera2? 0\b/i.test(c.label)) main=c; });
+      if(!main||main.deviceId===cur){ if(cur) lsSet(CAM_KEY,cur); return s; }
+      stopStream(s);
+      return navigator.mediaDevices.getUserMedia(videoWant(main.deviceId,big))
+        .then(function(s2){ lsSet(CAM_KEY,main.deviceId); return s2; },
+              function(){ return navigator.mediaDevices.getUserMedia(videoWant(null,big)); });
+    });
+  });
+}
+function hasMode(list,m){ return !!list&&list.indexOf(m)>-1; }
 function setupCam(){
   vtrack=stream.getVideoTracks()[0];
-  var caps={}; try{ caps=vtrack.getCapabilities?vtrack.getCapabilities():{}; }catch(e){}
+  caps={}; try{ caps=vtrack.getCapabilities?vtrack.getCapabilities():{}; }catch(e){}
   tools.hidden=false;
   torchBtn.hidden=!('torch' in caps);
-  if(caps.zoom){
+  camBtn.hidden=backCams.length<2;
+  /* separate sets, so one the camera cannot do does not cancel the others */
+  var adv=[];
+  if(hasMode(caps.focusMode,'continuous')) adv.push({focusMode:'continuous'});
+  if(hasMode(caps.exposureMode,'continuous')) adv.push({exposureMode:'continuous'});
+  if(hasMode(caps.whiteBalanceMode,'continuous')) adv.push({whiteBalanceMode:'continuous'});
+  if(caps.zoom&&caps.zoom.max>caps.zoom.min){
     zoom.min=caps.zoom.min; zoom.max=Math.min(caps.zoom.max,caps.zoom.min*6);
-    zoom.step=caps.zoom.step||.1; zoom.value=caps.zoom.min;
-    zoomWrap.hidden=false; zoomVal.textContent=(+zoom.value).toFixed(1)+'\u00D7';
+    zoom.step=caps.zoom.step||.1;
+    var want=parseFloat(lsGet(ZOOM_KEY)); if(!(want>0)) want=2;
+    var z=Math.max(+zoom.min,Math.min(+zoom.max,want));
+    zoom.value=z; adv.push({zoom:z});
+    zoomWrap.hidden=false; zoomVal.textContent=(+zoom.value).toFixed(1)+'×';
   }
+  if(adv.length){ try{ vtrack.applyConstraints({advanced:adv}).catch(function(){}); }catch(e){} }
+  /* a lens that only focuses when asked: ask every 2 seconds */
+  if(!hasMode(caps.focusMode,'continuous')&&hasMode(caps.focusMode,'single-shot'))
+    focusTimer=setInterval(function(){ refocus(); },2000);
+  if(backCams.length>1){
+    var cur=trackDevice(stream), n=0;
+    backCams.forEach(function(c,k){ if(c.deviceId===cur) n=k+1; });
+    say('Scanning'+(n?' with lens '+n+' of '+backCams.length:'')+' — still blurry? Tap ⇄ to try the next lens');
+  }
+}
+/* focus once, on a point of the picture if the camera allows it, then back to continuous */
+function refocus(x,y){
+  if(!vtrack) return;
+  var fm=caps.focusMode||[], mode=hasMode(fm,'single-shot')?'single-shot':(hasMode(fm,'continuous')?'continuous':'');
+  if(!mode) return;
+  var sets=[];
+  if(x!=null) sets.push({focusMode:mode,pointsOfInterest:[{x:x,y:y}]});
+  sets.push({focusMode:mode});
+  var p; try{ p=vtrack.applyConstraints({advanced:sets}); }catch(e){ return; }
+  if(p&&p.then) p.then(function(){
+    if(mode==='single-shot'&&hasMode(fm,'continuous')) setTimeout(function(){
+      try{ if(vtrack) vtrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(function(){}); }catch(e){}
+    },1500);
+  },function(){});
 }
 function start(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
@@ -347,11 +439,8 @@ function start(){
       })
     : Promise.reject(new Error('detector'));
 
-  native.then(function(){
-    /* 1280 wide decodes noticeably quicker than 1920 and is plenty for a barcode */
-    return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},
-      width:{ideal:1280},height:{ideal:960}}});
-  }).then(function(s){ stream=s; video.srcObject=s; return video.play(); })
+  native.then(function(){ return openCam(true); })
+  .then(function(s){ stream=s; video.srcObject=s; return video.play(); })
   .then(function(){
     live(); setupCam();
     var running_=true;
@@ -369,19 +458,28 @@ function start(){
     },80);
   })
   .catch(function(err){
-    if(err&&(err.name==='NotAllowedError'||err.name==='SecurityError')){
+    if(blocked(err)){
       say('Camera blocked. Allow camera access for this page, then try again.','bad'); return;
     }
+    if(stream){ stopStream(stream); stream=null; video.srcObject=null; }
+    /* no built-in detector (iPhone): the ZXing library, told which barcodes to look for
+       and to try every 60 ms instead of its default of every half second */
     loadScript(['https://cdnjs.cloudflare.com/ajax/libs/zxing-library/0.21.3/index.min.js',
                 'https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js',
                 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js'])
     .then(function(){
-      zx=new ZXing.BrowserMultiFormatReader();
-      return zx.decodeFromConstraints({video:{facingMode:{ideal:'environment'},width:{ideal:1280}}},video,
-        function(res){ if(res&&running) accept(res.getText()); });
-    }).then(function(){ stream=video.srcObject; live(); setupCam(); })
+      var F=ZXing.BarcodeFormat, hints=new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[F.CODE_128,F.CODE_39,F.ITF,F.EAN_13,F.DATA_MATRIX]);
+      zx=new ZXing.BrowserMultiFormatReader(hints,60);
+      return openCam(false).then(function(s){
+        var cb=function(res){ if(res&&running) accept(res.getText()); };
+        if(zx.decodeFromStream){ stream=s; return zx.decodeFromStream(s,video,cb); }
+        var dev=trackDevice(s); stopStream(s);
+        return zx.decodeFromConstraints(videoWant(dev,false),video,cb);
+      });
+    }).then(function(){ stream=stream||video.srcObject; live(); setupCam(); })
     .catch(function(e){
-      if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError')) say('Camera blocked. Allow camera access, then try again.','bad');
+      if(blocked(e)) say('Camera blocked. Allow camera access, then try again.','bad');
       else if(e&&e.name==='NotFoundError') say('No camera found on this device.','bad');
       else say('Could not start the scanner. Check you are on https.','bad');
     });
@@ -390,26 +488,47 @@ function start(){
 function live(){
   running=true; idle.hidden=true;
   go.textContent='Stop scanning'; go.classList.add('stop');
-  say('Scanning \u2014 hold the barcode inside the corners');
+  say('Scanning — hold about 20 cm away, tap the picture to focus');
 }
 function stop(){
   running=false;
   if(timer){clearInterval(timer);timer=null;}
+  if(focusTimer){clearInterval(focusTimer);focusTimer=null;}
   if(zx){ try{zx.reset();}catch(e){} zx=null; }
-  if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
-  if(video.srcObject){ try{video.srcObject.getTracks().forEach(function(t){t.stop();});}catch(e){} video.srcObject=null; }
+  if(stream){ stopStream(stream); stream=null; }
+  if(video.srcObject){ stopStream(video.srcObject); video.srcObject=null; }
   vtrack=null; tools.hidden=true; zoomWrap.hidden=true; torchBtn.setAttribute('aria-pressed','false');
   idle.hidden=false; go.textContent='Start scanning'; go.classList.remove('stop');
   say('Camera off');
 }
 go.onclick=function(){ running?stop():start(); };
-torchBtn.onclick=function(){
+torchBtn.onclick=function(e){
+  e.stopPropagation();
   var on=torchBtn.getAttribute('aria-pressed')==='true';
-  try{ vtrack.applyConstraints({advanced:[{torch:!on}]}); torchBtn.setAttribute('aria-pressed',String(!on)); }catch(e){}
+  try{ vtrack.applyConstraints({advanced:[{torch:!on}]}); torchBtn.setAttribute('aria-pressed',String(!on)); }catch(err){}
+};
+/* next back lens; remembered, so the phone opens with it next time */
+camBtn.onclick=function(e){
+  e.stopPropagation();
+  if(backCams.length<2) return;
+  var cur=stream?trackDevice(stream):'', i=-1;
+  backCams.forEach(function(c,k){ if(c.deviceId===cur) i=k; });
+  lsSet(CAM_KEY,backCams[(i+1)%backCams.length].deviceId);
+  stop(); start();
 };
 zoom.addEventListener('input',function(){
-  zoomVal.textContent=(+zoom.value).toFixed(1)+'\u00D7';
+  zoomVal.textContent=(+zoom.value).toFixed(1)+'×';
+  lsSet(ZOOM_KEY,zoom.value);
   try{ vtrack.applyConstraints({advanced:[{zoom:+zoom.value}]}); }catch(e){}
+});
+zoomWrap.addEventListener('click',function(e){ e.stopPropagation(); });
+/* tap the picture to focus on that spot */
+view.addEventListener('click',function(e){
+  if(!running||!vtrack) return;
+  var r=view.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+  ring.style.left=(x*100)+'%'; ring.style.top=(y*100)+'%';
+  ring.classList.remove('on'); void ring.offsetWidth; ring.classList.add('on');
+  refocus(Math.max(0,Math.min(1,x)),Math.max(0,Math.min(1,y)));
 });
 document.addEventListener('visibilitychange',function(){ if(document.hidden&&running) stop(); });
 

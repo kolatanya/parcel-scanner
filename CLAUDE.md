@@ -348,7 +348,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 
 ### Others
 
-`index.html` hub, `scanner.html` (v8, camera barcode scanner — camera OCR was abandoned, do not reintroduce), `labels.html` (Royal Mail label PDF reader; since 15 Oct 2026 SKUs may contain `+` and `_` (e.g. `LR+B-L`), which it used to skip, and PDFs open with `isEvalSupported:false` against the pdf.js 3.11.174 font flaw), `signup.html` (self-signup; code shown once).
+`index.html` hub, `scanner.html` (v9, camera barcode scanner — camera OCR was abandoned, do not reintroduce. v9, 5 Nov 2026, against blurry pictures: asks for continuous autofocus/exposure, starts at 2× zoom so the phone is held ~20 cm back (lenses cannot focus closer than ~10–20 cm), prefers Android's main back lens `camera2 0` over wide/ultra-wide, tap the picture to focus there, ⇄ button cycles back lenses, lens and zoom remembered in localStorage `scan:camera`/`scan:zoom`; the iPhone path (no BarcodeDetector → ZXing) now only looks for Code 128/39, ITF, EAN-13 and Data Matrix and tries every 60 ms instead of ZXing's default 500 ms. Tested with a fake camera, `scanner_v9_flows.mjs`, 26 checks), `labels.html` (Royal Mail label PDF reader; since 15 Oct 2026 SKUs may contain `+` and `_` (e.g. `LR+B-L`), which it used to skip, and PDFs open with `isEvalSupported:false` against the pdf.js 3.11.174 font flaw), `signup.html` (self-signup; code shown once).
 
 ### Stripe card top-ups (built, not live)
 
@@ -363,7 +363,7 @@ v5 (24 Sep 2026) was a redesign only: every element ID, database call and workfl
 3. GitHub → repository → **Add file → Upload files** → "choose your files" → select the **files, not the folder** → Commit changes.
 4. Wait about a minute, then use an incognito window or hard-refresh (Ctrl+Shift+R). Check the admin version badge.
 
-**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v29`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
+**Bump the `CACHE` constant in `sw.js` on every deploy** (currently `ecomflex-v30`) and add any new file to its `CORE` list. Since v19 the service worker only stores successful responses, so a 404 page never becomes an offline copy.
 
 ---
 
